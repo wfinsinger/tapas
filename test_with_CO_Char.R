@@ -65,7 +65,7 @@ co.detr1 <- SeriesDetrend(series = co.i1, smoothing.yr = 500,
                           detr.type = "mov.mode", out.dir = "Figures")
 #rm(char.thresh.gl1, co, co.i1)
 
-## Fit gaussina mixture models to determine the noise-signal threshold
+## Fit gaussian mixture models to determine the noise-signal threshold
 char.thresh.gl1 <- SeriesThresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
                                 thresh.value = 0.99, smoothing.yr = 500, span.sm = 0.2,
                                 gm.local = F, keep_consecutive = F,

@@ -1,7 +1,7 @@
 
 ##########################################################################################
 # R code to detect positive and negative anomalies in palaeoecological time series.
-# Walter Finsinger, June 2020 - )ctober 2021
+# Walter Finsinger, June 2020 - October 2021
 
 # The functions are loaded at the beginning. Explanations concerning the
 #   user-determined parameters are given in the functions files.
@@ -34,7 +34,9 @@ rm(list = ls())
 source("./R/pretreatment_full.r")
 source("./R/pretreatment_data.r")
 source("./R/SeriesDetrend.r")
-source("./R/SeriesThreshold_v5.r")
+source("./R/Global_Thresh.r")
+source("./R/Local_Thresh.r")
+
 source("./R/SNI.r")
 source("./R/PlotAnomalies.r")
 source("./R/Plot_ReturnIntervals.r")
@@ -66,15 +68,15 @@ co.detr1 <- SeriesDetrend(series = co.i1, smoothing.yr = 500,
 #rm(char.thresh.gl1, co, co.i1)
 
 ## Fit gaussian mixture models to determine the noise-signal threshold
-char.thresh.gl1 <- SeriesThresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
+
+char.thresh.gl1 <- glob_thresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
                                 thresh.value = 0.99, smoothing.yr = 500, span.sm = 0.2,
-                                gm.local = F, keep_consecutive = F,
+                                keep_consecutive = F,
                                 out.dir = "Figures")
 
-
-char.thresh.loc <- SeriesThresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
+char.thresh.loc <- local_thresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
                                 thresh.value = 0.99, smoothing.yr = 500,
-                                gm.local = T, keep_consecutive = F,
+                                keep_consecutive = F,
                                 out.dir = "Figures")
 
 

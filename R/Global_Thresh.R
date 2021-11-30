@@ -68,17 +68,6 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   # out.dir = "Figures"
   # 
   # 
-  # series = dist.detr1
-  # proxy = "df"
-  # thresh.yr = 2000
-  # thresh.value = 0.99
-  # smoothing.yr = 2000
-  # span.sm = 0.2
-  # gm.local = T
-  # out.dir = "Figures/PRA"
-  # noise.gmm = 2
-  # keep_consecutive = T
-  # t.lim = NULL
   
   require(mclust)
   

@@ -52,21 +52,7 @@
 
 local_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
                          thresh.value=0.95, noise.gmm=1, smoothing.yr=500, span.sm=NULL,
-                         gm.local=T, keep_consecutive=F, out.dir="Figures") {
-  
-  
-  series = co.detr1
-  proxy = "charAR"
-  t.lim = NULL
-  thresh.yr = 500
-  thresh.value = 0.99
-  noise.gmm = 1
-  smoothing.yr = 500
-  span.sm = NULL
-  #span.sm = 0.2
-  gm.local = T
-  keep_consecutive = F
-  out.dir = "Figures"
+                         keep_consecutive=F, out.dir="Figures") {
   
   
   require(mclust)
@@ -122,12 +108,11 @@ local_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   }
   
   # Determine the proportion of datapoints used to smooth local thresholds with loess()
-  if (gm.local == T) {
+  if (is.null(span.sm)) {
     n.smooth <- round(smoothing.yr/yr.interp)
-    if (is.null(span.sm)) {
-      span.sm <- n.smooth/dim(a)[1]
+    span.sm <- n.smooth/dim(a)[1]
     }
-  }
+
   
   # Create empty list where output data will be stored
   a.out <- list(span.sm = span.sm, thresh.value = thresh.value, yr.interp = yr.interp)
@@ -413,7 +398,7 @@ local_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   
   ## Prepare output
   out1 <- structure(list(proxy = proxy, ages.thresh = ageI,
-                         gm.local = gm.local, thresh.value = thresh.value,
+                         thresh.value = thresh.value,
                          SNI_pos = SNI_pos, SNI_neg = SNI_neg,
                          thresh.pos = thresh.pos, thresh.neg = thresh.neg,
                          thresh.pos.sm = thresh.pos.sm, thresh.neg.sm = thresh.neg.sm,

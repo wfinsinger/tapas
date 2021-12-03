@@ -29,13 +29,7 @@
 
 pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL, last=NULL,
                               yrInterp=yr.interp) {
-  # series=charcoal1
-  # out="accI"
-  # #out="conI"
-  # series.name="dist"
-  # first=min.ages
-  # last=max.ages
-  # yrInterp=yr.interp
+  
   
   if (is.null(first)) first <- min(series$AgeTop)
   if (is.null(last)) last <- max(series$AgeBot)
@@ -51,17 +45,27 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
     colnames(int) [1] <- "age"
     int$age <- ybpI
     
+    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    colnames(conI) [1] <- "age"
+    conI$age <- ybpI
+    
+    
     j = 2
     for (i in 6:ncol(series)) {
       #i=7
-      pre.i <- pretreatment_full(params=series[ ,1:5], serie=series[ ,i], Int=F,
-                                 first=first, last=last, yrInterp=yr.interp)
+      pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
+                                 first = first, last = last, yrInterp = yr.interp)
       
       raw[ ,j] <- pre.i$acc
       colnames(raw) [j] <- colnames(series) [i]
       
       int[ ,j] <- pre.i$accI
       colnames(int) [j] <- paste0(colnames(series) [i], "AR")
+      
+      conI[ ,j] <- pre.i$conI
+      colnames(conI) [j] <- colnames(series) [i]
+      
+      volI <- pre.i$volI
       
       j = j + 1
     }
@@ -71,15 +75,15 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
     raw <- data.frame(series$AgeTop)
     colnames(raw) <- "age"
     
-    int <- data.frame(matrix(data=NA, ncol=dim(series)[2]-4, nrow=length(ybpI)))
+    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
     colnames(int) [1] <- "age"
     int$age <- ybpI
     
-    j=2
+    j = 2
     for (i in 6:ncol(series)) {
-      #i=6
-      pre.i <- pretreatment_full(params=series[ ,1:5], serie=series[ ,i], Int=F,
-                                 first=first, last=last, yrInterp=yr.interp)
+      #i = 6
+      pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
+                                 first = first, last = last, yrInterp = yr.interp)
       
       raw[ ,j] <- series[ ,i]
       colnames(raw) [j] <- colnames(series) [i]
@@ -87,13 +91,16 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
       int[ ,j] <- pre.i$countI
       colnames(int) [j] <- colnames(series) [i]
       
+      volI <- pre.i$volI
+      
       j = j + 1
     }
   }
   
-  d.out <- structure(list(list(series=raw, series.name=series.name),
-                          list(series.int=int, yr.interp=yrInterp,
-                               span.l=NA, type="pretreatment")))
+  d.out <- structure(list(list(series = raw, series.name = series.name),
+                          list(series.int = int, series.conI = conI, volI = volI,
+                               yr.interp = yrInterp,
+                               span.l = NA, type = "pretreatment")))
   names(d.out) [1] <- "raw"
   names(d.out) [2] <- "int"
   

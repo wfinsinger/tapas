@@ -105,7 +105,7 @@ pretreatment_full = function(params, serie, Int=TRUE, first=NULL, last=NULL, yrI
   ageTop = A[,3] # [yr BP] Age at top of sample.
   ageBot = A[,4] # [yr BP] Age at bottom of sample.
   
-  ybpI =seq(first, last, yrInterp) # [yr BP] Years to 
+  ybpI = seq(first, last, yrInterp) # [yr BP] Years to 
   # resample record to.
   
   propMatrix = matrix(nrow=length(ybpI),ncol=length(ybp))

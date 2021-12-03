@@ -27,14 +27,6 @@ Plot_ReturnIntervals <- function(series=NULL, proxy=NULL, x.lim=NULL,
                                  plot.x=F, plot.neg=T) {
   
   
-  # series = char.thresh.loc
-  # series = char.thresh.gl1
-  # proxy = "charAR"
-  # x.lim = NULL
-  # plot.x = T
-  # plot.neg = F
-  
-  
   ## Gather data
   d <- series
   peaks_neg_ages <- d$thresh$peaks.neg.ages

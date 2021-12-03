@@ -23,16 +23,8 @@
 #  ***************************************************************************
 
 
-Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T, plot.x=F, plot.neg=T) {
-  
-  
-  # series = char.thresh.loc
-  # series = char.thresh.gl1
-  # proxy = "charAR"
-  # x.lim = NULL
-  # plot.crosses = T
-  # plot.x = T
-  # plot.neg = F
+Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
+                           plot.x=F, plot.neg=T) {
   
   
   

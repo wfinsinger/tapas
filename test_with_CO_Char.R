@@ -10,7 +10,7 @@
 # 
 # 1) the time series are virtually resampled to equal sampling intervals.
 # To do this, I used the pretreatment() function from the paleofire() package
-# (aka pretreatment as from CharAnalysis, Higuera et al., 200x), which I slightly
+# (aka pretreatment as from CharAnalysis, Higuera et al., 2009), which I slightly
 # modified in order to get all output data needed later.
 # 
 # 2) the resampled time series are detrended using a smoothing function, 
@@ -50,29 +50,39 @@ co <- read.csv("./Data-In/CO_charData.csv", header = T)
 co <- dplyr::rename(co, "AgeTop" = "ageTop..yr.BP.")
 co <- dplyr::rename(co, "AgeBot" = "AgeBot..yr.BP.")
 co <- dplyr::rename(co, "char" = "CharCount.....")
+co$dummy_chararea <- co$char * 0.2421
 
 ## Pretreatment
 min.ages <- min(co$AgeTop)
 max.ages <- max(co$AgeTop)
 yr.interp <- 15
-co.i1 <- pretreatment_data(series = co, out = "accI", series.name = "co",
+co_i <- pretreatment_data(series = co, out = "accI", series.name = "co",
                              first = -51, last = 7500, yrInterp = yr.interp)
-plot(co.i1$raw$series$age, co.i1$raw$series$char, type = "l")
-lines(co.i1$int$series.int$age, co.i1$int$series.int$char, col = "red")
+plot(co_i$raw$series$age, co_i$raw$series$char, type = "l")
+lines(co_i$int$series.int$age, co_i$int$series.int$char, col = "red")
+
 
 ## Detrending
-co.detr1 <- SeriesDetrend(series = co.i1, smoothing.yr = 500,
+co.detr1 <- SeriesDetrend(series = co_i, smoothing.yr = 500,
                             detr.type = "rob.loess", out.dir = "Figures")
-co.detr1 <- SeriesDetrend(series = co.i1, smoothing.yr = 500,
+co.detr1 <- SeriesDetrend(series = co_i, smoothing.yr = 500,
                           detr.type = "mov.mode", out.dir = "Figures")
-#rm(char.thresh.gl1, co, co.i1)
+#rm(char.thresh.gl1, co, co_i)
+
+save.image(file = "./Data-Out/co_detr1.rdata")
+
 
 ## Fit gaussian mixture models to determine the noise-signal threshold
 
 char.thresh.gl1 <- glob_thresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
-                                thresh.value = 0.99, smoothing.yr = 500, span.sm = 0.2,
-                                keep_consecutive = F,
+                                thresh.value = 0.95, smoothing.yr = 500, span.sm = 0.2,
+                                keep_consecutive = F, minCountP = 0.05,
                                 out.dir = "Figures")
+
+char.thresh.gl1 <- glob_thresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
+                               thresh.value = 0.95, smoothing.yr = 500, span.sm = 0.2,
+                               keep_consecutive = F, minCountP = NULL,
+                               out.dir = "Figures")
 
 char.thresh.loc <- local_thresh(series = co.detr1, proxy = "charAR", thresh.yr = 500,
                                 thresh.value = 0.99, smoothing.yr = 500,
@@ -83,13 +93,15 @@ char.thresh.loc <- local_thresh(series = co.detr1, proxy = "charAR", thresh.yr =
 
 ## Make final plots
 layout(1)
-par(mfrow = c(2,1), mar = c(1,5,2,0.5))
+par(mfrow = c(2,1), mar = c(0,5,2,0.5), oma = c(4,1,0,0))
 Plot.Anomalies(series = char.thresh.gl1, proxy = "charAR", plot.crosses = T,
                plot.x = F, plot.neg = F)
-Plot_ReturnIntervals(series = char.thresh.gl1, proxy = "charAR", plot.neg = F)
+Plot_ReturnIntervals(series = char.thresh.gl1, proxy = "charAR",
+                     plot.x = T, plot.neg = F)
 
 Plot.Anomalies(series = char.thresh.loc, proxy = "charAR", plot.crosses = T,
-               plot.x = T, plot.neg = F)
-Plot_ReturnIntervals(series = char.thresh.loc, proxy = "charAR", plot.neg = F)
+               plot.x = F, plot.neg = F)
+Plot_ReturnIntervals(series = char.thresh.loc, proxy = "charAR",
+                     plot.x = T, plot.neg = F)
 
 

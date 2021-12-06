@@ -23,12 +23,12 @@
 #  ***************************************************************************
 
 
-Plot_ReturnIntervals <- function(series=NULL, proxy=NULL, x.lim=NULL,
-                                 plot.x=F, plot.neg=T) {
+Plot_ReturnIntervals <- function(series = NULL, x.lim = NULL, plot.x = F, plot.neg = T) {
   
   
   ## Gather data
   d <- series
+  proxy <- d$thresh$proxy
   peaks_neg_ages <- d$thresh$peaks.neg.ages
   peaks_pos_ages <- d$thresh$peaks.pos.ages
   RI_neg <- d$thresh$RI_neg

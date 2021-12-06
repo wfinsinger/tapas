@@ -1,8 +1,8 @@
 #  ***************************************************************************
 #   Global_Thresh.R
 #  ---------------------
-#   Date                 : July 2020 - December 2021
-#   Copyright            : (C) 2021 by Walter Finsinger
+#   Date                 : July 2020
+#   Copyright            : (C) 2020 by Walter Finsinger
 #   Email                : walter.finsinger@umontpellier.fr
 #  ---------------------
 #
@@ -12,7 +12,7 @@
 #     a 'noise' and a 'signal' component using a 2-component Gaussian Mixture Model (GMM).
 #     Based on Phil Higuera's CharThreshLocal.m Matlab code.
 #   Determines a positive and a negative threshold value for each interpolated sample, based on the
-#     distribution of values within the selected window (thresh.yr).
+#     distribution of values within the entire record.
 #   The procedure uses a Gaussian mixture model on the assumption that the noise component
 #     is normally distributed around 0 (the values were detrended!).
 #
@@ -24,10 +24,6 @@
 #   proxy   ->  Set proxy="VariableName" to determine threshold for one single variable.
 #     In this case, a Figure will be generated and saved to the "output" directory on the
 #     hard drive and a list will be returned with the threshold data for the analysed proxy.
-#     With the beta-version default option (proxy=NULL), the analysis uses all variables
-#     that are in the output from the SeriesDetrend() function;
-#     Figures for each variable will be generated and saved to the "output" directory, and
-#     a list will be returned with the threshold data for the last proxy only.
 #   
 #   t.lim   ->  allows defining a portion of the time series.
 #     Should be t.lim=c(older age limit, younger age limit).
@@ -39,22 +35,16 @@
 #   noise.gmm     =>  Determines which of the two GMM components should be considered as
 #     the noise component. By default noise.gmm=1.
 #   
-#   thresh.yr     =>  determines the length of the window width from which
-#                       values are selected to determine the local threshold (if gm.local=T)
-#   
-#   smoothing.yr  =>  determines the smoothing-window width to smooth the threshold values
-#   
-#   span.sm       =>  determines the smoothing of the threshold values.
-#                     If span.sm=NULL, the span is calculated based on smoothing.yr
+#   smoothing.yr  =>  determines the smoothing-window width to smooth the SNI values
 #
 #  ***************************************************************************
 
 
-glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
-                        thresh.value=0.95, noise.gmm=1, smoothing.yr=500, span.sm=NULL,
-                        keep_consecutive=F, minCountP = 0.05, out.dir="Figures") {
-  
-
+global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
+                          thresh.value = 0.95, noise.gmm = 1, smoothing.yr = 500,
+                          keep_consecutive = F,
+                          minCountP = 0.05, MinCountP_window = 150,
+                          out.dir = "Figures") {
   
   require(mclust)
   
@@ -74,6 +64,7 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
       print('Fatal error: please specify which proxy you want to use')
       return()
     } else {
+      proxy <- colnames(series$detr$detr) [2]
       a <- series$detr$detr
     }
   }
@@ -108,14 +99,9 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
     signal.gmm <- 1
   }
   
-  # Determine the proportion of datapoints used to smooth local thresholds with loess()
-  if (is.null(span.sm)) {
-    n.smooth <- round(smoothing.yr/yr.interp)
-    span.sm <- n.smooth/dim(a)[1]
-  }
   
   # Create empty list where output data will be stored
-  a.out <- list(span.sm = span.sm, thresh.value = thresh.value, yr.interp = yr.interp)
+  a.out <- list(thresh.value = thresh.value, yr.interp = yr.interp)
   
   
   # Create space for local variables
@@ -161,32 +147,21 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   
   
   ## Calculate SNI ####
-  if (is.null(proxy)) {
-    SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     series$int$series.int[ ,2],
-                                     thresh.pos),
-                   BandWidth = smoothing.yr)
-    SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     -1 * series$int$series.int[ ,2],
-                                     -1 * thresh.neg),
-                   BandWidth = smoothing.yr)
-  } else {
-    SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     series$int$series.int[[proxy]],
-                                     thresh.pos),
-                   BandWidth = smoothing.yr)
-    SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     -1 * series$int$series.int[[proxy]],
-                                     -1 * thresh.neg),
-                   BandWidth = smoothing.yr)
-  }
+  SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
+                                   series$int$series.int[[proxy]],
+                                   thresh.pos),
+                 BandWidth = smoothing.yr)
+  SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
+                                   -1 * series$int$series.int[[proxy]],
+                                   -1 * thresh.neg),
+                 BandWidth = smoothing.yr)
   
   
   
   ## Get peaks ####
   ## 
   ## If keep_consecutive == F ####
-  if (keep_consecutive == F) { # if consecutive peaks should be removed
+  if (keep_consecutive == F) { # if consecutive peak samples should be removed
     
     Peaks.pos[which(v > thresh.pos)] <- 2
     Peaks.neg[which(v < thresh.neg)] <- 2
@@ -224,7 +199,7 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
       }
     }
   } else {
-    # Get peaks
+    # Get all peak samples
     Peaks.pos[which(v > thresh.pos)] <- 1
     Peaks.neg[which(v < thresh.neg)] <- 1
   }
@@ -232,11 +207,14 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   
   
   
-  ## If minCountP is not NULL, screen positive peaks with minimum count test ####
+  ## Minimum-count Analysis ####
+  ## If minCountP is not NULL, screen positive peaks with minimum count test
   if (is.null(minCountP) == F) {
-    ## Minimum-count Analysis
+    
     # Set [yr] Years before and after a peak to look for the min. and max. value
-    mcWindow <- round(150/yr.interp)*yr.interp
+    if (is.null(MinCountP_window) == T) {
+      MinCountP_window <- round(150/yr.interp) * yr.interp
+    }
     
     countI_index <- which(colnames(series$int$series.int) == proxy)
     countI <- series$int$series.conI[ ,countI_index]
@@ -251,8 +229,8 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
     if (length(peakIndex) > 1) {                     # Only proceed if there is > 1 peak
       for (i in 1:length(peakIndex)) {               # For each peak identified...
         peakYr <- ageI[peakIndex[i]]      # Find age of peak and window around peak
-        windowTime <- c(max(ageI[which(ageI <= peakYr + mcWindow)]),
-                        min(ageI[which(ageI >= peakYr - mcWindow)]))
+        windowTime <- c(max(ageI[which(ageI <= peakYr + MinCountP_window)]),
+                        min(ageI[which(ageI >= peakYr - MinCountP_window)]))
         windowTime_in <- c(which(ageI == windowTime[1]), # Index to find range of window ages
                            which(ageI == windowTime[2]))
         if (i == 1) {  # find the year of two adjacent Peaks.pos, unless first peak,
@@ -268,10 +246,10 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
           windowPeak_in <- c(which(ageI == ageI[peakIndex[i + 1]]),
                              which(ageI == ageI[peakIndex[i - 1]]))
         }
-        if (windowTime_in[1] > windowPeak_in[1]) { # thus, if a peak falls within the time window defined by mcWindow
+        if (windowTime_in[1] > windowPeak_in[1]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[1] <- windowPeak_in[1] # replace the windowTime_in with the windowPeak_in
         }
-        if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by mcWindow
+        if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[2] <- windowPeak_in[2] # replace the windowTime_in with the windowPeak_in
         }
         
@@ -293,9 +271,9 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
         volMax <- volI[countMaxIn]
         volMin <- volI[countMinIn]
         d[ peakIndex[i] ] <- (abs(countMin - (countMin + countMax) *
-                                     (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
-                                                                                (volMin/(volMin + volMax)) * 
-                                                                                (volMax/(volMin + volMax))))
+                                    (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
+                                                                               (volMin/(volMin + volMax)) * 
+                                                                               (volMax/(volMin + volMax))))
         
         # Test statistic
         Thresh_minCountP[peakIndex[i]] <- 1 - pt(q = d[peakIndex[i]], df = Inf)
@@ -308,11 +286,10 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
         # with an infinite degrees of freedom, which is the same as the 
         # cumulative normal distribution.
       }
-    }  
-    #}
+    }
     
     # Clean Environment
-    rm(mcWindow, d, countMax, countMaxIn, countMin, countMinIn, peakIndex, peakYr, volMax, volMin,
+    rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn, peakIndex, peakYr, volMax, volMin,
        windowPeak_in, windowSearch, windowTime, windowTime_in)
     
     
@@ -332,6 +309,7 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   }
   
   
+  ## Gather data to calculate return intervals ####
   
   # Use these for plotting significant peaks
   Peaks.pos.plot <- which(Peaks.pos == 1)
@@ -351,6 +329,9 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
   RI_neg <- c(diff(peaks.neg.ages), NA)
   RI_pos <- c(diff(peaks.pos.ages), NA)
   
+  
+  
+  ## Make summary plots ####
   
   # Plot Gaussian Mixture Model with thresholds and classification (from densityMclust)
   pdf(paste0(out.path, s.name, '_', v.name, '_Global_01_GMM_Evaluation.pdf'),
@@ -423,7 +404,6 @@ glob_thresh <- function(series=NA, proxy=NULL, t.lim=NULL, thresh.yr=1000,
                          peaks.pos.insig = Peaks.pos.insig,
                          peaks.pos.ages = peaks.pos.ages, peaks.neg.ages = peaks.neg.ages,
                          RI_neg = RI_neg, RI_pos = RI_pos,
-                         span.sm = span.sm,
                          x.lim = x.lim))
   
   

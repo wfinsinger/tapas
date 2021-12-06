@@ -14,8 +14,6 @@
 #
 #   The user-defined parameters are as follows:
 #     series        =>  the output from the SeriesThreshold() function
-#     proxy         =>  a character string with the colname of the variable
-#     x.lim         =>  set the age limits of the x-axis scale (the time scale)
 #     plot.crosses  =>  if plot.crosses=T (default), crosses are added to indicate the location of the anomalies
 #     plot.x        =>  if plot.x=F (default), the x-axis labels are omitted
 #     plot.neg      =>  if plot.neg=T (default), both positive and negative anomalies are marked with colored shaded areas.
@@ -23,13 +21,13 @@
 #  ***************************************************************************
 
 
-Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
-                           plot.x=F, plot.neg=T) {
-  
+Plot.Anomalies <- function(series = NULL, x.lim = NULL, plot.crosses = T,
+                           plot.x = F, plot.neg = T) {
   
   
   d <- series
-  i <- proxy
+  proxy <- d$thresh$proxy
+  i <- which(colnames(d$detr$detr) == proxy)
   
   if (is.null(x.lim)) {
     x.lim <- rev(c(min(d$int$series.int$age), max(d$int$series.int$age)))
@@ -41,6 +39,7 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
   # Gather data from input list
   Peaks.pos.plot <- which(d$thresh$peaks.pos == 1)
   Peaks.neg.plot <- which(d$thresh$peaks.neg == 1)
+  insig.peaks <- which(d$thresh$peaks.pos.insig == 1)
   
   d.int.proxy <- d$int$series.int[[proxy]]
   d.ages <- d$int$series.int$age
@@ -72,7 +71,7 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
     if (length(peaks.pos.poly.start > 0)) {
       for (j in 1:length(d$thresh$peaks.pos.ages)) {
         polygon(x = c(peaks.pos.poly.start[j], peaks.pos.poly.end[j],
-                    peaks.pos.poly.end[j], peaks.pos.poly.start[j]),
+                      peaks.pos.poly.end[j], peaks.pos.poly.start[j]),
                 y = rep(y.lim, each = 2), col = "mistyrose", border = NA)
       }
     }
@@ -81,7 +80,7 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
       if (length(peaks.neg.poly.start > 0)) {
         for (j in 1:length(d$thresh$peaks.neg.ages)) {
           polygon(x = c(peaks.neg.poly.start[j], peaks.neg.poly.end[j],
-                      peaks.neg.poly.end[j], peaks.neg.poly.start[j]),
+                        peaks.neg.poly.end[j], peaks.neg.poly.start[j]),
                   y = rep(y.lim, each = 2), col = "slategray1", border = NA)
         }
       }
@@ -121,7 +120,7 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
     if (length(peaks.pos.poly.start) > 0) {
       for (j in 1:length(peaks.pos.poly.start)) {
         polygon(x = c(peaks.pos.poly.start[j], peaks.pos.poly.end[j],
-                    peaks.pos.poly.end[j], peaks.pos.poly.start[j]),
+                      peaks.pos.poly.end[j], peaks.pos.poly.start[j]),
                 y = rep(y.lim, each = 2), col = "mistyrose", border = NA)
       }
     }
@@ -130,7 +129,7 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
       if (length(peaks.neg.poly.start > 0)) {
         for (j in 1:length(peaks.neg.poly.start)) {
           polygon(x = c(peaks.neg.poly.start[j], peaks.neg.poly.end[j],
-                      peaks.neg.poly.end[j], peaks.neg.poly.start[j]),
+                        peaks.neg.poly.end[j], peaks.neg.poly.start[j]),
                   y = rep(y.lim, each = 2), col = "lightgrey", border = NA)
         }
       }
@@ -151,12 +150,15 @@ Plot.Anomalies <- function(series=NULL, proxy=NULL, x.lim=NULL, plot.crosses=T,
     #       xlim = x.lim, ylim = y.lim, axes = F, ylab = "")
     if (plot.crosses == T) {
       points(x = d$int$series.int$age[Peaks.pos.plot],
-             y = rep(x = 0.85*y.lim[2], length(Peaks.pos.plot)),
+             y = rep(x = 0.85 * y.lim[2], length(Peaks.pos.plot)),
              pch = 3, col = "red", lwd = 1.5)
+      points(x = d$int$series.int$age[insig.peaks],
+             y = rep(0.85 * y.lim[2], length(insig.peaks)),
+             pch = 16, col = "darkgrey", lwd = 1.5)
       if (plot.neg == T) {
-      points(x = d$int$series.int$age[Peaks.neg.plot],
-             y = rep(0.80*y.lim[2], length(Peaks.neg.plot)),
-             pch = 3, col = "blue", lwd = 1.5)
+        points(x = d$int$series.int$age[Peaks.neg.plot],
+               y = rep(0.80*y.lim[2], length(Peaks.neg.plot)),
+               pch = 3, col = "blue", lwd = 1.5)
       }
     }
     # mtext(paste0("thresh.value = ", d$thresh$thresh.value), side=2, las=0, line=1, cex=0.8)

@@ -26,6 +26,7 @@
 SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.loess",
                           out.dir = "Figures") {
   
+  
   require(dplyr)
   
   # Determine path to Figure-output folder and create folder if it does not exist

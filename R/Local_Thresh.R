@@ -54,9 +54,15 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
                          thresh.value = 0.95, noise.gmm = 1, smoothing.yr = 500,
                          span.sm = NULL, minCountP = 0.05, keep_consecutive = F,
                          out.dir = "Figures") {
-  
+
   
   require(mclust)
+  
+  # Initial check-up of input parameters ####
+  if (keep_consecutive == T & is.null(minCountP) == F) {
+    print('Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.')
+    return()
+  }
   
   # Determine path to output folder for Figures
   out.path <- paste0("./", out.dir, "/")
@@ -113,8 +119,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   if (is.null(span.sm)) {
     n.smooth <- round(smoothing.yr/yr.interp)
     span.sm <- n.smooth/dim(a)[1]
-  }
-  
+    }
+
   
   # Create empty list where output data will be stored
   a.out <- list(span.sm = span.sm, thresh.value = thresh.value, yr.interp = yr.interp)
@@ -279,14 +285,14 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   
   ## Calculate SNI ####
-  SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                   series$int$series.int[[proxy]],
-                                   thresh.pos),
-                 BandWidth = smoothing.yr)
-  SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                   -1 * series$int$series.int[[proxy]],
-                                   -1 * thresh.neg),
-                 BandWidth = smoothing.yr)
+    SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
+                                     series$int$series.int[[proxy]],
+                                     thresh.pos),
+                   BandWidth = smoothing.yr)
+    SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
+                                     -1 * series$int$series.int[[proxy]],
+                                     -1 * thresh.neg),
+                   BandWidth = smoothing.yr)
   
   
   # Smooth local threshold values ####
@@ -454,7 +460,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   
   ## Gather data to calculate return intervals ####    
-  
+    
   ## Plot series with trend + threshold + peaks
   Peaks.pos.plot <- which(Peaks.pos > 0)
   Peaks.neg.plot <- which(Peaks.neg > 0)

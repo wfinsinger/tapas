@@ -137,6 +137,13 @@ char_thresh_loc <- local_thresh(series = co_detr, proxy = "charAR", thresh.yr = 
                                 keep_consecutive = F, minCountP = 0.05,
                                 out.dir = "Figures")
 
+## As before, but selecting the time interval from 5000 to 0 cal BP
+char_thresh_loc <- local_thresh(series = co_detr, proxy = "charAR", thresh.yr = 500,
+                                thresh.value = 0.95, smoothing.yr = 500,
+                                keep_consecutive = F, minCountP = 0.05,
+                                t.lim = c(5000, 0),
+                                out.dir = "Figures")
+
 ## With minimum-count test and keeping consecutive peak samples
 ## Although the code would work with this combination of parameters,
 ##      it doesn't make much sense.

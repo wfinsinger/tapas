@@ -485,6 +485,80 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   RI_pos <- c(diff(peaks.pos.ages), NA)
   
   
+  
+  ## Get peak magnitude ####
+  # Peak magnitude (pieces cm-2 peak-1) is the sum of all samples exceeding
+  # threshFinalPos for a given peak.
+  # The units are derived as follows:
+  # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].  
+  
+  ## Get peak-magnitude values for positive peaks
+  if (length(Peaks.pos.final) > 0) {
+    PeakMag_pos_val <- v - thresh.pos
+    PeakMag_pos_val[PeakMag_pos_val < 0] <- 0
+    PeakMag_pos_index <- which(PeakMag_pos_val > 0)
+    
+    Peaks_pos_groups <- split(PeakMag_pos_index,
+                              cumsum(c(1, diff(PeakMag_pos_index) != 1)))
+    
+    PeakMag_pos <- vector(mode = "numeric", length = length(Peaks_pos_groups))
+    PeakMag_pos_ages <- vector(mode = "numeric", length = length(Peaks_pos_groups))
+    Peak_duration <- vector(mode = "numeric", length = length(Peaks_pos_groups))
+    
+    for (i in 1:length(Peaks_pos_groups)) {
+      #i = 2
+      n_groups <- length(Peaks_pos_groups[[i]])
+      Peak_duration[i] <- ageI[ Peaks_pos_groups[[i]] [n_groups] + 1] -
+        ageI[ Peaks_pos_groups[[i]] [1]]
+      PeakMag_pos[i] <- sum(c(PeakMag_pos_val[ Peaks_pos_groups[[i]] ])) *
+        Peak_duration[i]
+      PeakMag_pos_ages[i] <- ageI[Peaks_pos_groups[[i]] [n_groups]]
+    }
+    
+    PeakMag_pos <- as.data.frame(cbind(PeakMag_pos_ages, PeakMag_pos))
+    colnames(PeakMag_pos) <- c("ageI", "peak_mag")
+    
+    rm(PeakMag_pos_val, PeakMag_pos_index, Peak_duration, Peaks_pos_groups)
+  } else {
+    PeakMag_pos <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
+    colnames(PeakMag_pos) <- c("ageI", "peak_mag")
+  }
+  
+  ## Get peak-magnitude values for negative peaks
+  if (length(Peaks.neg.final) > 0) {
+    PeakMag_neg_val <- thresh.neg - v
+    PeakMag_neg_val[PeakMag_neg_val < 0] <- 0
+    PeakMag_neg_index <- which(PeakMag_neg_val > 0)
+    
+    Peaks_neg_groups <- split(PeakMag_neg_index,
+                              cumsum(c(1, diff(PeakMag_neg_index) != 1)))
+    
+    PeakMag_neg <- vector(mode = "numeric", length = length(Peaks_neg_groups))
+    PeakMag_neg_ages <- vector(mode = "numeric", length = length(Peaks_neg_groups))
+    Peak_duration <- vector(mode = "numeric", length = length(Peaks_neg_groups))
+    
+    for (i in 1:length(Peaks_neg_groups)) {
+      n_groups <- length(Peaks_neg_groups[[i]])
+      Peak_duration[i] <- ageI[ Peaks_neg_groups[[i]] [n_groups] + 1] -
+        ageI[ Peaks_neg_groups[[i]] [1]]
+      PeakMag_neg[i] <- sum(c(PeakMag_neg_val[ Peaks_neg_groups[[i]] ])) *
+        Peak_duration[i]
+      PeakMag_neg_ages[i] <- ageI[Peaks_neg_groups[[i]] [n_groups]]
+    }
+    
+    PeakMag_neg <- as.data.frame(cbind(PeakMag_neg_ages, PeakMag_neg))
+    colnames(PeakMag_neg) <- c("ageI", "peak_mag")
+    
+    rm(PeakMag_neg_val, PeakMag_neg_index, Peak_duration, Peaks_neg_groups)
+  } else {
+    PeakMag_neg <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
+    colnames(PeakMag_neg) <- c("ageI", "peak_mag")
+  }
+  
+  
+  
+  ## Make summary plots ####
+  
   # Set y-axis limits
   y.lim <- c(min(v, na.rm = T), max(v, na.rm = T))
   
@@ -527,6 +601,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
                          peaks.pos = Peaks.pos, peaks.neg = Peaks.neg,
                          peaks.pos.insig = Peaks.pos.insig,
                          peaks.pos.ages = peaks.pos.ages, peaks.neg.ages = peaks.neg.ages,
+                         PeakMag_pos = PeakMag_pos, PeakMag_neg = PeakMag_neg,
                          RI_neg = RI_neg, RI_pos = RI_pos,
                          span.sm = span.sm,
                          x.lim = x.lim))

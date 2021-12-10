@@ -1,8 +1,8 @@
 #  ***************************************************************************
 #   Local_Thresh.R
 #  ---------------------
-#   Date                 : July 2020
-#   Copyright            : (C) 2020 by Walter Finsinger
+#   Date                 : December 2021
+#   Copyright            : (C) 2021 by Walter Finsinger
 #   Email                : walter.finsinger@umontpellier.fr
 #  ---------------------
 #
@@ -21,38 +21,46 @@
 # The user-defined parameters are as follows:
 #   series  ->  the output from the SeriesDetrend() function
 #   
-#   proxy   ->  Set proxy="VariableName" to determine threshold for one single variable.
-#     In this case, a Figure will be generated and saved to the "output" directory on the
-#     hard drive and a list will be returned with the threshold data for the analysed proxy.
-#     With the beta-version default option (proxy=NULL), the analysis uses all variables
-#     that are in the output from the SeriesDetrend() function;
-#     Figures for each variable will be generated and saved to the "output" directory, and
-#     a list will be returned with the threshold data for the last proxy only.
+#   proxy   ->  Set proxy="VariableName" select the variable for the peak-detection analysis.
+#               If the dataset includes only one variable, proxy does not need to be specified. 
 #   
 #   t.lim   ->  allows defining a portion of the time series.
-#     Should be t.lim=c(older age limit, younger age limit).
-#     With t.lim=NULL (as per default) the analysis will be performed using the entire timeseries.
+#     With t.lim=NULL (as per default), the analysis will be performed using
+#     the entire timeseries.
 #   
-#   thresh.value  ->  Determines the location of the threshold as the percentile of the
-#     Gaussian Model of the noise component
+#   thresh.value  ->  Determines the threshold as the nth-percentile of the
+#     Gaussian Model of the noise component. Default thresh.value = 0.95
 #   
 #   noise.gmm     =>  Determines which of the two GMM components should be considered as
 #     the noise component. By default noise.gmm=1.
 #   
 #   thresh.yr     =>  determines the length of the window width from which
-#                       values are selected to determine the local threshold (if gm.local=T)
+#                       values are selected to determine the local threshold
 #   
 #   smoothing.yr  =>  determines the smoothing-window width to smooth the threshold values
 #   
 #   span.sm       =>  determines the smoothing of the threshold values.
 #                     If span.sm=NULL, the span is calculated based on smoothing.yr
+#                     
+#   keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
+#                       threshold will be removed and only the first (older) sample is retained.
+#                       
+#   MinCountP       => Defines the probability (default = 0.05) that two resampled counts
+#                     could arise from the same Poisson distribution. This is used to
+#                     screen peak samples and remove any that fail to pass the 
+#                     minimum-count test. If MinCountP = NULL, the test will not be performed.
+#
+#   MinCountP_window = Defines the width (in years) of the search window used for the 
+#                     minimum-count test. Default: MinCountP_window=150.
 #
 #  ***************************************************************************
 
 
 local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 1000,
                          thresh.value = 0.95, noise.gmm = 1, smoothing.yr = 500,
-                         span.sm = NULL, minCountP = 0.05, keep_consecutive = F,
+                         span.sm = NULL,
+                         keep_consecutive = F,
+                         minCountP = 0.05, MinCountP_window = 150,
                          out.dir = "Figures") {
 
   
@@ -72,7 +80,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   }
   
   
-  # Extract parameters from input list (detrended series) ####
+  # Extract parameters from input list (i.e. detrended series) ####
   
   # Determines for which of the variables the threshold analysis should be made
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
@@ -100,6 +108,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   # Determine whether to limit the analysis to a portion of the record
   if (is.null(t.lim) == T) {
     ageI <- a$age
+    t.lim <- c(min(ageI), max(ageI))
   }
   if (is.null(t.lim) == F) {
     a <- a[which(a$age <= max(t.lim) & a$age >= min(t.lim)), ]
@@ -175,8 +184,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
     }
     
     
-    ## ESTIMATE LOCAL NOISE DISTRIBUTION
-    # Estimate noise distribution with Guassian mixture model
+
+    ## Estimate local noise distribution with Guassian mixture model ####
+    
     X.gmm <- X[which(complete.cases(X))]
     
     if (length(X) < 3) {
@@ -285,18 +295,24 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   
   ## Calculate SNI ####
-    SNI_pos <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     series$int$series.int[[proxy]],
-                                     thresh.pos),
-                   BandWidth = smoothing.yr)
-    SNI_neg <- SNI(ProxyData = cbind(series$int$series.int$age,
-                                     -1 * series$int$series.int[[proxy]],
-                                     -1 * thresh.neg),
-                   BandWidth = smoothing.yr)
+  ## 
+  ## Get resampled values for selected variable (proxy) for selected time interval (t.lim)
+  SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
+                          series$int$series.int$age >= min(t.lim))
+  
+  SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
+  
+  SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh.pos),
+                 BandWidth = smoothing.yr)
+  SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh.neg),
+                 BandWidth = smoothing.yr)
+  
+  rm(SNI_in, SNI_in_index)
+  
   
   
   # Smooth local threshold values ####
-  ## Smooth thresholds and SNI with Lowess smoother
+  ## Smooth thresholds Lowess smoother
   # thresh.pos.sm <- stats::loess(thresh.pos ~ ageI, data = data.frame(ageI, thresh.pos),
   #                        span = span.sm, family = "gaussian")$fitted
   # thresh.neg.sm <- stats::loess(thresh.neg ~ ageI, data = data.frame(ageI, thresh.neg),
@@ -309,8 +325,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   ## Get peaks ####
   
-  # if consecutive peaks should be removed
-  if (keep_consecutive == F) { 
+  ## If keep_consecutive == F ####
+  ## 
+  if (keep_consecutive == F) {  # if consecutive peak samples should be removed
     
     # Flag values exceeding thresholds
     Peaks.pos[which(v > thresh.pos.sm)] <- 2
@@ -356,12 +373,15 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   
   
-  
+  ## Minimum-count Analysis ####
   ## If minCountP is not NULL, screen positive peaks with minimum count test ####
   if (is.null(minCountP) == F) {
     ## Minimum-count Analysis
+    
     # Set [yr] Years before and after a peak to look for the min. and max. value
-    mcWindow <- round(150/yr.interp) * yr.interp
+    if (is.null(MinCountP_window) == T) {
+      MinCountP_window <- round(150/yr.interp) * yr.interp
+    }
     
     countI_index <- which(colnames(series$int$series.int) == proxy)
     countI <- series$int$series.conI[ ,countI_index]
@@ -376,8 +396,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
     if (length(peakIndex) > 1) {                     # Only proceed if there is > 1 peak
       for (i in 1:length(peakIndex)) {               # For each peak identified...
         peakYr <- ageI[peakIndex[i]]      # Find age of peak and window around peak
-        windowTime <- c(max(ageI[which(ageI <= peakYr + mcWindow)]),
-                        min(ageI[which(ageI >= peakYr - mcWindow)]))
+        windowTime <- c(max(ageI[which(ageI <= peakYr + MinCountP_window)]),
+                        min(ageI[which(ageI >= peakYr - MinCountP_window)]))
         windowTime_in <- c(which(ageI == windowTime[1]), # Index to find range of window ages
                            which(ageI == windowTime[2]))
         if (i == 1) {  # find the year of two adjacent Peaks.pos, unless first peak,
@@ -393,10 +413,10 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
           windowPeak_in <- c(which(ageI == ageI[peakIndex[i + 1]]),
                              which(ageI == ageI[peakIndex[i - 1]]))
         }
-        if (windowTime_in[1] > windowPeak_in[1]) { # thus, if a peak falls within the time window defined by mcWindow
+        if (windowTime_in[1] > windowPeak_in[1]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[1] <- windowPeak_in[1] # replace the windowTime_in with the windowPeak_in
         }
-        if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by mcWindow
+        if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[2] <- windowPeak_in[2] # replace the windowTime_in with the windowPeak_in
         }
         
@@ -406,12 +426,14 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
         
         # search for max and min Peaks.pos within this window.
         # [# cm^-3] Max charcoal concentration after peak.
-        
         countMax <- round(max(countI[ windowSearch[2]:peakIndex[i] ]))
+        
         # Index for location of max count.
         countMaxIn <- windowSearch[2] - 1 + max(which(round(countI[windowSearch[2]:peakIndex[i]]) == countMax))
+        
         # [# cm^-3] Min charcoal concentration before peak.
         countMin <- round(min(countI[peakIndex[i]:windowSearch[1] ]))
+        
         # Index for location of Min count
         countMinIn <- peakIndex[i] - 1 + min(which(round(countI[peakIndex[i]:windowSearch[1]]) == countMin))
         
@@ -436,8 +458,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
     }
     
     # Clean Environment
-    rm(mcWindow, d, countMax, countMaxIn, countMin, countMinIn, peakIndex, peakYr, volMax, volMin,
-       windowPeak_in, windowSearch, windowTime, windowTime_in)
+    rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn, peakIndex,
+       peakYr, volMax, volMin, windowPeak_in, windowSearch, windowTime, windowTime_in)
     
     
     # Take note of and remove peaks that do not pass the minimum-count screening-peak test
@@ -462,8 +484,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   ## Gather data to calculate return intervals ####    
     
   ## Plot series with trend + threshold + peaks
-  Peaks.pos.plot <- which(Peaks.pos > 0)
-  Peaks.neg.plot <- which(Peaks.neg > 0)
+  Peaks.pos.final <- which(Peaks.pos == 1)
+  Peaks.neg.final <- which(Peaks.neg == 1)
   
   peaks.pos.ages <- ageI[which(Peaks.pos == 1)]
   peaks.neg.ages <- ageI[which(Peaks.neg == 1)]
@@ -485,11 +507,11 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   abline(h = 0)
   lines(ageI, thresh.pos.sm, col = "red")
   lines(ageI, thresh.neg.sm, col = "blue")
-  points(ageI[Peaks.pos.plot], rep(0.9*y.lim[2], length(Peaks.pos.plot)),
+  points(ageI[Peaks.pos.final], rep(0.9*y.lim[2], length(Peaks.pos.final)),
          pch = 3, col = "red", lwd = 1.5)
   points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
          pch = 16, col = "darkgrey", lwd = 1.5)
-  points(ageI[Peaks.neg.plot], rep(0.8*y.lim[2], length(Peaks.neg.plot)),
+  points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
          pch = 3, col = "blue", lwd = 1.5)
   axis(side = 1, labels = T, tick = T)
   axis(2)

@@ -31,9 +31,6 @@
 #   thresh.value  ->  Determines the threshold as the nth-percentile of the
 #     Gaussian Model of the noise component. Default thresh.value = 0.95
 #   
-#   noise.gmm     =>  Determines which of the two GMM components should be considered as
-#     the noise component. By default noise.gmm=1.
-#   
 #   thresh.yr     =>  determines the length of the window width from which
 #                       values are selected to determine the local threshold
 #   
@@ -57,12 +54,11 @@
 
 
 local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 1000,
-                         thresh.value = 0.95, noise.gmm = 1, smoothing.yr = 500,
+                         thresh.value = 0.95, smoothing.yr = 500,
                          span.sm = NULL,
                          keep_consecutive = F,
                          minCountP = 0.05, MinCountP_window = 150,
                          out.dir = "Figures") {
-
   
   require(mclust)
   
@@ -116,13 +112,6 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   }
   x.lim <- c(max(ageI), min(ageI))
   
-  
-  if (noise.gmm == 1) {
-    signal.gmm <- 2
-  }
-  if (noise.gmm == 2) {
-    signal.gmm <- 1
-  }
   
   # Determine the proportion of datapoints used to smooth local thresholds with loess()
   if (is.null(span.sm)) {
@@ -206,25 +195,25 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
       
       # Get parameters from Gaussian mixture models
       muHat[i, ] <- m$parameters$mean
-      sigmaHat[i, noise.gmm] <- sqrt(m$parameters$variance$sigmasq[noise.gmm])
-      sigmaHat[i, signal.gmm] <- sqrt(m$parameters$variance$sigmasq[signal.gmm])
+      sigmaHat[i, 1] <- sqrt(m$parameters$variance$sigmasq[1])
+      sigmaHat[i, 2] <- sqrt(m$parameters$variance$sigmasq[2])
       propN[i, ] <- m$parameters$pro
       
       # Check
-      if (muHat[i, noise.gmm] == muHat[i, signal.gmm]) {
+      if (muHat[i, 1] == muHat[i, 2]) {
         warning('Poor fit of Gaussian mixture model')
       }
       
       ## Define local threshold
-      if (!is.na(m$parameters$variance$sigmasq[noise.gmm]) == T) {
-        thresh.pos[i] <- m$parameters$mean[noise.gmm] + qnorm(p = thresh.value) *
-          sqrt(m$parameters$variance$sigmasq)[noise.gmm]
-        thresh.neg[i] <- m$parameters$mean[noise.gmm] - qnorm(p = thresh.value) *
-          sqrt(m$parameters$variance$sigmasq)[noise.gmm]
+      if (!is.na(m$parameters$variance$sigmasq[1]) == T) {
+        thresh.pos[i] <- m$parameters$mean[1] + qnorm(p = thresh.value) *
+          sqrt(m$parameters$variance$sigmasq)[1]
+        thresh.neg[i] <- m$parameters$mean[1] - qnorm(p = thresh.value) *
+          sqrt(m$parameters$variance$sigmasq)[1]
         
-        if (m$parameters$mean[noise.gmm] < 0) {
+        if (m$parameters$mean[1] < 0) {
           thresh.pos[i] <- 0 + qnorm(p = thresh.value) *
-            sqrt(m$parameters$variance$sigmasq)[noise.gmm]
+            sqrt(m$parameters$variance$sigmasq)[1]
         }
         
         #sig_i.pos <- X[which(X > thresh.pos[i])]
@@ -234,7 +223,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
         
       }
       
-      if (is.na(m$parameters$variance$sigmasq[noise.gmm]) == T) {
+      if (is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- 0
         thresh.neg[i] <- 0
       }
@@ -257,12 +246,12 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
       # plot(h, freq = F, col = "grey", border = "grey", xlim = c(min(h$breaks), max(h$breaks)),
       #      ylab = "Density", xlab = '', main = "Local threshold")
       par(new = T)
-      pdf2 <- curve(dnorm(x = x, mean = muHat[i, signal.gmm], sd = sigmaHat[i, signal.gmm]),
+      pdf2 <- curve(dnorm(x = x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
                     from = min(h$breaks), to = max(h$breaks),
                     ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
                     axes = F, ylab = '', xlab = '')
       par(new = T)
-      pdf1 <- curve(dnorm(x = x, mean = muHat[i, noise.gmm], sd = sigmaHat[i, noise.gmm]),
+      pdf1 <- curve(dnorm(x = x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
                     from = min(h$breaks), to = max(h$breaks),
                     ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
                     axes = F, ylab = '', xlab = '')

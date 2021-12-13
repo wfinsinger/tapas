@@ -27,16 +27,18 @@
 #               If the dataset includes only one variable, proxy does not need to be specified. 
 #   
 #   t.lim   ->  allows defining a portion of the time series.
-#     Should be t.lim=c(older age limit, younger age limit).
-#     With t.lim=NULL (default) the analysis will be performed using the entire timeseries.
+#               With t.lim=NULL (default) the analysis will be performed using
+#               the entire timeseries.
 #   
 #   thresh.value  ->  Determines the threshold as the nth-percentile of the
-#     Gaussian Model of the noise component. Default thresh.value = 0.95
+#                     Gaussian Model of the noise component. Default thresh.value = 0.95
 #   
 #   noise.gmm     =>  Determines which of the two GMM components should be considered as
-#     the noise component. By default noise.gmm=1.
+#                     the noise component. By default noise.gmm=1.
 #   
-#   smoothing.yr  =>  determines the smoothing-window width to smooth the SNI values.
+#   smoothing.yr  =>  Width of moving window for computing SNI.
+#                     By default, this value is inherited from the smoothing.yr value set in
+#                     the SeriesDetrend() function.
 #   
 #   keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
 #                       threshold will be removed and only the first (older) sample is retained.
@@ -53,7 +55,7 @@
 
 
 global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
-                          thresh.value = 0.95, noise.gmm = 1, smoothing.yr = 500,
+                          thresh.value = 0.95, noise.gmm = 1, smoothing.yr = NULL,
                           keep_consecutive = F,
                           minCountP = 0.05, MinCountP_window = 150,
                           out.dir = "Figures") {
@@ -80,6 +82,11 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Extract parameters from input list (i.e. the detrended series) ####
   
   # Determines for which of the variables (proxy) in the dataset the analysis should be made
+  # 
+  if (is.null(smoothing.yr) == T) {
+    smoothing.yr <- series$detr$smoothing.yr
+  }
+  
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
     if (dim(series$detr$detr)[2] > 2) {
       print('Fatal error: please specify which proxy you want to use')
@@ -509,7 +516,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   
   ## Merge output into input list
   a.out <- append(series, list(out1))
-  names(a.out) [4] <- "thresh"
+  names(a.out) [5] <- "thresh"
   
   ## Return final output
   return(a.out)

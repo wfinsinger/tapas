@@ -126,7 +126,7 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
   out1 <- structure(list(detr = a.detr, smoothing.yr = smoothing.yr,
                          detr.type = detr.type, series.name = s.name))
   out2 <- append(series, list(out1))
-  names(out2) [3] <- "detr"
+  names(out2) [4] <- "detr"
   
   # Get output
   return(out2)

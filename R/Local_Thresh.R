@@ -31,13 +31,12 @@
 #   thresh.value  ->  Determines the threshold as the nth-percentile of the
 #     Gaussian Model of the noise component. Default thresh.value = 0.95
 #   
-#   thresh.yr     =>  determines the length of the window width from which
-#                       values are selected to determine the local threshold
+#   thresh.yr     =>  determines the length of the window width (in years) from which
+#                       values are selected to determine the local threshold. By default,
+#                       this value is inherited from the smoothing.yr value set in
+#                       the SeriesDetrend() function.
 #   
-#   smoothing.yr  =>  determines the smoothing-window width to smooth the threshold values
-#   
-#   span.sm       =>  determines the smoothing of the threshold values.
-#                     If span.sm=NULL, the span is calculated based on smoothing.yr
+#   smoothing.yr  =>  Width of moving window for computing SNI
 #                     
 #   keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
 #                       threshold will be removed and only the first (older) sample is retained.
@@ -49,13 +48,14 @@
 #
 #   MinCountP_window = Defines the width (in years) of the search window used for the 
 #                     minimum-count test. Default: MinCountP_window=150.
+#   
+#   out.dir = path to the output directory where figures will be written as *.pdf
 #
 #  ***************************************************************************
 
 
-local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 1000,
-                         thresh.value = 0.95, smoothing.yr = 500,
-                         span.sm = NULL,
+local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NULL,
+                         thresh.value = 0.95, smoothing.yr = NULL,
                          keep_consecutive = F,
                          minCountP = 0.05, MinCountP_window = 150,
                          out.dir = "Figures") {
@@ -114,10 +114,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
   
   
   # Determine the proportion of datapoints used to smooth local thresholds with loess()
-  if (is.null(span.sm)) {
     n.smooth <- round(smoothing.yr/yr.interp)
     span.sm <- n.smooth/dim(a)[1]
-    }
 
   
   # Create empty list where output data will be stored
@@ -607,7 +605,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = 10
                          x.lim = x.lim))
   
   a.out <- append(series, list(out1))
-  names(a.out) [4] <- "thresh"
+  names(a.out) [5] <- "thresh"
   
   return(a.out)
   

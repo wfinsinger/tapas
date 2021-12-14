@@ -289,10 +289,25 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
   
+  
   SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh.pos),
                  BandWidth = smoothing.yr)
+  
+  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
+  if (all(is.na(SNI_pos$SNI_raw))) {
+    SNI_pos$SNI_raw <- 0
+    SNI_pos$SNI_sm <- 0
+  }
+  
+  
   SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh.neg),
                  BandWidth = smoothing.yr)
+  
+  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
+  if (all(is.na(SNI_neg$SNI_raw))) {
+    SNI_neg$SNI_raw <- 0
+    SNI_neg$SNI_sm <- 0
+  }
   
   rm(SNI_in, SNI_in_index)
   

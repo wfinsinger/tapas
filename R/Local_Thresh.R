@@ -96,6 +96,16 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     colnames(a)[2] <- proxy
   }
   
+  # Checks if smoothing.yr and thresh.yr were specified,
+  # else use smoothing.yr used for detrending
+  if (is.null(smoothing.yr) == T) {
+    smoothing.yr <- series$detr$smoothing.yr
+  }
+  
+  if (is.null(thresh.yr) == T) {
+    thresh.yr <- series$detr$smoothing.yr
+  }
+  
   # Further extract parameters from input dataset
   a.names <- colnames(a)
   s.name <- series$detr$series.name

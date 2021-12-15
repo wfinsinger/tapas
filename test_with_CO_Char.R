@@ -86,6 +86,10 @@ co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
 
 ## With a Global Threshold ####
 
+# With default options
+char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR")
+
+
 ## With minimum-count test and removing consecutive peak samples
 char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR",
                                 thresh.value = 0.95, smoothing.yr = NULL,
@@ -156,6 +160,9 @@ Plot_ReturnIntervals(series = char_thresh_gl, plot.x = T, plot.neg = F)
 
 
 ## With a Local Threshold ###################
+
+## With default options
+char_thresh_loc <- local_thresh(series = co_detr, proxy = "charAR")
 
 ## With minimum-count test and removing consecutive peak samples
 char_thresh_loc <- local_thresh(series = co_detr, proxy = "charAR", thresh.yr = 500,
@@ -533,3 +540,4 @@ Plot.Anomalies(series = char_thresh_loc, plot.crosses = T,
 Plot_ReturnIntervals(series = char_thresh_gl, plot.x = T, plot.neg = F)
 
 # END test ####
+

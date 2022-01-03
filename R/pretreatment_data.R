@@ -1,8 +1,8 @@
 #  ***************************************************************************
 #   pretreatment_data.R
 #  ---------------------
-#   Date                 : July 2020
-#   Copyright            : (C) 2020 by Walter Finsinger
+#   Date                 : January 2022
+#   Copyright            : (C) 2022 by Walter Finsinger
 #   Email                : walter.finsinger@umontpellier.fr
 #  ---------------------
 #
@@ -17,7 +17,7 @@
 #
 #   The user-defined parameters are as follows:
 #     series      ->  the name of the input matrix
-#     out         ->  with out = "accI" the function returns resampled accumulation rates,
+#     out         ->  with out = "accI" (default) the function returns resampled accumulation rates,
 #                     with out = "conI" the function returns resampled concentrations,
 #                     with out = "countI" the function returns resampled counts.
 #     series.name ->  a character string defining the name of the input matrix. Is NA by default.
@@ -29,20 +29,31 @@
 #
 #  ***************************************************************************
 
-pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL, last=NULL,
-                              yrInterp=yr.interp) {
-  
+pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
+                              first=NULL, last=NULL, yrInterp=NULL) {
+
+  ## Gather data ####
+  ybp <- series[ ,3]  # sample AgeTop
+  ybpB <- series[ ,4] # sample AgeBot
   
   ## Initial check up ####
-  if (is.null(first)) first <- min(series$AgeTop)
-  if (is.null(last)) last <- max(series$AgeBot)
+  if (is.null(first)) first <- min(ybp)
+  if (is.null(last)) last <- max(ybpB)
   
-  ybpI <- seq(first, last, yrInterp) # [yr BP] Years to resample record to.
+  ## Calculate yrInterp ####
+  if (is.null(yrInterp)) {
+    yrInterp <- round(median(diff(ybp)))
+  }
+  
+  
+  ## [yr BP] Years to resample record to ####
+  ybpI <- seq(from = first, to = last, by = yrInterp) 
+  
   
   
   ## If output == resampled accumulation rates ####
   if (out == "accI") {
-    raw <- data.frame(series$AgeTop)
+    raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
     int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
@@ -58,7 +69,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
     for (i in 6:ncol(series)) {
       #i=6
       pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yr.interp)
+                                 first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- pre.i$acc
       colnames(raw) [j] <- colnames(series) [i]
@@ -78,7 +89,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
   
   ## If output = resampled concentration values ####
   if (out == "conI") {
-    raw <- data.frame(series$AgeTop)
+    raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
     int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
@@ -93,7 +104,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
     for (i in 6:ncol(series)) {
       #i = 6
       pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yr.interp)
+                                 first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i] / series[ ,5] # non-resampled concentration values
       colnames(raw) [j] <- colnames(series) [i]
@@ -113,7 +124,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
   
   ## If output = resampled counts ####
   if (out == "countI") {
-    raw <- data.frame(series$AgeTop)
+    raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
     int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
@@ -128,7 +139,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
     for (i in 6:ncol(series)) {
       #i = 6
       pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yr.interp)
+                                 first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i]  # non-resampled count values
       colnames(raw) [j] <- colnames(series) [i]
@@ -148,7 +159,7 @@ pretreatment_data <- function(series=NULL, out=NULL, series.name=NA, first=NULL,
   d.out <- structure(list(list(series = raw, series.name = series.name),
                           list(series.int = int, series.conI = conI, volI = volI,
                                yr.interp = yrInterp,
-                               span.l = NA, type = "pretreatment"), out = out))
+                               type = "pretreatment"), out = out))
   names(d.out) [1] <- "raw"
   names(d.out) [2] <- "int"
   

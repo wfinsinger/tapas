@@ -51,16 +51,8 @@ source("./R/Plot_ReturnIntervals.r")
 ### Load test data #######################################################################
 
 ### Charcoal data ###
-co <- read.csv("./Data-In/CO_charData.csv", header = T)
-co <- dplyr::rename(co, "AgeTop" = "ageTop..yr.BP.")
-co <- dplyr::rename(co, "AgeBot" = "AgeBot..yr.BP.")
-co <- dplyr::rename(co, "char" = "CharCount.....")
-
-### Add a dummy variable (charcoal area) #################################################
-### This is two show that the resampling and the detrending is done for
-### all the variables that are listed in the dataset (one column for each variable):
-co$dummy_chararea <- co$char * 0.2421
-
+load("./Data-In/co_char_data.rda")
+co <- co_char_data
 
 ## Set parameters ######################################################################## 
 min.ages <- min(co$AgeTop)

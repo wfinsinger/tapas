@@ -49,16 +49,19 @@
 #   MinCountP_window = Defines the width (in years) of the search window used for the 
 #                     minimum-count test. Default: MinCountP_window=150.
 #   
-#   out.dir = path to the output directory where figures will be written as *.pdf
+# out.dir -> path to the folder where figures will be written to. If out.dir=NULL, the 
+#             figures will be written in the working directory.
 #
+# plot.local_thresh -> Logical. If plot.thresh=T (default), *.pdf files will be
+#                       produces and written in the out.dir folder.
 #  ***************************************************************************
 
 
 local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NULL,
                          thresh.value = 0.95, smoothing.yr = NULL,
                          keep_consecutive = F,
-                         minCountP = 0.05, MinCountP_window = 150,
-                         out.dir = "Figures") {
+                         minCountP = 0.95, MinCountP_window = 150,
+                         out.dir = "Figures", plot.local_thresh = T) {
   
   require(mclust)
   
@@ -69,12 +72,13 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   }
   
   # Determine path to output folder for Figures
-  out.path <- paste0("./", out.dir, "/")
-  
-  if (dir.exists(out.path) == F) {
-    dir.create(out.path)
+  if (plot.local_thresh == T) {
+    out.path <- paste0("./", out.dir, "/")
+    
+    if (dir.exists(out.path) == F) {
+      dir.create(out.path)
+    }
   }
-  
   
   # Extract parameters from input list (i.e. detrended series) ####
   
@@ -124,9 +128,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   
   # Determine the proportion of datapoints used to smooth local thresholds with loess()
-    n.smooth <- round(smoothing.yr/yr.interp)
-    span.sm <- n.smooth/dim(a)[1]
-
+  n.smooth <- round(smoothing.yr/yr.interp)
+  span.sm <- n.smooth/dim(a)[1]
+  
   
   # Create empty list where output data will be stored
   a.out <- list(span.sm = span.sm, thresh.value = thresh.value, yr.interp = yr.interp)
@@ -181,7 +185,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     }
     
     
-
+    
     ## Estimate local noise distribution with Guassian mixture model ####
     
     X.gmm <- X[which(complete.cases(X))]
@@ -251,7 +255,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       plot(h, freq = F, col = "grey", border = "grey",
            xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
            ylab = "Density", xlab = '', main = "Local threshold")
-      # plot(h, freq = F, col = "grey", border = "grey", xlim = c(min(h$breaks), max(h$breaks)),
+      # plot(h, freq = F, col = "grey", border = "grey",
+      #      xlim = c(min(h$breaks), max(h$breaks)),
       #      ylab = "Density", xlab = '', main = "Local threshold")
       par(new = T)
       pdf2 <- curve(dnorm(x = x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
@@ -280,13 +285,16 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   }
   
   # Print pdf with selected plots that were saved at the end of the loop above
-  pdf(paste0(out.path, s.name, '_', v.name, '_Local_GMM_Evaluation.pdf'),
-      onefile = TRUE, paper = "a4")
-  par(mfrow = (c(5,5)), mar = c(0.5,1,0.5,1), oma = c(1,1,0.5,1), cex = 0.7)
-  for (k in 1:length(num.plots)) {
-    replayPlot(my.plots[[k]])
+  if (plot.local_thresh == T) {  
+    pdf(paste0(out.path, s.name, '_', v.name, '_Local_GMM_Evaluation.pdf'),
+        onefile = TRUE, paper = "a4")
+    par(mfrow = (c(5,5)), mar = c(0.5,1,0.5,1), oma = c(1,1,0.5,1), cex = 0.7)
+    for (k in 1:length(num.plots)) {
+      replayPlot(my.plots[[k]])
+    }
+    dev.off()
   }
-  dev.off()
+  
   
   #rm(my.plots, num.plots)
   
@@ -330,8 +338,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   # thresh.neg.sm <- stats::loess(thresh.neg ~ ageI, data = data.frame(ageI, thresh.neg),
   #                        span = span.sm, family = "gaussian")$fitted
   
-  thresh.pos.sm <- stats::lowess(ageI, thresh.pos, f = span.sm, iter = 0)$y
-  thresh.neg.sm <- stats::lowess(ageI, thresh.neg, f = span.sm, iter = 0)$y
+  thresh.pos.sm <- stats::lowess(ageI, thresh.pos, f = span.sm, iter = 1)$y
+  thresh.neg.sm <- stats::lowess(ageI, thresh.neg, f = span.sm, iter = 1)$y
   
   
   
@@ -494,7 +502,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   
   ## Gather data to calculate return intervals ####    
-    
+  
   ## Plot series with trend + threshold + peaks
   Peaks.pos.final <- which(Peaks.pos == 1)
   Peaks.neg.final <- which(Peaks.neg == 1)
@@ -581,38 +589,39 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   
   ## Make summary plots ####
-  
-  # Set y-axis limits
-  y.lim <- c(min(v, na.rm = T), max(v, na.rm = T))
-  
-  pdf(paste0(out.path, s.name, '_', v.name, '_Local_ThresholdSeries.pdf'))
-  par(mfrow = c(2,1), oma  =  c(3,1,0,0), mar = c(1,4,0.5,0.5))
-  
-  plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = a.names[1],
-       xlim = x.lim)
-  abline(h = 0)
-  lines(ageI, thresh.pos.sm, col = "red")
-  lines(ageI, thresh.neg.sm, col = "blue")
-  points(ageI[Peaks.pos.final], rep(0.9*y.lim[2], length(Peaks.pos.final)),
-         pch = 3, col = "red", lwd = 1.5)
-  points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
-         pch = 16, col = "darkgrey", lwd = 1.5)
-  points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
-         pch = 3, col = "blue", lwd = 1.5)
-  axis(side = 1, labels = T, tick = T)
-  axis(2)
-  mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -0.5)
-  
-  plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
-       ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
-       xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
-  lines(ageI, SNI_pos$SNI_sm, col = "black", lwd = 2)
-  abline(h  =  3, lty  =  "dashed")
-  axis(side = 1, labels = T, tick = T)
-  axis(2)
-  
-  dev.off()
-  
+  if (plot.local_thresh == T) {
+    
+    # Set y-axis limits
+    y.lim <- c(min(v, na.rm = T), max(v, na.rm = T))
+    
+    pdf(paste0(out.path, s.name, '_', v.name, '_Local_ThresholdSeries.pdf'))
+    par(mfrow = c(2,1), oma  =  c(3,1,0,0), mar = c(1,4,0.5,0.5))
+    
+    plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = a.names[1],
+         xlim = x.lim)
+    abline(h = 0)
+    lines(ageI, thresh.pos.sm, col = "red")
+    lines(ageI, thresh.neg.sm, col = "blue")
+    points(ageI[Peaks.pos.final], rep(0.9*y.lim[2], length(Peaks.pos.final)),
+           pch = 3, col = "red", lwd = 1.5)
+    points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
+           pch = 16, col = "darkgrey", lwd = 1.5)
+    points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
+           pch = 3, col = "blue", lwd = 1.5)
+    axis(side = 1, labels = T, tick = T)
+    axis(2)
+    mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -0.5)
+    
+    plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
+         ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
+         xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
+    lines(ageI, SNI_pos$SNI_sm, col = "black", lwd = 2)
+    abline(h  =  3, lty  =  "dashed")
+    axis(side = 1, labels = T, tick = T)
+    axis(2)
+    
+    dev.off()
+  }
   
   
   ## Prepare output

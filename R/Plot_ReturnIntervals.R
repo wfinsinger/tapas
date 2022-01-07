@@ -18,12 +18,12 @@
 #     proxy         =>  a character string with the colname of the variable
 #     x.lim         =>  set the age limits of the x-axis scale (the time scale)
 #     plot.x        =>  if plot.x=F (default), the x-axis labels are omitted
-#     plot.neg      =>  if plot.neg=T (default), the return intervals for both positive and negative anomalies are plotted.
+#     plot.neg      =>  if plot.neg=T (default), the return intervals for both 
+#                         positive and negative anomalies are plotted.
 #
 #  ***************************************************************************
 
-
-Plot_ReturnIntervals <- function(series = NULL, x.lim = NULL, plot.x = F, plot.neg = T) {
+Plot_ReturnIntervals <- function(series = NULL, x.lim = NULL, plot.x = F, plot.neg = F) {
   
   
   ## Gather data
@@ -49,7 +49,7 @@ Plot_ReturnIntervals <- function(series = NULL, x.lim = NULL, plot.x = F, plot.n
   # Plot data
   #par(mfrow = c(1,1), mar = c(5,4,2,0.5))
   plot(peaks_pos_ages, RI_pos, type = "l", axes = F,
-       ylab = paste(proxy, "return interval \n (years)"), lwd = 2,
+       ylab = paste(proxy, "events\nreturn interval (years)"), lwd = 2,
        xlab = "", xlim = x.lim, ylim = y.lim)
   if (plot.neg == T) {
     lines(peaks_neg_ages, RI_neg, col = "blue", lwd = 2)

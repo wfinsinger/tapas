@@ -8,22 +8,21 @@
 #
 #  ***************************************************************************
 #
-#   The script determines threshold values to decompose a detrended timeseries into
-#     a 'noise' and a 'signal' component using a 2-component Gaussian Mixture Model (GMM).
-#     Based on Phil Higuera's CharThreshLocal.m Matlab code.
-#   Determines a positive and a negative threshold value for each interpolated sample, based on the
-#     distribution of values within the entire record.
-#   The procedure uses a Gaussian mixture model on the assumption that the noise component
-#     is normally distributed around 0 (the values were detrended!).
-#     A Figure will be generated and saved to the "output" directory on the
-#     hard drive and a list will be returned with the threshold data for the analyzed proxy.
+# The script determines threshold values to decompose a detrended timeseries into
+#   a 'noise' and a 'signal' component using a 2-component Gaussian Mixture Model (GMM).
+#   Based on Phil Higuera's CharThreshLocal.m Matlab code.
+#   Determines a positive and a negative threshold value for each interpolated sample, based on the distribution of values within the entire record.
+# The procedure uses a Gaussian mixture model on the assumption that the noise component
+#   is normally distributed around 0 (the values were detrended!).
+#   A Figure will be generated and saved to the "output" directory on the
+#   hard drive and a list will be returned with the threshold data for the analyzed proxy.
 #
-#   Requires an output from the SeriesDetrend() function.
+# Requires an output from the SeriesDetrend() function.
 #
 # The user-defined parameters are as follows:
-#   series  ->  the output from the SeriesDetrend() function
+# series -> the output from the SeriesDetrend() function
 #   
-#   proxy   ->  Set proxy="VariableName" select the variable for the peak-detection analysis.
+# proxy -> Set proxy="VariableName" select the variable for the peak-detection analysis.
 #               If the dataset includes only one variable, proxy does not need to be specified. 
 #   
 #   t.lim   ->  allows defining a portion of the time series.
@@ -36,21 +35,27 @@
 #   noise.gmm     =>  Determines which of the two GMM components should be considered as
 #                     the noise component. By default noise.gmm=1.
 #   
-#   smoothing.yr  =>  Width of moving window for computing SNI.
-#                     By default, this value is inherited from the smoothing.yr value set in
-#                     the SeriesDetrend() function.
+# smoothing.yr  =>  Width of moving window for computing SNI.
+#                     By default, this value is inherited from the smoothing.yr value set
+#                     in the SeriesDetrend() function.
 #   
-#   keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
-#                       threshold will be removed and only the first (older) sample is retained.
+# keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
+#                       threshold will be removed and only the first (older) sample is
+#                       retained.
 #                       
-#   MinCountP       => Defines the probability (default = 0.05) that two resampled counts
-#                     could arise from the same Poisson distribution. This is used to
-#                     screen peak samples and remove any that fail to pass the 
-#                     minimum-count test. If MinCountP = NULL, the test will not be performed.
+# MinCountP => Defines the probability (default = 0.05) that two resampled counts
+#               could arise from the same Poisson distribution. This is used to
+#               screen peak samples and remove any that fail to pass the 
+#               minimum-count test. If MinCountP = NULL, the test will not be performed.
 #
-#   MinCountP_window = Defines the width (in years) of the search window used for the 
+# MinCountP_window = Defines the width (in years) of the search window used for the 
 #                     minimum-count test. Default: MinCountP_window=150.
 #
+# out.dir -> path to the folder where figures will be written to. If out.dir=NULL, the 
+#             figures will be written in the working directory.
+#
+# plot.global_thresh -> Logical. If plot.global_thresh=T (default), *.pdf files will be
+#                       produces and written in the out.dir folder.
 #  ***************************************************************************
 
 
@@ -58,7 +63,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                           thresh.value = 0.95, noise.gmm = 1, smoothing.yr = NULL,
                           keep_consecutive = F,
                           minCountP = 0.05, MinCountP_window = 150,
-                          out.dir = "Figures") {
+                          out.dir = "Figures", plot.global_thresh = T) {
   
   
   require(mclust)
@@ -70,14 +75,15 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     return()
   }
   
-    
+  
   # Determine path to output folder for Figures
-  out.path <- paste0("./", out.dir, "/")
-  
-  if (dir.exists(out.path) == F) {
-    dir.create(out.path)
+  if (plot.global_thresh == T) {
+    out.path <- paste0("./", out.dir, "/")
+    
+    if (dir.exists(out.path) == F) {
+      dir.create(out.path)
+    }
   }
-  
   
   # Extract parameters from input list (i.e. the detrended series) ####
   
@@ -180,7 +186,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   ## Get resampled values for selected variable (proxy) for selected time interval (t.lim)
   SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
                           series$int$series.int$age >= min(t.lim))
-
+  
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
   
   
@@ -455,65 +461,66 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   propN <- m2$parameters$pro
   
   ## Make pdf
-  pdf(paste0(out.path, s.name, '_', v.name, '_Global_01_GMM_Evaluation.pdf'),
-      onefile = TRUE, paper = "a4")
-  par(mfrow = c(2,1), mar = c(5,4,1,1))
-  
-  plot.Mclust(m2, what = "classification")
-  
-  h <- hist(x = v, breaks = 50, plot = F)
-  dens <- hist(v, breaks = 50, plot = F)$density
-  plot(h, freq = F, col = "grey", border = "grey",
-       xlim = c(min(h$breaks), max(h$breaks)),
-       ylab = "Density", xlab = '', main = "Global threshold")
-  par(new = T)
-  pdf2 <- curve(dnorm(x = x, mean = muHat[signal.gmm], sd = sigmaHat[signal.gmm]),
-                from = min(h$breaks), to = max(h$breaks),
-                ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
-                axes = F, ylab = '', xlab = '')
-  par(new = T)
-  pdf1 <- curve(dnorm(x = x, mean = muHat[noise.gmm], sd = sigmaHat[noise.gmm]),
-                from = min(h$breaks), to = max(h$breaks),
-                ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
-                axes = F, ylab = '', xlab = '')
-  par(new = T)
-  lines(x = c(thresh.pos, thresh.pos), y = c(0, max(dens)), type = "l",
-        col = "red", lwd = 1.5)
-  lines(x = c(thresh.neg, thresh.neg), y = c(0, max(dens)), type = "l",
-        col = "red", lwd = 1.5)
-  mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -1)
-  mtext(paste0("propN = ", round(propN[1], 2), ", ", round(propN[2], 2)), side = 3,
-        las = 0, line = -2)
-  dev.off()
-  
-  
-  ## Plot series with trend + threshold + significant peaks
-  pdf(paste0(out.path, s.name, '_', v.name, '_Global_02_ThresholdSeries.pdf'))
-  par(mfrow = c(2,1), oma = c(3,1,0,0), mar = c(1,4,0.5,0.5))
-  plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = "",
-       xlim = x.lim)
-  abline(h = 0)
-  abline(h = thresh.pos, col = "red")
-  abline(h = thresh.neg, col = "blue")
-  points(x = ageI[Peaks.pos.final], y = rep(0.9*y.lim[2], length(Peaks.pos.final)),
-         pch = 3, col = "red", lwd = 1.5)
-  points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
-         pch = 16, col = "darkgrey", lwd = 1.5)
-  points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
-         pch = 3, col = "blue", lwd = 1.5)
-  axis(side = 1, labels = F, tick = T)
-  axis(2)
-  mtext(paste0("thresh.value = ", thresh.value), side = 3, las = 0, line = -0.5)
-  
-  plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
-       ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
-       xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
-  lines(ageI, SNI_pos$SNI_sm, col = "black", lwd = 2)
-  abline(h  =  3, lty  =  "dashed")
-  axis(side = 1, labels = T, tick = T)
-  axis(2)
-  dev.off()
-  
+  if (plot.global_thresh == T) {
+    pdf(paste0(out.path, s.name, '_', v.name, '_Global_01_GMM_Evaluation.pdf'),
+        onefile = TRUE, paper = "a4")
+    par(mfrow = c(2,1), mar = c(5,4,1,1))
+    
+    plot.Mclust(m2, what = "classification")
+    
+    h <- hist(x = v, breaks = 50, plot = F)
+    dens <- hist(v, breaks = 50, plot = F)$density
+    plot(h, freq = F, col = "grey", border = "grey",
+         xlim = c(min(h$breaks), max(h$breaks)),
+         ylab = "Density", xlab = '', main = "Global threshold")
+    par(new = T)
+    pdf2 <- curve(dnorm(x = x, mean = muHat[signal.gmm], sd = sigmaHat[signal.gmm]),
+                  from = min(h$breaks), to = max(h$breaks),
+                  ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
+                  axes = F, ylab = '', xlab = '')
+    par(new = T)
+    pdf1 <- curve(dnorm(x = x, mean = muHat[noise.gmm], sd = sigmaHat[noise.gmm]),
+                  from = min(h$breaks), to = max(h$breaks),
+                  ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
+                  axes = F, ylab = '', xlab = '')
+    par(new = T)
+    lines(x = c(thresh.pos, thresh.pos), y = c(0, max(dens)), type = "l",
+          col = "red", lwd = 1.5)
+    lines(x = c(thresh.neg, thresh.neg), y = c(0, max(dens)), type = "l",
+          col = "red", lwd = 1.5)
+    mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -1)
+    mtext(paste0("propN = ", round(propN[1], 2), ", ", round(propN[2], 2)), side = 3,
+          las = 0, line = -2)
+    dev.off()
+    
+    
+    ## Plot series with trend + threshold + significant peaks
+    pdf(paste0(out.path, s.name, '_', v.name, '_Global_02_ThresholdSeries.pdf'))
+    par(mfrow = c(2,1), oma = c(3,1,0,0), mar = c(1,4,0.5,0.5))
+    plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = "",
+         xlim = x.lim)
+    abline(h = 0)
+    abline(h = thresh.pos, col = "red")
+    abline(h = thresh.neg, col = "blue")
+    points(x = ageI[Peaks.pos.final], y = rep(0.9*y.lim[2], length(Peaks.pos.final)),
+           pch = 3, col = "red", lwd = 1.5)
+    points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
+           pch = 16, col = "darkgrey", lwd = 1.5)
+    points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
+           pch = 3, col = "blue", lwd = 1.5)
+    axis(side = 1, labels = F, tick = T)
+    axis(2)
+    mtext(paste0("thresh.value = ", thresh.value), side = 3, las = 0, line = -0.5)
+    
+    plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
+         ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
+         xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
+    lines(ageI, SNI_pos$SNI_sm, col = "black", lwd = 2)
+    abline(h  =  3, lty  =  "dashed")
+    axis(side = 1, labels = T, tick = T)
+    axis(2)
+    dev.off()
+  }
   
   ## Gather data for output
   out1 <- structure(list(proxy = proxy, ages.thresh = ageI,

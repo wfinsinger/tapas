@@ -26,7 +26,8 @@
 Plot.Anomalies <- function(series = NULL, x.lim = NULL, plot.crosses = T,
                            plot.x = F, plot.neg = T) {
   
-  
+
+  # Gather the data
   d <- series
   proxy <- d$thresh$proxy
   i <- which(colnames(d$detr$detr) == proxy)

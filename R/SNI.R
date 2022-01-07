@@ -1,5 +1,14 @@
+########################################################################################
 ## Calculate signal-to-noise index (SNI) for a time paleoecological time series record.
 #
+# Author: Ryan Kelly (University of Illinois, USA)
+# 
+# Source:
+# Supplementary material to the publication:
+# Kelly, R., Higuera, P., Barrett, C., & Hu, F. (2011). A signal-to-noise index to
+# quantify the potential for peak detection in sediment–charcoal records.
+# Quaternary Research, 75(1), 11-17. doi:10.1016/j.yqres.2010.07.011
+# 
 # ProxyData = Matrix of input data with one row per sample, containing:
 #   Column 1: age associated with the sample (yr)
 #   Column 2: proxy accumulation rate (e.g. CHAR) of the sample (pieces/cm^2/yr)
@@ -8,7 +17,7 @@
 # BandWidth = Width of moving window for computing SNI 
 #
 #
-# This function computes SNI as described in Kelly et al. 2010. Note that
+# This function computes SNI as described in Kelly et al. 2011. Note that
 # your data must be interpolated to constant sample resolution (yr/sample)
 # before input to the function. The function makes no assumption about
 # prior analysis on the input series, i.e. any background and
@@ -35,9 +44,12 @@
 #   $CF     = the "correction factor" used in computing SNI.  Equal to
 #     (v - 2)/v ,where v is the number of samples in popN
 #     
-# The function returns only a subset of the SNI_output list:
+# The function was modified by Walter Finsinger and returns only a subset of the
+#   SNI_output list:
 #   $SNI_sm = lowess-smoothed SNI values ()
 #   $SNI_raw = raw SNI values
+#########################################################################################   
+
 
 SNI <- function(ProxyData, BandWidth) {
   

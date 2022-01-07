@@ -1,4 +1,4 @@
-#  ***************************************************************************
+#########################################################################################
 #   check_pretreat.R
 #  ---------------------
 #   Date                 : January 2022
@@ -7,34 +7,42 @@
 #  ---------------------
 #
 #  ***************************************************************************
-#  
-#### This functions does some check-up on the data frame used for
-#### the paleofire::pretreatment() function, which requires that the depth and age scales
-#### are continuous. In other words, for every i-th row, it requires that
-#### - CmBot[i] > CmTop[i],
-#### - AgeBot[i] > AgeTop[i],
-#### - there shouldn't be duplicate values in the CmTop, CmBot, AgeTop, and AgeBot columns,
-#### - CmBot[i] == CmTop[i+1],
-#### - AgeBot[i] == AgeTop[i+1].
-#### 
-#### 
-#### If:
-#### - any CmBot[i] < CmTop[i], or
-#### - any AgeBot[i] < AgeTop[i], or
-#### - there are duplicate values in one of the columns CmTop, CmBot,
-####    the function returns a fatal error and stops 
-#### 
-#### If any CmBot[i] < CmTop[i+1]:
-#### - the function adds a new row [j = i+1] to fill in the missing CmTop and CmBot values.
-####    Thus, the added samples will have CmTop[j] == CmBot[i] and CmBot[j] == CmTop[i+1].
-####    The age scale values will be: AgeTop[j] == AgeBot[i] and AgeBot[j] == AgeTop[i+1].
-####  
-#### 
-#### If after these checks any AgeTop[i] == AgeBot[i]:
-#### - the function removes the flagged rows, and
-#### - creates new corrected CmTop and CmBot scales that exclude slumps, such that
-####    CmBot[i] > CmTop[i] and CmBot[i] == CmTop[i+1].
-########################################################################################## 
+#    
+# Requires a matrix as input with the following columns:
+#   CmTop, CmBot, AgeTop, AgeBot, Volume, and one or more columns with the data which
+#    should be resampled (variables).
+#
+# The user-defined parameters are as follows:
+#     series      ->  the name of the input matrix
+#     
+#
+# Details:
+# This functions does some check-up on the data frame used for
+# the paleofire::pretreatment() function, which requires that the depth and age scales
+# are continuous. In other words, for every i-th row, it requires that
+# - CmBot[i] > CmTop[i],
+# - AgeBot[i] > AgeTop[i],
+# - there shouldn't be duplicate values in the CmTop, CmBot, AgeTop, and AgeBot columns,
+# - CmBot[i] == CmTop[i+1],
+# - AgeBot[i] == AgeTop[i+1].
+# 
+# If:
+# - any CmBot[i] < CmTop[i], or
+# - any AgeBot[i] < AgeTop[i], or
+# - there are duplicate values in one of the columns CmTop, CmBot,
+#    the function returns a fatal error and stops 
+# 
+# If any CmBot[i] < CmTop[i+1]:
+# - the function adds a new row [j = i+1] to fill in the missing CmTop and CmBot values.
+#    Thus, the added samples will have CmTop[j] == CmBot[i] and CmBot[j] == CmTop[i+1].
+#    The age scale values will be: AgeTop[j] == AgeBot[i] and AgeBot[j] == AgeTop[i+1].
+# 
+# If after these checks any AgeTop[i] == AgeBot[i]:
+# - the function removes the flagged rows, and
+# - creates new corrected CmTop and CmBot scales that exclude slumps, such that
+#    CmBot[i] > CmTop[i] and CmBot[i] == CmTop[i+1].
+#    
+#########################################################################################
 
 
 check_pretreat <- function(series) {
@@ -52,21 +60,21 @@ check_pretreat <- function(series) {
   
   # Initial check ups ####
   
-  # Check if CmTop < CmBot
+  # Check that CmTop < CmBot
   if (any((cmB < cm))) {
     A[which(cmB < cm), ]
     print('Fatal error: CmTop > CmBot in some of the samples')
     return()
   }
   
-  # Check if AgeTop < AgeBot
+  # Check that AgeTop < AgeBot
   if (any((ybpB < ybp))) {
     A[which(ybpB < ybpB), ]
     print('Fatal error: AgeTop > AgeBot in some of the samples')
     return()
   }
   
-  # Check if there are duplicate sample depths
+  # Check for duplicate sample depths
   if (any(duplicated(cm) == T)) {
     print('Fatal error: the following CmTop samples depths are duplicated')
     return(A[duplicated(cm) == T, ])
@@ -76,8 +84,6 @@ check_pretreat <- function(series) {
     print('Fatal error: the following CmBot samples depths are duplicated')
     return(A[duplicated(cmB) == T, ])
   }
-  
-  
   
   
   ## Check if the depth scale is continuous (cmBot[i] = cmTop[i+1]) ####
@@ -93,7 +99,6 @@ check_pretreat <- function(series) {
     
     # Get gaps
     for (i in 1:length(gaps)) {
-      #i=1
       gap_cm[i] <- cm[ gaps[i] + 1] - cmB[ gaps[i] ]
     }
     tot_gap <- sum(gap_cm)
@@ -106,7 +111,6 @@ check_pretreat <- function(series) {
     A_gaps <- A[0, ]
     
     for (i in 1:length(gaps)) {
-      #i = 1
       A_gaps[i, 1] <- cmB[ gaps[i] ]
       A_gaps[i, 2] <- cm[ gaps[i] + 1 ]
       A_gaps[i, 3] <- ybpB[ gaps[i] ]
@@ -122,25 +126,23 @@ check_pretreat <- function(series) {
     print("No missing samples detected.")
   }
   
-  rm(gap_cm, gaps, gaps_index)
-  
-  
-  
   
   ## Check if the age scale is continuous ####
   ## 
-  ## These could arise if there's a slump or a tephra, thus for sediment sections that
+  ## This could arise if there's a slump or a tephra, thus for sediment sections that
   ## were deposited in a very short time interval.
   ## The result will be that AgeBot[i] == AgeTop[i]
   
-  slumps <- ifelse(ybpB == ybp, yes = 1, no = 0) # check for slumps 
+  # Check for presence of samples having AgeBot[i] == AgeTop[i]
+  slumps <- ifelse(ybpB == ybp, yes = 1, no = 0)
   slumps_index <- which(slumps == 1)
   slumps_n <- sum(slumps)
   
-  
+  # If slumps were found:
   if (length(slumps_index) > 0) {
     slumps_cm <- vector()
     
+    # Quantify total thickness of slumps
     for (i in 1:length(slumps_index)) {
     slumps_cm[i] <- cmB[ slumps_index[i] ] - cm[ slumps_index[i] ]
     }
@@ -148,18 +150,20 @@ check_pretreat <- function(series) {
     
     print(paste0('Warning: AgeTop = AgeBot for ',slumps_n,' samples, totaling ',slumps_tot_cm,'cm'))
     
+    # Remove samples identified as slumps (those with AgeBot[i] == AgeTop[i])
     A <- A[-c(slumps_index), ]
     
+    # Build a new, corrected depth scale based on the sample thicknesses
     smpl_thickn <- A[ ,2] - A[ ,1]
     
     cm_corr <- cumsum(smpl_thickn)
     cmB_corr <- cm_corr + smpl_thickn
     
-    A$cmTop <- cm_corr
-    A$cmBot <- cmB_corr
+    A$CmTop <- cm_corr
+    A$CmBot <- cmB_corr
     
   } else {
-    print('No slumps detected. The age scale is continuous.')
+    print('No slumps detected; the age scale is continuous.')
   }
   
   

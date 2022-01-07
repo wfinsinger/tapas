@@ -11,16 +11,18 @@
 #   The script uses the pretreatment_full() function to virtually resample timeseries
 #     at equal sampling intervals.
 #
-#   Requires a matrix as input with the following columns 
-#   CmTop CmBot AgeTop AgeBot Volume 
-#   and one or more columns with the data which should be resampled.
+#   Requires a matrix as input with the following columns:
+#   CmTop, CmBot, AgeTop, AgeBot, Volume, and one or more columns with the data
+#   which should be resampled.
 #
 #   The user-defined parameters are as follows:
 #     series      ->  the name of the input matrix
-#     out         ->  with out = "accI" (default) the function returns resampled accumulation rates,
+#     out         ->  with out = "accI" (default) the function returns resampled
+#                      accumulation rates,
 #                     with out = "conI" the function returns resampled concentrations,
 #                     with out = "countI" the function returns resampled counts.
-#     series.name ->  a character string defining the name of the input matrix. Is NA by default.
+#     series.name ->  a character string defining the name of the input matrix.
+#                     Is NA by default.
 #     first, last ->  determine the age boundaries of the resampled timeserie.
 #                     If they are not specified (first & last == NULL),
 #                     the resampling is done over the entire sequence,

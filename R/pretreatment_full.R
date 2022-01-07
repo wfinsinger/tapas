@@ -16,8 +16,8 @@ pretreatment_full = function(params, serie, Int=TRUE, first=NULL, last=NULL, yrI
   if(is.null(last)) last=max(A[,4])
   
   ## Redefine the matrix and values
-  cm=A[,1]
-  cmB=A[,2]
+  cm = A[,1]
+  cmB = A[,2]
   count=A[,6]
   vol=A[,5]
   con=count/vol
@@ -170,8 +170,6 @@ pretreatment_full = function(params, serie, Int=TRUE, first=NULL, last=NULL, yrI
   return(output)
   ## Et Hop
 }
-
-
 
 
 

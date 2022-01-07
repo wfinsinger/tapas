@@ -24,7 +24,9 @@ A typical workflow of the peak-detection analysis as implemented in *CharAnalysi
 To run your own data, make a new folder within an umbrella folder, and save it under a name, e.g., 'Data-In'. Then place a file (e.g., 'MyData.csv') in that folder. The input data file will contain the sample depths, sample ages, sample volume, and the variable(s). The file should have the following formatting: It has headers and at least six fields. The first five columns will report the metadata for the samples, the subsequent columns contain the variable(s) to be analysed (e.g., the abundance of charcoal pieces).
 
 | CmTop | CmBot | AgeTop | AgeBot | Volume | variable1 | variable2 | ... | nth-variable |
+
 | 0.5   |  1    | -42    | -24    | 3      | 8         | 0.01      | ... |     ...      |
+
 |  1    |  1.5  | -24    | 5      | 3      | 18        | 0.005     | ... |     ...      |
 
 The depths and ages should be arranged in ascending order. Sample ages should thus be reported as *calendar ages BP*.

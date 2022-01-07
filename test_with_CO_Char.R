@@ -70,7 +70,7 @@ co_i <- pretreatment_data(series = co, out = "accI", series.name = "co",
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
                          detr.type = "rob.loess", out.dir = "Figures")
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
-                         detr.type = "mov.mode", out.dir = "Figures")
+                         detr.type = "mov.median", out.dir = "Figures")
 
 
 
@@ -86,7 +86,7 @@ char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR")
 char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR",
                                 thresh.value = 0.95, smoothing.yr = NULL,
                                 keep_consecutive = F,
-                                minCountP = 0.05, MinCountP_window = 150,
+                                minCountP = 0.95, MinCountP_window = 150,
                                 out.dir = "Figures")
 
 layout(1)
@@ -100,7 +100,7 @@ Plot_ReturnIntervals(series = char_thresh_gl, plot.x = T, plot.neg = F)
 char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR",
                                 thresh.value = 0.95, smoothing.yr = NULL,
                                 keep_consecutive = F,
-                                minCountP = 0.05, MinCountP_window = 150,
+                                minCountP = 0.95, MinCountP_window = 150,
                                 t.lim = c(5000, 0),
                                 out.dir = "Figures")
 
@@ -118,7 +118,7 @@ Plot_ReturnIntervals(series = char_thresh_gl, plot.x = T, plot.neg = F)
 char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR",
                                 thresh.value = 0.95, smoothing.yr = NULL,
                                 keep_consecutive = T,
-                                minCountP = 0.05, MinCountP_window = 150,
+                                minCountP = 0.95, MinCountP_window = 150,
                                 out.dir = "Figures")
 
 
@@ -235,7 +235,7 @@ lines(co_i$int$series.int$age, co_i$int$series.int$char, col = "red")
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
                          detr.type = "rob.loess", out.dir = "Figures")
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
-                         detr.type = "mov.mode", out.dir = "Figures")
+                         detr.type = "mov.median", out.dir = "Figures")
 
 
 
@@ -391,7 +391,7 @@ lines(co_i$int$series.int$age, co_i$int$series.int$char, col = "red")
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
                          detr.type = "rob.loess", out.dir = "Figures")
 co_detr <- SeriesDetrend(series = co_i, smoothing.yr = 500,
-                         detr.type = "mov.mode", out.dir = "Figures")
+                         detr.type = "mov.median", out.dir = "Figures")
 
 
 

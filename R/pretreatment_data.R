@@ -1,36 +1,29 @@
-#  ***************************************************************************
-#   pretreatment_data.R
-#  ---------------------
-#   Date                 : January 2022
-#   Copyright            : (C) 2022 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
-#
-#  ***************************************************************************
-#
-#   The script uses the pretreatment_full() function to virtually resample timeseries
-#     at equal sampling intervals.
-#
-#   Requires a matrix as input with the following columns:
-#   CmTop, CmBot, AgeTop, AgeBot, Volume, and one or more columns with the data
-#   which should be resampled.
-#
-#   The user-defined parameters are as follows:
-#     series      ->  the name of the input matrix
-#     out         ->  with out = "accI" (default) the function returns resampled
-#                      accumulation rates,
-#                     with out = "conI" the function returns resampled concentrations,
-#                     with out = "countI" the function returns resampled counts.
-#     series.name ->  a character string defining the name of the input matrix.
-#                     Is NA by default.
-#     first, last ->  determine the age boundaries of the resampled timeserie.
-#                     If they are not specified (first & last == NULL),
-#                     the resampling is done over the entire sequence,
-#                     from min(series$AgeTop) to max(series$AgeBot).
-#     yrInterp    ->  determines the resolution of the resampled timeseries.
-#
-#  ***************************************************************************
-
+#' Pre-process data by resampling all columns.
+#'
+#' Uses paleofire::pretreatment() function
+#' to virtually resample timeseries at equal sampling intervals.
+#'
+#' @param series A matrix with the following first columns:
+#'               \code{c("CmTop", "CmBot", "AgeTop", "AgeBot", "Volume")}
+#'               and additional columns with the data which should be resampled.
+#' @param out Desired return value: \describe{
+#'             \item{"acc_i"}{the function returns resampled accumulation rates}
+#'             \item{"con_i"}{the function returns resampled concentrations}
+#'             \item{"count_i"}{the function returns resampled counts}
+#'            }
+#' @param series.name A string defining the name of the input matrix.
+#'                    Defaults to \code{NA}.
+#' @param first,last Age boundaries of the resampled time serie.
+#'                   If unspecified (\code{first=NULL} and \code{last=NULL}),
+#'                   then resampling is done over the entire sequence,
+#'                   from \code{min(series$AgeTop)} to max(series$AgeBot).
+#' @param yrInterp Resolution of the resampled timeseries.
+#'
+#' @return Resampled data according to \code{out} parameter.
+#'
+#' @importFrom stats median
+#'
+#' @export
 pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
                               first=NULL, last=NULL, yrInterp=NULL) {
 
@@ -70,7 +63,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       #i=6
-      pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
                                  first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- pre.i$acc
@@ -105,7 +98,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       #i = 6
-      pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
                                  first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i] / series[ ,5] # non-resampled concentration values
@@ -140,7 +133,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       #i = 6
-      pre.i <- pretreatment_full(params = series[ ,1:5], serie = series[ ,i], Int = F,
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
                                  first = first, last = last, yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i]  # non-resampled count values

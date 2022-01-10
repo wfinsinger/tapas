@@ -9,7 +9,7 @@ The set of functions gathered under the hood of ***R-PaleoAnomalies*** is meant 
 
 Two main reasons led to the development of *R-PaleoAnomalies*. Firstly, as R is an open source product, modifying the program to suit individual needs may be more straigthforward. Secondly, an integration and inter-operability with other existing R-packages may allow using peak-detection analysis in conjunction with other workflows and types of paleoecological records (see for instance [Cagliero et al., 2021](https://doi.org/10.1007/s00334-021-00862-x)).
 
-  
+***
   
 ## Usage
 A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps (Higuera et al., 2011):
@@ -61,9 +61,9 @@ And analysed, for instance, with the following settings (leaving other arguments
                                 detr_type = "mov.median", sens = F)
 
 With these settings, the results obtained using *R-PaleoAnomalies* strikingly resemble those obtained with *CharAnalysis*.
-![Code Lake: peak-detection outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs")
+![Code Lake: peak-detection outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs"){width=50%}
 
-![Code Lake: reconstructed fire-return intervals (FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
+![Code Lake: reconstructed fire-return intervals (FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)"){width=50%}
 
 ***
 

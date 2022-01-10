@@ -61,6 +61,7 @@ And analysed, for instance, with the following settings (leaving other arguments
                                 detr_type = "mov.median", sens = F)
 
 With these settings, the results obtained using *R-PaleoAnomalies* strikingly resemble those obtained with *CharAnalysis*.
+
 ![Code Lake: peak-detection outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs")
 
 ![Code Lake: reconstructed fire-return intervals (FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")

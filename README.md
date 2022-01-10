@@ -11,13 +11,13 @@ Two main reasons led to the development of *R-PaleoAnomalies*. Firstly, as R is 
 
 ## Usage
 A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps (Higuera et al., 2011):
-1.) *resample* the record to equally spaced sampling intervals in time (years);
-2.) *decompose* the resampled record into a long-term trend (background component) and peaks (peak component);
-3.) *screen* the peak component to distinguish signal from noise using: 
-  3.1.1) a unique *global* 2-component Gaussian mixture model, or
-  3.1.2) *local* 2-component Gaussian mixture models,
-  3.2) and eventually also a minimum-count test;
-4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index (Kelly et al., 2011).
+* 1.) *resample* the record to equally spaced sampling intervals in time (years);
+* 2.) *decompose* the resampled record into a long-term trend (background component) and peaks (peak component);
+* 3.) *screen* the peak component to distinguish signal from noise using: 
+  + 3.1.1) a unique *global* 2-component Gaussian mixture model, or
+  + 3.1.2) *local* 2-component Gaussian mixture models,
+  + 3.2) and eventually also a minimum-count test;
+* 4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index (Kelly et al., 2011).
 
 *R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of one dataset type (e.g. different estimates of charcoal abundance). Steps 3.) and 4.) are performed for one user-selected variable.
 

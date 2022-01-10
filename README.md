@@ -55,7 +55,7 @@ For instance, to analyse the MyData dataset for variable1:
 The dataset can be loaded into the R environment
 > load("./Data-In/co_char_data.rda")
 
-And analysed, for instance, with the following settings (leaving other arguments with their default values) 
+and analysed, for instance, with the following settings (leaving other arguments with their default values) 
 > co_thresh_loc <- peak_detection(series = co_char_data, proxy = "char",
                                 first = -51, last = 7500, yrInterp = 15,
                                 detr_type = "mov.median", sens = F)
@@ -66,10 +66,11 @@ With these settings, the results obtained using *R-PaleoAnomalies* strikingly re
 
 ![Code Lake: reconstructed fire-return intervals (FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
 
+
 ***
 
 ## Acknowledgements & Credits
-The development of this set of functions would not have been possible without the Matlab-coded templates that were written and made open source by Philip Higuera (https://github.com/phiguera/CharAnalysis). I'm thankful to Dan Gavin for suggesting tweaks to accomodate for non-standard data-input formats. His suggestions led to the check_pretreatment() function.
+The development of this set of functions would not have been possible without the Matlab-coded templates that were written and made open source by Philip Higuera (https://github.com/phiguera/CharAnalysis). I'm thankful to Dan Gavin for suggesting tweaks to accomodate for non-standard data-input formats. His suggestions led to the `check_pretreatment()` function. I'm extremely thankful to Petr Kunes and several CharAnalysis users who ignited the conversation over the past few years about getting that program into R.
 
 If you use *R-PaleoAnomalies* in your publications, please cite *https://github.com/wfinsinger/R-PaleoAnomalies* and any non-default settings applied. The packaging of these functions is in progress.
 

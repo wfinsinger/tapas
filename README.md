@@ -11,23 +11,23 @@ Two main reasons led to the development of *R-PaleoAnomalies*. Firstly, as R is 
 
 ## Usage
 A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps (Higuera et al., 2011):
-1.) resample the record to equally spaced sampling intervals in time (years);
-2.) decompose the resampled record into a long-term trend (background component) and peaks (peak component);
-3.) screen the peak component to distinguish signal from noise using: 
-  3.1.1) a unique 'global' 2-component Gaussian mixture model, or
-  3.1.2) 'local' 2-component Gaussian mixture models,
+1.) *resample* the record to equally spaced sampling intervals in time (years);
+2.) *decompose* the resampled record into a long-term trend (background component) and peaks (peak component);
+3.) *screen* the peak component to distinguish signal from noise using: 
+  3.1.1) a unique *global* 2-component Gaussian mixture model, or
+  3.1.2) *local* 2-component Gaussian mixture models,
   3.2) and eventually also a minimum-count test;
-4.) evaluate the suitability of the record for peak-detection analysis using the signal-to-noise index (Kelly et al., 2011).
+4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index (Kelly et al., 2011).
 
 *R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of one dataset type (e.g. different estimates of charcoal abundance). Steps 3.) and 4.) are performed for one user-selected variable.
 
-To run your own data, make a new folder within an umbrella folder, and save it under a name, e.g., 'Data-In'. Then place a file (e.g., 'MyData.csv') in that folder. The input data file will contain the sample depths, sample ages, sample volume, and the variable(s). The file should have the following formatting: It has headers and at least six fields. The first five columns will report the metadata for the samples, the subsequent columns contain the variable(s) to be analysed (e.g., the abundance of charcoal pieces).
+To run your own data, make a new folder within an umbrella folder, and save it under a name, e.g., `Data-In`. Then place a file (e.g., `MyData.csv`) in that folder. The input data file will contain the sample depths, sample ages, sample volume, and the variable(s). The file should have the following formatting: It has headers and at least six fields. The first five columns will report the metadata for the samples, the subsequent columns contain the variable(s) to be analysed (e.g., the abundance of charcoal pieces).
 
-| CmTop | CmBot | AgeTop | AgeBot | Volume | variable1 | variable2 | ... | nth-variable |
-
-| 0.5   |  1    | -42    | -24    | 3      | 8         | 0.01      | ... |     ...      |
-
-|  1    |  1.5  | -24    | 5      | 3      | 18        | 0.005     | ... |     ...      |
+CmTop | CmBot | AgeTop | AgeBot | Volume | variable1 | variable2 | ... | nth-variable
+------|-------|--------|--------|--------|-----------|-----------|-----|-------------
+ 0.5  |  1    | -42    | -24    | 3      | 8         | 0.01      | ... |    ...      
+ 1    |  1.5  | -24    | 5      | 3      | 18        | 0.005     | ... |    ...      
+ 
 
 The depths and ages should be arranged in ascending order. Sample ages should thus be reported as *calendar ages BP*.
 
@@ -37,17 +37,17 @@ Load the data into the R environment
 
 Until the packaging is not finished, download the entire *R-PaleoAnomalies* program as a .zip or tar.gz archive [here](https://github.com/wfinsinger/R-PaleoAnomalies/archive/refs/heads/main.zip). Alternativly, download individual files by visiting the GitHub pages.
 
-The 'check_pretreat()' function can be used verify the input data is formatted correctly. If the samples in the input file are not contiguous, the 'check_pretreat()' function will add rows for the missing samples. Should the dataset contain samples that were deposited in a very short amount of time (e.g., slumps, tephras), for which AgeTop = AgeBot, these samples will be flagged and removed, and a new depth scale will be created to replace the original one.
+The `check_pretreat()` function can be used verify the input data is formatted correctly. If the samples in the input file are not contiguous, the `check_pretreat()` function will add rows for the missing samples. Should the dataset contain samples that were deposited in a very short amount of time (e.g., slumps, tephras), for which AgeTop = AgeBot, these samples will be flagged and removed, and a new depth scale will be created to replace the original one.
 > MyData <- check_pretreat(Mydata)
 
-The functions can either be run individually and stepwise, or the wrapper function 'peak_detection()' can be used to perform an analysis including steps from 1.) to 4.) in one go.
+The functions can either be run individually and stepwise, or the wrapper function `peak_detection()` can be used to perform an analysis including steps from 1.) to 4.) in one go.
 
 For instance, to analyse the MyData dataset for variable1:
 > MyData_peaks <- peak_detection(series = MyData, proxy = "variable1")
 
 
 ## Example
-*R-PaleoAnomalies* comes with an example dataset, called 'co_char_data' ([Code Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4), Higuera et al., 2009). It is placed in the folder 'Data-In'.
+*R-PaleoAnomalies* comes with an example dataset, called `co_char_data` ([Code Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4), Higuera et al., 2009). It is placed in the folder 'Data-In'.
 
 The dataset can be loaded into the R environment
 > load("./Data-In/co_char_data.rda")
@@ -70,7 +70,7 @@ If you use *R-PaleoAnomalies* in your publications, please cite *https://github.
 
 
 ## Issues & Contributions
-If you are having problems running *R-PaleoAnomalies*, please use the "Issues" tab.
+If you are having problems running *R-PaleoAnomalies* or if you have any suggestions, please use the "Issues" tab.
 Contributions to this work are more than welcome. You can just fork, make changes,and then file a pull request. Alternatively, you can get in touch with me to discuss how your improvements may fit with ongoing development of add-ons. Thanks!
 
 

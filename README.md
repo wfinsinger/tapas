@@ -2,13 +2,15 @@
  
 The set of functions gathered under the hood of ***R-PaleoAnomalies*** is meant to be used for analyzing paleoecological records, when the goal is peak detection to reconstruct the occurrence, the return intervals, and the magnitude of distinct events.
 
-
+  
+  
 ## Rationale for developing *R-PaleoAnomalies*
 *R-PaleoAnomalies* builds on *CharAnalysis* (https://github.com/phiguera/CharAnalysis), a software for analyzing sediment-charcoal records written in and compiled with Matlab 7.0 by Phil Higuera (Higuera et al., 2009), with significant input by (amongst others) Patrick Bartlein (U of OR), Daniel Gavin (U of OR), Jennifer Marlon, and Ryan Kelly.
 
 Two main reasons led to the development of *R-PaleoAnomalies*. Firstly, as R is an open source product, modifying the program to suit individual needs may be more straigthforward. Secondly, an integration and inter-operability with other existing R-packages may allow using peak-detection analysis in conjunction with other workflows and types of paleoecological records (see for instance [Cagliero et al., 2021](https://doi.org/10.1007/s00334-021-00862-x)).
 
-
+  
+  
 ## Usage
 A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps (Higuera et al., 2011):
 * 1.) *resample* the record to equally spaced sampling intervals in time (years);
@@ -45,6 +47,7 @@ The functions can either be run individually and stepwise, or the wrapper functi
 For instance, to analyse the MyData dataset for variable1:
 > MyData_peaks <- peak_detection(series = MyData, proxy = "variable1")
 
+***
 
 ## Example
 *R-PaleoAnomalies* comes with an example dataset, called `co_char_data` ([Code Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4), Higuera et al., 2009). It is placed in the folder 'Data-In'.
@@ -62,12 +65,14 @@ With these settings, the results obtained using *R-PaleoAnomalies* strikingly re
 
 ![Code Lake: reconstructed fire-return intervals (FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
 
+***
 
 ## Acknowledgements & Credits
 The development of this set of functions would not have been possible without the Matlab-coded templates that were written and made open source by Philip Higuera (https://github.com/phiguera/CharAnalysis). I'm thankful to Dan Gavin for suggesting tweaks to accomodate for non-standard data-input formats. His suggestions led to the check_pretreatment() function.
 
 If you use *R-PaleoAnomalies* in your publications, please cite *https://github.com/wfinsinger/R-PaleoAnomalies* and any non-default settings applied. The packaging of these functions is in progress.
 
+***
 
 ## Issues & Contributions
 If you are having problems running *R-PaleoAnomalies* or if you have any suggestions, please use the "Issues" tab.

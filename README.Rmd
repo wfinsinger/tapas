@@ -47,6 +47,15 @@ co_i <- pretreatment_data(
 )
 ```
 
+Then, detrend the data with `series_detrend()`:
+
+``` {r detrend, fig.show='animate', ffmpeg.format='gif', dev='jpeg'}
+co_detr <- SeriesDetrend(
+  series = co_i, smoothing.yr = 500,
+  detr.type = "rob.loess"
+)
+```
+
 --------------------------------------------------------------------------------
 <!--- Walter's unintegrated README below. --->
  

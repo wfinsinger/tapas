@@ -1,81 +1,72 @@
-#  ***************************************************************************
-#   Global_Thresh.R
-#  ---------------------
-#   Date                 : July 2020
-#   Copyright            : (C) 2020 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
-#
-#  ***************************************************************************
-#
-# The script determines threshold values to decompose a detrended timeseries into
-#   a 'noise' and a 'signal' component using a 2-component Gaussian Mixture Model (GMM).
-#   Based on Phil Higuera's CharThreshLocal.m Matlab code.
-#   Determines a positive and a negative threshold value for each interpolated sample, based on the distribution of values within the entire record.
-# The procedure uses a Gaussian mixture model on the assumption that the noise component
-#   is normally distributed around 0 (the values were detrended!).
-#   A Figure will be generated and saved to the "output" directory on the
-#   hard drive and a list will be returned with the threshold data for the analyzed proxy.
-#
-# Requires an output from the SeriesDetrend() function.
-#
-# The user-defined parameters are as follows:
-# series -> the output from the SeriesDetrend() function
-#   
-# proxy -> Set proxy="VariableName" select the variable for the peak-detection analysis.
-#               If the dataset includes only one variable, proxy does not need to be specified. 
-#   
-#   t.lim   ->  allows defining a portion of the time series.
-#               With t.lim=NULL (default) the analysis will be performed using
-#               the entire timeseries.
-#   
-#   thresh.value  ->  Determines the threshold as the nth-percentile of the
-#                     Gaussian Model of the noise component. Default thresh.value = 0.95
-#   
-#   noise.gmm     =>  Determines which of the two GMM components should be considered as
-#                     the noise component. By default noise.gmm=1.
-#   
-# smoothing.yr  =>  Width of moving window for computing SNI.
-#                     By default, this value is inherited from the smoothing.yr value set
-#                     in the SeriesDetrend() function.
-#   
-# keep_consecutive => logical. If FALSE (default), consecutive peak samples exceeding the
-#                       threshold will be removed and only the first (older) sample is
-#                       retained.
-#                       
-# MinCountP => Defines the probability (default = 0.05) that two resampled counts
-#               could arise from the same Poisson distribution. This is used to
-#               screen peak samples and remove any that fail to pass the 
-#               minimum-count test. If MinCountP = NULL, the test will not be performed.
-#
-# MinCountP_window = Defines the width (in years) of the search window used for the 
-#                     minimum-count test. Default: MinCountP_window=150.
-#
-# out.dir -> path to the folder where figures will be written to. If out.dir=NULL, the 
-#             figures will be written in the working directory.
-#
-# plot.global_thresh -> Logical. If plot.global_thresh=T (default), *.pdf files will be
-#                       produces and written in the out.dir folder.
-#  ***************************************************************************
-
-
+#' Determine threshold values to extract signal from a detrended timeseries.
+#' 
+#' The script determines threshold values
+#' to decompose a detrended timeseries
+#' into a *noise* and a *signal* component
+#' using a 2-component Gaussian Mixture Model (GMM).
+#' This is based on Phil Higuera's CharThreshLocal.m Matlab code.
+#' It determines a positive and a negative threshold value
+#' for each interpolated sample,
+#' based on the distribution of values within the entire record.
+#' The procedure uses a Gaussian mixture model
+#' with the assumption that the noise component
+#' is normally distributed around 0 (because input values were detrended!).
+#' A figure is generated and saved to the \code{output} directory 
+#' and a list is returned with the threshold data for the analyzed proxy.
+#'
+#' @param series The output of the \code{SeriesDetrend()} function.
+#' @param proxy Set \code{proxy = "VariableName"} to select the variable
+#'              for the peak-detection analysis.
+#'              If the dataset includes only one variable,
+#'              \code{proxy} does not need to be specified.
+#' @param t.lim Restricted portion of the timeseries.
+#'              With \code{t.lim = NULL} (by default),
+#'              the analysis is performed with the entire timeseries.
+#' @param thresh.value Threshold: the nth-percentile of the Gaussian Model
+#'                     of the noise component.
+#'                     Defaults to \code{thresh.value = 0.95}.
+#' @param noise.gmm Specifies which of the two GMM components
+#'                 should be considered as the noise component.
+#'                 By default \code{noise.gmm = 1}.
+#' @param smoothing.yr Width of the moving window for computing SNI.
+#'                     By default, this value is inherited
+#'                     from the \code{smoothing.yr} value
+#'                     set in the \code{SeriesDetrend()} function.
+#' @param keep_consecutive Logical. When \code{FALSE} (by default),
+#'                         consecutive peak samples exceeding the threshold
+#'                         will be removed,
+#'                         and only the first sample (the oldest) is retained.
+#' @param minCountP Probability that two resampled counts
+#'                  could arise from the same Poisson distribution
+#'                  (defaults to \code{0.05}).
+#'                  This is used to screen peak samples and remove
+#'                  any that fails to pass the minimum-count test.
+#'                  If \code{MinCountP = NULL}, the test is not performed.
+#' @param MinCountP_window Width of the search window (in years)
+#'                         used for the minimum-count test.
+#'                         Defaults to \code{MinCountP_window = 150}.
+#' @param out.dir Path to the folder where figures will be written to.
+#'                Use \code{out.dir = NULL} to plot to current device instead.
+#' @param plot.global_thresh Logical. If \code{TRUE}, then \code{*.pdf} files
+#'                           are produced and written to \code{out.dir} folder.
+#'
+#' @return Threshold values.
+#'
+#' @export
 global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                           thresh.value = 0.95, noise.gmm = 1, smoothing.yr = NULL,
                           keep_consecutive = F,
                           minCountP = 0.05, MinCountP_window = 150,
-                          out.dir = "Figures", plot.global_thresh = T) {
-
-  require(mclust)
-
-
-  # Initial check-up of input parameters ####
+                          out.dir = NULL, plot.global_thresh = T) {
+  
+  # initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
     stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
   }
 
 
   # Determine path to output folder for Figures
-  if (plot.global_thresh == T) {
+  if (plot.global_thresh == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")
   
     if (dir.exists(out.path) == F) {
@@ -459,8 +450,10 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   
   ## Make pdf
   if (plot.global_thresh == T) {
+    if (!is.null(out.dir)) {
     pdf(paste0(out.path, s.name, '_', v.name, '_Global_01_GMM_Evaluation.pdf'),
         onefile = TRUE, paper = "a4")
+    }
     par(mfrow = c(2,1), mar = c(5,4,1,1))
     
     plot.Mclust(m2, what = "classification")
@@ -488,11 +481,15 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -1)
     mtext(paste0("propN = ", round(propN[1], 2), ", ", round(propN[2], 2)), side = 3,
           las = 0, line = -2)
+    if (!is.null(out.dir)) {
     dev.off()
+    }
     
     
     ## Plot series with trend + threshold + significant peaks
+    if (!is.null(out.dir)) {
     pdf(paste0(out.path, s.name, '_', v.name, '_Global_02_ThresholdSeries.pdf'))
+    }
     par(mfrow = c(2,1), oma = c(3,1,0,0), mar = c(1,4,0.5,0.5))
     plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = "",
          xlim = x.lim)
@@ -516,7 +513,9 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     abline(h  =  3, lty  =  "dashed")
     axis(side = 1, labels = T, tick = T)
     axis(2)
+    if (!is.null(out.dir)) {
     dev.off()
+    }
   }
   
   ## Gather data for output

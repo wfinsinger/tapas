@@ -22,6 +22,10 @@ load("./Data-In/co_char_data.rda")
 co_thresh_glob <- peak_detection(series = co_char_data, proxy = "char",
                                  thresh_type = "global", out_dir = "Figures")
 
+Plot.Anomalies(co_thresh_glob, plot.neg = F)
+
+Plot_ReturnIntervals(co_thresh_glob)
+
 ## With a 'local' GMM-inferred models
 co_thresh_loc <- peak_detection(series = co_char_data, proxy = "char", out = "accI",
                                 first = -51, last = 7500, yrInterp = 15,

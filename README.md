@@ -9,17 +9,18 @@ The set of functions gathered under the hood of ***R-PaleoAnomalies*** is meant 
 
 Two main reasons led to the development of *R-PaleoAnomalies*. Firstly, as R is an open source product, modifying the program to suit individual needs may be more straigthforward. Secondly, an integration and inter-operability with other existing R-packages may allow using peak-detection analysis in conjunction with other workflows and types of paleoecological records (see for instance [Cagliero et al., 2021](https://doi.org/10.1007/s00334-021-00862-x)).
 
+
 ***
   
 ## Usage
-A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps (Higuera et al., 2011):
+A typical workflow of the peak-detection analysis as implemented in *CharAnalysis* includes the following steps [Higuera et al., 2011](http://dx.doi.org/10.1071/WF09134):
 * 1.) *resample* the record to equally spaced sampling intervals in time (years);
 * 2.) *decompose* the resampled record into a long-term trend (background component) and peaks (peak component);
-* 3.) *screen* the peak component to distinguish signal from noise using: 
+* 3.1) *screen* the peak component to distinguish signal from noise using 
   + 3.1.1) a unique *global* 2-component Gaussian mixture model, or
   + 3.1.2) *local* 2-component Gaussian mixture models,
-  + 3.2) and eventually also a minimum-count test;
-* 4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index (Kelly et al., 2011).
+* 3.2) and eventually also screen the peak component using a minimum-count test;
+* 4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index [Kelly et al., 2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
 *R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of one dataset type (e.g. different estimates of charcoal abundance). Steps 3.) and 4.) are performed for one user-selected variable.
 
@@ -37,15 +38,32 @@ The depths and ages should be arranged in ascending order. Sample ages should th
 Load the data into the R environment
 > MyData <- read.csv("./Data-In/MyData.csv")
 
-Until the packaging is not finished, download the entire *R-PaleoAnomalies* program as a .zip or tar.gz archive [here](https://github.com/wfinsinger/R-PaleoAnomalies/archive/refs/heads/main.zip). Alternativly, download individual files by visiting the GitHub pages.
+Until the packaging is not finished, download the entire *R-PaleoAnomalies* program as a .zip or tar.gz archive [here](https://github.com/wfinsinger/R-PaleoAnomalies/archive/refs/heads/main.zip). Alternatively, download individual files by visiting the GitHub pages.
 
-The `check_pretreat()` function can be used verify the input data is formatted correctly. If the samples in the input file are not contiguous, the `check_pretreat()` function will add rows for the missing samples. Should the dataset contain samples that were deposited in a very short amount of time (e.g., slumps, tephras), for which AgeTop = AgeBot, these samples will be flagged and removed, and a new depth scale will be created to replace the original one.
+The `check_pretreat()` function can be used to verify the input data is formatted correctly. If the samples in the input file are not contiguous, the `check_pretreat()` function will add rows for the missing samples. Should the dataset contain samples that were deposited in a very short amount of time (e.g., slumps, tephras), for which AgeTop = AgeBot, these samples will be flagged and removed, and a new depth scale will be created to replace the original one.
 > MyData <- check_pretreat(Mydata)
 
 The functions can either be run individually and stepwise, or the wrapper function `peak_detection()` can be used to perform an analysis including steps from 1.) to 4.) in one go.
 
 For instance, to analyse the MyData dataset for variable1:
 > MyData_peaks <- peak_detection(series = MyData, proxy = "variable1")
+
+Individual output plots can be generated with dedicated plotting functions:
+> Plot.Anomalies(co_thresh_glob, plot.neg = F)
+
+> Plot_ReturnIntervals(co_thresh_glob)
+
+***
+
+## Details
+
+* 1.) *resampling* the record to equally spaced sampling intervals in time (years) is performed using the `pretreatment_data()` function, which loops the `paleofire::pretreatment()` function for all variables in the input data frame. The user can choose among the following output data types: resampled accumulation rates (out = "accI"; default), resampled concentrations (out = "conI"), or resampled input data (e.g., if variable1 in the input is charcoal counts, with out = "countI" one gets resampled counts).
+* 2.) *decomposition* of the resampled record into a long-term trend (background component) and peaks (peak component) is performed with the `SeriesDetrend()` function for all variables in the input data frame. The user can select the smoothing-window width (in years) as well as the type of the detrending. Currently, the following functions are implemented to smooth the timeseries: robust loess ("rob.loess"), robust Lowess ("rob.lowess"), and moving median ("mov.median"; aka Method #4 in CharAnalysis' Matlab version);
+* 3.1) *screen* the peak component to distinguish signal from noise using a unique *global* 2-component Gaussian mixture model, or several *local* 2-component Gaussian mixture models. The 2-component Gaussian mixture models that are produced with the `Global_Thresh()` and `Local_Thresh()` functions   are determined using the `mclust` R package [Scrucca et al., 2016](https://doi.org/10.32614/RJ-2016-021).
+* 3.2) and eventually also *screen* the peak component using a minimum-count test. This part of the `Global_Thresh()` and `Local_Thresh()` functions was translated verbatim from *CharAnalysis*.
+* 4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index [SNI; R code from Supplementary Material to Kelly et al., 2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
+* 5.) Diagnostic plots showing the sensitivity to different smoothing-window widths are produced with the `peak-detection()` function if `sens=TRUE`.
+
 
 ***
 
@@ -84,9 +102,10 @@ Contributions to this work are more than welcome. You can just fork, make change
 ## References
 > Cagliero E, Morresi D, Paradis L, Curović M, Spalević V, Marchi N, Meloni F, Bentaleb I, Motta R, Garbarino M, Lingua E, Finsinger W (2022) Legacies of past human activities on one of the largest old-growth forests in south-east European mountains. *Vegetation History and Archaeobotany*, online available [link](https://doi.org/10.1007/s00334-021-00862-x).
 
-
-> Higuera PE, LB Brubaker, PM Anderson, FS Hu, TA Brown (2009) Vegetation mediated the impacts of postglacial climatic change on fire regimes in the south-central Brooks Range, *Alaska Ecological Monographs* 79: 201-219 [link](https://doi.org/10.1890/07-2019.1)
+> Higuera PE, LB Brubaker, PM Anderson, FS Hu, TA Brown (2009) Vegetation mediated the impacts of postglacial climatic change on fire regimes in the south-central Brooks Range. *Alaska Ecological Monographs* 79: 201-219 [link](https://doi.org/10.1890/07-2019.1)
 
 > Higuera PE, Gavin DG, Bartlein PJ, Hallett DJ (2010) Peak detection in sediment–charcoal records: impacts of alternative data analysis methods on fire-history interpretations. *International Journal of Wildland Fire* 19: 996. [link](http://dx.doi.org/10.1071/WF09134)
 
-> Kelly RF, PE Higuera, CM Barrett, FS Hu (2011) A signal-to-noise index to quantify the potential for peak detection in sediment-charcoal records *Quaternary Research* 75: 11-17 [link](http://dx.doi.org/10.1016/j.yqres.2010.07.011)
+> Kelly RF, PE Higuera, CM Barrett, FS Hu (2011) A signal-to-noise index to quantify the potential for peak detection in sediment-charcoal records. *Quaternary Research* 75: 11-17 [link](http://dx.doi.org/10.1016/j.yqres.2010.07.011)
+
+> Scrucca L, Fop M, Murphy TB, Raftery AE (2016) mclust 5: clustering, classification and density estimation using Gaussian finite mixture models. *The R Journal* 8: 289-317 [link](https://doi.org/10.32614/RJ-2016-021)

@@ -36,6 +36,17 @@ co_i <- pretreatment_data(
 )
 ```
 
+Then, detrend the data with `series_detrend()`:
+
+``` r
+co_detr <- SeriesDetrend(
+  series = co_i, smoothing.yr = 500,
+  detr.type = "rob.loess"
+)
+```
+
+<img src="man/figures/README-detrend.gif" width="100%" />
+
 ------------------------------------------------------------------------
 
 <!--- Walter's unintegrated README below. --->

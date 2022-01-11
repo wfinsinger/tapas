@@ -1,40 +1,40 @@
-#  ***************************************************************************
-#   SeriesDetrend.R
-#  ---------------------
-#   Date                 : July 2020
-#   Copyright            : (C) 2020 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
 #
-#  ***************************************************************************
-#
-#   The script detrends timeseries.
-#
-#   Requires an output from the pretreatment_data() function.
-#
-#   The user-defined parameters are as follows:
-# series        ->  the output from the pretreatment_data() function
-# smoothing.yr  ->  smoothing-window width
-# detr.type   ->  determines the function used to smooth the timeseries.
-#                   With detr.type="rob.loess" it uses a robust Loess,
-#                   with detr.type="rob.lowess" it uses a robust Lowess (with 4 iterations)
-#                   with detr.type="mov.median" it uses a moving median
-#                     (aka Method #4 in CharAnalysis' Matlab version)
-# out_dir     ->    path to the output directory where figures will be written as *.pdf
-#                    files. Default: out_dir = "Figures".
-# plot_pdf      ->  Logical. If plot_pdf=TRUE, a *.pdf file will be written in the
-#                     out.dir folder.
 #
 #  ***************************************************************************
 
+#' Detrend time series.
+#'
+#' Process the output of pretreatment_data() function
+#' to de-trend the time series.
+#'
+#' @param series Output of pretreatment_data().
+#' @param smoothing.yr Smoothing window width.
+#' @param detr.type Smoothing function used: \describe{
+#'              \item{"rob.loess"}{robust Loess}
+#'              \item{"rob.lowess"}{robust Lowess with 4 iterations}
+#'              \item{"mov.mode"}{moving median (aka. method #4
+#'                                in Matlab CharAnalysis version)}
+#'            }
+#' @param out.dir Folder to output the generated figures to.
+#'                Defaults to NULL, and the figures are generated
+#'                to default device instead.
+#' @param plot_pdf Logical. If \code{TRUE}, a \code{*.pdf} file
+#'                 will be written in the \code{out.dir} folder.
+#'
+#' @return A list similar to \code{series} with additional detrended data
+#'         appended.
+#'
+#' @importFrom dplyr %>% select everything
+#' @importFrom stats loess lowess predict
+#' @importFrom grDevices dev.off pdf
+#' @importFrom graphics abline axis lines mtext par
+#'
+#' @export
 SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.loess",
-                          out.dir = "Figures", plot_pdf = T) {
-  
-  
-  require(dplyr)
+                          out.dir = NULL, plot_pdf = T) {
   
   # Determine path to Figure-output folder and create folder if it does not exist
-  if (plot_pdf == T) {
+  if (plot_pdf == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")
     
     if (dir.exists(out.path) == F) {
@@ -99,7 +99,7 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
   a.detr <- as.data.frame(a[ ,2:ncol(a)] - a.trend[ ,2:ncol(a.trend)])
   colnames(a.detr) <- colnames(a) [2:ncol(a)]
   a.detr$age <- a.trend$age
-  a.detr <- a.detr %>% select(age, everything()) # reorders the columns
+  a.detr <- a.detr %>% select("age", everything()) # reorders the columns
   # a.detr <- a.detr[which(complete.cases(a.detr)), ] # removed this because in some datasets some variables are incomplete!
   
   
@@ -108,7 +108,9 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
   a.names <- colnames(a)
   
   if (plot_pdf == T) {
-    pdf(paste0(out.path, s.name, "_DetrendedSeries.pdf"))
+    if (!is.null(out.dir)) {
+      pdf(paste0(out.path, s.name, "_DetrendedSeries.pdf"))
+    }
     for (i in 2:dim(a.detr)[2]) {
       i.name <- colnames(a)[i]
       par(mfrow = c(2,1), oma = c(2,0.5,0.5,0.5), mar = c(2,5,1,0.5))
@@ -125,7 +127,9 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
       axis(2)
       mtext(text = "Age (cal yr BP)", side = 1, line = 2.3)
     }
-    dev.off()
+    if (!is.null(out.dir)) {
+      dev.off()
+    }
   }
   
   # Prepare output

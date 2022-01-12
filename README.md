@@ -49,9 +49,9 @@ For instance, to analyse the MyData dataset for variable1:
 > MyData_peaks <- peak_detection(series = MyData, proxy = "variable1")
 
 Individual output plots can be generated with dedicated plotting functions:
-> Plot.Anomalies(co_thresh_glob, plot.neg = F)
+> Plot.Anomalies(MyData_peaks, plot.neg = F)
 
-> Plot_ReturnIntervals(co_thresh_glob)
+> Plot_ReturnIntervals(MyData_peaks)
 
 ***
 

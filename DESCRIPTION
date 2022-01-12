@@ -23,6 +23,10 @@ Description: The program proceeds to several steps.
       the GMMs,
       the thresholds and
       the detected anomalies (values beyond the noise threshold).
+    PaleoAnomalies embeds and uses the SNI.R script
+    written by Ryan Kelly,
+    and available in supplementary materials
+    of Kelly et al., (2017) doi:10.1016/j.yqres.2010.07.011.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

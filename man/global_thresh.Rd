@@ -38,7 +38,8 @@ Defaults to \code{thresh.value = 0.95}.}
 should be considered as the noise component.
 By default \code{noise.gmm = 1}.}
 
-\item{smoothing.yr}{Width of the moving window for computing SNI.
+\item{smoothing.yr}{Width of the moving window
+for computing \code{\link{SNI}}.
 By default, this value is inherited
 from the \code{smoothing.yr} value
 set in the \code{SeriesDetrend()} function.}

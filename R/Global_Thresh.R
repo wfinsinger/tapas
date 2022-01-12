@@ -28,7 +28,8 @@
 #' @param noise.gmm Specifies which of the two GMM components
 #'                 should be considered as the noise component.
 #'                 By default \code{noise.gmm = 1}.
-#' @param smoothing.yr Width of the moving window for computing SNI.
+#' @param smoothing.yr Width of the moving window
+#'                     for computing \code{\link{SNI}}.
 #'                     By default, this value is inherited
 #'                     from the \code{smoothing.yr} value
 #'                     set in the \code{SeriesDetrend()} function.

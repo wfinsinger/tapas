@@ -52,6 +52,9 @@
 #'                           are produced and written to \code{out.dir} folder.
 #'
 #' @return Threshold values.
+#' 
+#' @importFrom stats complete.cases dnorm pt qnorm
+#' @importFrom graphics curve hist points
 #'
 #' @export
 global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
@@ -145,7 +148,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Get 2 components with Gaussian mixture models for positive values
   m2 <- mclust::densityMclust(data = v.gmm, G = 2, verbose = F)
   # summary(m2, parameters=TRUE)
-  # plot.Mclust(m2, what="classification")
+  # mclust::plot.Mclust(m2, what="classification")
   # plot(x=m2, what="density", data=v)
   # summary(m2, parameters=T, classification=T)
   
@@ -457,7 +460,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     }
     par(mfrow = c(2,1), mar = c(5,4,1,1))
     
-    plot.Mclust(m2, what = "classification")
+    mclust::plot.Mclust(m2, what = "classification")
     
     h <- hist(x = v, breaks = 50, plot = F)
     dens <- hist(v, breaks = 50, plot = F)$density

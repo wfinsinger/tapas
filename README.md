@@ -47,6 +47,16 @@ co_detr <- SeriesDetrend(
 
 <img src="man/figures/README-detrend.gif" width="100%" />
 
+Fit gaussian mixture models to determine the noise-signal threshold
+
+-   With a Global Threshold (default options):
+
+``` r
+char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR")
+```
+
+<img src="man/figures/README-global_threshold_default.gif" width="100%" />
+
 ------------------------------------------------------------------------
 
 <!--- Walter's unintegrated README below. --->

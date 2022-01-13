@@ -64,27 +64,25 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                           keep_consecutive = F,
                           minCountP = 0.05, MinCountP_window = 150,
                           out.dir = "Figures", plot.global_thresh = T) {
-  
-  
+
   require(mclust)
-  
-  
+
+
   # Initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
-    print('Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.')
-    return()
+    stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
   }
-  
-  
+
+
   # Determine path to output folder for Figures
   if (plot.global_thresh == T) {
     out.path <- paste0("./", out.dir, "/")
-    
+  
     if (dir.exists(out.path) == F) {
       dir.create(out.path)
     }
   }
-  
+
   # Extract parameters from input list (i.e. the detrended series) ####
   
   # Determines for which of the variables (proxy) in the dataset the analysis should be made
@@ -95,8 +93,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
     if (dim(series$detr$detr)[2] > 2) {
-      print('Fatal error: please specify which proxy you want to use')
-      return()
+      stop("Fatal error: please specify which proxy you want to use")
     } else {
       proxy <- colnames(series$detr$detr) [2]
       a <- series$detr$detr
@@ -474,12 +471,12 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
          xlim = c(min(h$breaks), max(h$breaks)),
          ylab = "Density", xlab = '', main = "Global threshold")
     par(new = T)
-    pdf2 <- curve(dnorm(x = x, mean = muHat[signal.gmm], sd = sigmaHat[signal.gmm]),
-                  from = min(h$breaks), to = max(h$breaks),
-                  ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
-                  axes = F, ylab = '', xlab = '')
+    curve(dnorm(x, mean = muHat[signal.gmm], sd = sigmaHat[signal.gmm]),
+          from = min(h$breaks), to = max(h$breaks),
+          ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
+          axes = F, ylab = '', xlab = '')
     par(new = T)
-    pdf1 <- curve(dnorm(x = x, mean = muHat[noise.gmm], sd = sigmaHat[noise.gmm]),
+    curve(dnorm(x, mean = muHat[noise.gmm], sd = sigmaHat[noise.gmm]),
                   from = min(h$breaks), to = max(h$breaks),
                   ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
                   axes = F, ylab = '', xlab = '')

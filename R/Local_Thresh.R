@@ -67,8 +67,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   # Initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
-    print('Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.')
-    return()
+    stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
   }
   
   # Determine path to output folder for Figures
@@ -85,8 +84,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   # Determines for which of the variables the threshold analysis should be made
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
     if (dim(series$detr$detr)[2] > 2) {
-      print('Fatal error: please specify which proxy you want to use')
-      return()
+      stop("Fatal error: please specify which proxy you want to use")
     } else {
       proxy <- colnames(series$detr$detr) [2]
       a <- series$detr$detr
@@ -210,39 +208,36 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       sigmaHat[i, 1] <- sqrt(m$parameters$variance$sigmasq[1])
       sigmaHat[i, 2] <- sqrt(m$parameters$variance$sigmasq[2])
       propN[i, ] <- m$parameters$pro
-      
+
       # Check
       if (muHat[i, 1] == muHat[i, 2]) {
         warning('Poor fit of Gaussian mixture model')
       }
-      
+
       ## Define local threshold
       if (!is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- m$parameters$mean[1] + qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
         thresh.neg[i] <- m$parameters$mean[1] - qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
-        
+
         if (m$parameters$mean[1] < 0) {
           thresh.pos[i] <- 0 + qnorm(p = thresh.value) *
             sqrt(m$parameters$variance$sigmasq)[1]
         }
-        
         #sig_i.pos <- X[which(X > thresh.pos[i])]
         #noise_i <- X[which(X <= thresh.pos[i] & X >= thresh.neg[i])]
         #sig_i.neg <- X[which(X < thresh.neg[i])]
-        
-        
       }
-      
+
       if (is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- 0
         thresh.neg[i] <- 0
       }
       
     }
-    
-    
+
+
     # Plot some of the noise and signal distributions
     if (any(num.plots == i)) {
       # Print plots for positive peaks
@@ -259,12 +254,12 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       #      xlim = c(min(h$breaks), max(h$breaks)),
       #      ylab = "Density", xlab = '', main = "Local threshold")
       par(new = T)
-      pdf2 <- curve(dnorm(x = x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
+      curve(dnorm(x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
                     from = min(h$breaks), to = max(h$breaks),
                     ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
                     axes = F, ylab = '', xlab = '')
       par(new = T)
-      pdf1 <- curve(dnorm(x = x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
+      curve(dnorm(x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
                     from = min(h$breaks), to = max(h$breaks),
                     ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
                     axes = F, ylab = '', xlab = '')
@@ -294,9 +289,6 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     }
     dev.off()
   }
-  
-  
-  #rm(my.plots, num.plots)
   
   
   ## Calculate SNI ####
@@ -333,20 +325,13 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   # Smooth local threshold values ####
   ## Smooth thresholds Lowess smoother
-  # thresh.pos.sm <- stats::loess(thresh.pos ~ ageI, data = data.frame(ageI, thresh.pos),
-  #                        span = span.sm, family = "gaussian")$fitted
-  # thresh.neg.sm <- stats::loess(thresh.neg ~ ageI, data = data.frame(ageI, thresh.neg),
-  #                        span = span.sm, family = "gaussian")$fitted
-  
   thresh.pos.sm <- stats::lowess(ageI, thresh.pos, f = span.sm, iter = 1)$y
   thresh.neg.sm <- stats::lowess(ageI, thresh.neg, f = span.sm, iter = 1)$y
-  
-  
-  
+
+
   ## Get peaks ####
   
   ## If keep_consecutive == F ####
-  ## 
   if (keep_consecutive == F) {  # if consecutive peak samples should be removed
     
     # Flag values exceeding thresholds
@@ -413,8 +398,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     
     peakIndex <- which(Peaks.pos == 1) # Index to find peak samples
     
-    if (length(peakIndex) > 1) {                     # Only proceed if there is > 1 peak
-      for (i in 1:length(peakIndex)) {               # For each peak identified...
+    if (length(peakIndex) > 1) {          # Only proceed if there is > 1 peak
+      for (i in 1:length(peakIndex)) {    # For each peak identified...
         peakYr <- ageI[peakIndex[i]]      # Find age of peak and window around peak
         windowTime <- c(max(ageI[which(ageI <= peakYr + MinCountP_window)]),
                         min(ageI[which(ageI >= peakYr - MinCountP_window)]))
@@ -496,9 +481,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     insig.peaks <- NULL
     Peaks.pos.insig <- rep_len(NA, length.out = dim(a) [1])
   }
-  
-  
-  
+
   
   
   ## Gather data to calculate return intervals ####    

@@ -123,10 +123,9 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     #   "Unrecognized variable name: '", proxy, "'. ",
     #   "Accepted names: ", paste(proxies_options, collapse = ", "), "."
     # )
-    print(paste0("Fatal error: Unrecognized variable name (proxy = ). ",
+    stop(paste0("Fatal error: Unrecognized variable name (proxy = ). ",
                   "Accepted names: ", paste(proxies_options, collapse = ", "), "."
                 ))
-    return()
   }
   
   if (is.null(proxy) & length(proxies_options) == 1) {
@@ -193,7 +192,8 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     names(sens_sni_pos) <- c(smoothing_yr_seq)
     
     
-    sens_peaks_pos <- as.data.frame(matrix(NA, ncol = 2, nrow = length(smoothing_yr_seq)))
+    sens_peaks_pos <- as.data.frame(matrix(NA, ncol = 2,
+                                           nrow = length(smoothing_yr_seq)))
     sens_peaks_pos[ ,1] <- c(smoothing_yr_seq)
     
     sens_ri_pos <- vector('list', length(smoothing_yr_seq))
@@ -246,8 +246,10 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     boxplot(sens_sni_pos, xlab = "",
             ylab = "SNI",
             notch = T, axes = F,
-            ylim = c(0, max(sens_sni_pos[ ,1:length(smoothing_yr_seq)])),
-            main = paste("Sensitivity for", thresh_type, "threshold at", thresh_value))
+            ylim = c(0, max(sens_sni_pos[ ,1:length(smoothing_yr_seq)],
+                            na.rm = T)),
+            main = paste("Sensitivity for", thresh_type,
+                         "threshold at", thresh_value))
     abline(h = 3, lty = 2)
     axis(1, at = 1:length(smoothing_yr_seq), labels = c(smoothing_yr_seq))
     axis(2)

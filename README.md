@@ -57,6 +57,22 @@ char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR")
 
 <img src="man/figures/README-global_threshold_default.gif" width="100%" />
 
+-   With minimum-count test and removing consecutive peak samples.
+
+``` r
+char_thresh_gl <- global_thresh(
+  series = co_detr,
+  proxy = "charAR",
+  thresh.value = 0.95,
+  smoothing.yr = NULL,
+  keep_consecutive = FALSE,
+  minCountP = 0.95,
+  MinCountP_window = 150
+)
+```
+
+<img src="man/figures/README-global_threshold_config.gif" width="100%" />
+
 ------------------------------------------------------------------------
 
 <!--- Walter's unintegrated README below. --->

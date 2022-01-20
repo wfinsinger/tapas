@@ -86,6 +86,18 @@ Plot.Anomalies(
 
 <img src="man/figures/README-plot_anomalies-1.png" width="100%" />
 
+And plot the intervals:
+
+``` r
+Plot_ReturnIntervals(
+  series = char_thresh_gl,
+  plot.x = TRUE,
+  plot.neg = FALSE
+)
+```
+
+<img src="man/figures/README-plot_intervals-1.png" width="100%" />
+
 ------------------------------------------------------------------------
 
 <!--- Walter's unintegrated README below. --->

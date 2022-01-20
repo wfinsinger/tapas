@@ -86,6 +86,15 @@ Plot.Anomalies(
 )
 ```
 
+And plot the intervals:
+``` {r plot_intervals}
+Plot_ReturnIntervals(
+  series = char_thresh_gl,
+  plot.x = TRUE,
+  plot.neg = FALSE
+)
+```
+
 --------------------------------------------------------------------------------
 <!--- Walter's unintegrated README below. --->
  

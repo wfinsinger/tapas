@@ -63,6 +63,19 @@ Fit gaussian mixture models to determine the noise-signal threshold
 char_thresh_gl <- global_thresh(series = co_detr, proxy = "charAR")
 ```
 
+- With minimum-count test and removing consecutive peak samples.
+``` {r global_threshold_config, fig.show='animate', ffmpeg.format='gif', dev='jpeg'}
+char_thresh_gl <- global_thresh(
+  series = co_detr,
+  proxy = "charAR",
+  thresh.value = 0.95,
+  smoothing.yr = NULL,
+  keep_consecutive = FALSE,
+  minCountP = 0.95,
+  MinCountP_window = 150
+)
+```
+
 --------------------------------------------------------------------------------
 <!--- Walter's unintegrated README below. --->
  

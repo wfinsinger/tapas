@@ -116,7 +116,7 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
   }
   
   ## Check if the variable name (proxy) is coherent
-  proxies_options <- colnames(series[ ,6:dim(series)[2] ])
+  proxies_options <- colnames(series[ 6:dim(series)[2] ])
   
   if (is.null(proxy) & length(proxies_options) > 1) {
     # stop(
@@ -238,6 +238,12 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
       sens_ri_pos[[i]] <- d_thresh_i$thresh$RI_pos
     }
     
+    ## Replace Inf values with NA values in SNI data frame
+    sens_sni_pos <- do.call(data.frame,
+                            lapply(sens_sni_pos,
+                                   function(x) replace(x,
+                                                       is.infinite(x),
+                                                       NA)))
     
     ## Plot output of sensitivity analysis ####
     layout(1)
@@ -245,7 +251,7 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     
     boxplot(sens_sni_pos, xlab = "",
             ylab = "SNI",
-            notch = T, axes = F,
+            notch = F, axes = F,
             ylim = c(0, max(sens_sni_pos[ ,1:length(smoothing_yr_seq)],
                             na.rm = T)),
             main = paste("Sensitivity for", thresh_type,

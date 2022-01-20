@@ -63,15 +63,13 @@ check_pretreat <- function(series) {
   # Check that CmTop < CmBot
   if (any((cmB < cm))) {
     A[which(cmB < cm), ]
-    print('Fatal error: CmTop > CmBot in some of the samples')
-    return()
+    stop('Fatal error: CmTop > CmBot in some of the samples')
   }
   
   # Check that AgeTop < AgeBot
   if (any((ybpB < ybp))) {
-    A[which(ybpB < ybpB), ]
-    print('Fatal error: AgeTop > AgeBot in some of the samples')
-    return()
+    A[which(ybpB < ybp), ]
+    stop('Fatal error: AgeTop > AgeBot in some of the samples')
   }
   
   # Check for duplicate sample depths

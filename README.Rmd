@@ -76,6 +76,16 @@ char_thresh_gl <- global_thresh(
 )
 ```
 
+Once the analysis is done, plot the anomalies:
+``` {r plot_anomalies}
+Plot.Anomalies(
+  series = char_thresh_gl,
+  plot.crosses = TRUE,
+  plot.x = FALSE,
+  plot.neg = FALSE
+)
+```
+
 --------------------------------------------------------------------------------
 <!--- Walter's unintegrated README below. --->
  

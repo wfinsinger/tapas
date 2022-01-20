@@ -73,6 +73,19 @@ char_thresh_gl <- global_thresh(
 
 <img src="man/figures/README-global_threshold_config.gif" width="100%" />
 
+Once the analysis is done, plot the anomalies:
+
+``` r
+Plot.Anomalies(
+  series = char_thresh_gl,
+  plot.crosses = TRUE,
+  plot.x = FALSE,
+  plot.neg = FALSE
+)
+```
+
+<img src="man/figures/README-plot_anomalies-1.png" width="100%" />
+
 ------------------------------------------------------------------------
 
 <!--- Walter's unintegrated README below. --->

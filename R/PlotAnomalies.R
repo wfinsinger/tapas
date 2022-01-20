@@ -1,28 +1,21 @@
-#  ***************************************************************************
-#   PlotAnomalies.R
-#  ---------------------
-#   Date                 : July 2020
-#   Copyright            : (C) 2020 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
-#
-#  ***************************************************************************
-#
-#   The script plots a summary figure of the PaleoDataAnomalies analysis.
-#
-#   Requires an output from the SeriesThreshold() function.
-#
-#   The user-defined parameters are as follows:
-#     series        =>  the output from the SeriesThreshold() function
-#     proxy         =>  a character string with the colname of the variable
-#     x.lim         =>  set the age limits of the x-axis scale (the time scale)
-#     plot.crosses  =>  if plot.crosses=T (default), crosses are added to indicate the location of the anomalies
-#     plot.x        =>  if plot.x=F (default), the x-axis labels are omitted
-#     plot.neg      =>  if plot.neg=T (default), both positive and negative anomalies are marked with colored shaded areas.
-#
-#  ***************************************************************************
-
-
+#' Plots a summary figure of the PaleoDataAnomalies analysis.
+#'
+#' Requires output from the \code{\link{global_thresh}()} function.
+#' 
+#' @param series The output of \code{\link{global_thresh}()}.
+#' @param x.lim Limit age for the x-axis scale (time scale).
+#' @param plot.crosses Boolean. If \code{TRUE} (by default),
+#'                     crosses are displayed to indicate
+#'                     the location of anomalies.
+#' @param plot.x Boolean. If \code{FALSE} (by default),
+#'               the x-axis labels are omitted.
+#' @param plot.neg Boolean. If \code{FALSE} (by default),
+#'                 both positive and negative anomalies
+#'                 are marked with colored shaded areas.
+#' 
+#' @importFrom graphics polygon
+#' 
+#' @export
 Plot.Anomalies <- function(series = NULL, x.lim = NULL, plot.crosses = T,
                            plot.x = F, plot.neg = T) {
   

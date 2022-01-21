@@ -19,9 +19,9 @@ pretreatment_data(
 and additional columns with the data which should be resampled.}
 
 \item{out}{Desired return value: \describe{
-\item{"acc_i"}{the function returns resampled accumulation rates}
-\item{"con_i"}{the function returns resampled concentrations}
-\item{"count_i"}{the function returns resampled counts}
+\item{"accI"}{the function returns resampled accumulation rates}
+\item{"conI"}{the function returns resampled concentrations}
+\item{"countI"}{the function returns resampled counts}
 }}
 
 \item{series.name}{A string defining the name of the input matrix.

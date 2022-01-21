@@ -1,104 +1,114 @@
-#########################################################################################
-#   peak_detection.R
-#  ---------------------
-#   Date                 : January 2022
-#   Copyright            : (C) 2022 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
-#
-#  ***************************************************************************
-# Performs peak-detection analysis of a time series.
-# 
-# This is a wrapper function that calls the following functions:
-# check_pretreat(), pretreatment_data(), SeriesDetrend(), global_thresh(),
-# local_thresh(), Plot.Anomalies(), and Plot_ReturnIntervals().
-#
-#
-#  Requires a matrix as input with the following columns:
-#   CmTop, CmBot, AgeTop, AgeBot, Volume, and one or more columns with the data
-#   which should be resampled.
-#
-# The user-defined parameters are as follows:
-# series      ->  the name of the input matrix.
-# out         ->  with out = "accI" (default) the function returns resampled
-#                      accumulation rates,
-#                 with out = "conI" the function returns resampled concentrations,
-#                 with out = "countI" the function returns resampled counts.
-# series_name ->  a character string defining the name of the input matrix.
-#                     series_name = NULL by default.
-# first, last ->  determine the age boundaries of the resampled timeserie.
-#                 If they are not specified (first & last == NULL),
-#                 the resampling is done over the entire sequence,
-#                 from min(series$AgeTop) to max(series$AgeBot).
-# yrInterp    ->  determines the resolution of the resampled timeseries.
-#
-# smoothing_yr -> determines the smoothing-window width (in years) used for:
-#                   - detrending the data,
-#                   - smoothing the signal-to-noise index (SNI), and
-#                   - the window width (in years) for the local thresholds.
-# detr_type   ->  determines the function used to smooth the timeseries.
-#                   With detr_type="rob.loess" it uses a robust Loess,
-#                   with detr_type="rob.lowess" it uses a robust Lowess (with 4
-#                     iterations)
-#                   with detr_type="mov.median" it uses a moving median
-#                       (aka Method #4 in CharAnalysis' Matlab version).
-# proxy       ->   select the variable for the peak-detection analysis
-#                   (proxy="VariableName"). If the dataset includes only one variable,
-#                   proxy does not need to be specified.
-# t_lim       ->   allows defining a portion of the time series.
-#                   With t_lim=NULL (default) the analysis will be performed using
-#                   the entire time series.
-# thresh_type   ->  Determines whether to use a single 'global' GMM, or local GMMs to
-#                    determine the threshold. Default: thresh_type="local".
-# thresh_value  ->  Determines the threshold as the nth-percentile of the
-#                     Gaussian Model of the noise component. Default thresh_value = 0.95.
-# noise_gmm     ->  Determines which of the two GMM components should be considered as
-#                     the noise component. This is only needed if thresh_type="global".
-#                     By default noise_gmm=1.   
-# keep_consecutive -> logical. If FALSE (default), consecutive peak samples exceeding the
-#                       threshold will be removed and only the first (older) sample is
-#                       retained.
-# min_CountP       -> Defines the probability (default=0.95) that two resampled counts
-#                     could arise from the same Poisson distribution. This is used to
-#                     screen peak samples and remove any that fail to pass the 
-#                     minimum-count test. If min_CountP=NULL, the test will not be
-#                     performed.
-# MinCountP_window -> Defines the width (in years) of the search window used for the 
-#                     minimum-count test. Default: MinCountP_window=150.
-# out_dir     ->    path to the output directory where figures will be written as *.pdf
-#                    files. Default: out_dir = "Figures".
-# plotit      ->    Logical. If plotit=T (default), results obtained with the selected 
-#                     settings will be plotted in the display.
-# x_lim       ->    set the age limits of the x-axis scale (the time scale). By default,
-#                     x_lim = t_lim.
-# plot_x        ->  Logical. if plot_x=F (default), the x-axis labels are omitted.
-# plot_neg      ->  Logical. if plot_neg=F (default), the return intervals for both
-#                     positive and negative anomalies are plotted.
-# plot_crosses  ->  Logical. If plot_crosses=T (default), crosses are added to indicate
-#                     the location of the events.
-# plot_neg      ->  Logical. If plot_neg=F (default), both positive and negative
-#                     events are marked with colored shaded areas.
-# sens          ->  Logical. Determines if a sensitivity analysis will be performed.
-#                     This involves performing the peak-detection analysis with different
-#                     smoothing-window widths (smoothing_yr), and plotting boxplots for
-#                     the SNI distributions, the Return Intervals, and the number of
-#                     detected events.
-# smoothing_yr_seq -> determines the smoothing-window widths used for the sensitivity
-#                       analysis. If smoothing_yr_seq = NULL (default), the analysis will
-#                       be performed for the following smoothing-window widths:
-#                       500, 600, 700, 800, 900, 1000 years.
-#########################################################################################
-
+#' Performs peak-detection analysis of a time series.
+#'
+#' This wrapper function calls the following functions in correct order:
+#' \code{\link{check_pretreat}()}, \code{\link{pretreatment_data}()},
+#' \code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()},
+#' \code{\link{local_thresh}()}, \code{\link{Plot.Anomalies}()},
+#' and \code{Plot_ReturnIntervals()}.
+#'
+#' @param series A \code{data.frame} with the following columns:
+#'               \code{CmTop}, \code{CmBot}, \code{AgeTop},
+#'               \code{AgeBot}, \code{Volume},
+#'               and one or more columns with the data to be resampled.
+#' @param out Desired return value: \describe{
+#'            \item{"accI"}{the function returns resampled accumulation rates}
+#'            \item{"conI"}{the function returns resampled concentrations}
+#'            \item{"countI"}{the function returns resampled counts}
+#'            }
+#' @param series_name A character string defining the name of the input matrix
+#'                    (\code{NULL} by default).
+#' @param first,last Age boundaries of the resampled time serie.
+#'                   If unspecified (\code{first=NULL} and \code{last=NULL}),
+#'                   then resampling is done over the entire sequence,
+#'                   from \code{min(series$AgeTop)} to max(series$AgeBot).
+#' @param yrInterp Resolution of the resampled timeseries.
+#' @param smoothing_yr Smoothing-window width (in years) used for:\itemize{
+#'                   \item{detrending the data}
+#'                   \item{smoothing the signal-to-noise index (SNI)}
+#'                   \item{the window width (in years)
+#'                         for the local thresholds}
+#'                   }
+#' @param detr_type Smoothing function used: \describe{
+#'              \item{"rob.loess"}{robust Loess}
+#'              \item{"rob.lowess"}{robust Lowess with 4 iterations}
+#'              \item{"mov.mode"}{moving median (aka. method #4
+#'                                in Matlab CharAnalysis version)}
+#'            }
+#' @param proxy Select variable for the peak-detection analysis
+#'              with \code{proxy = "VariableName"}.
+#'              If the dataset includes only one variable,
+#'              proxy does not need be specified.
+#' @param t_lim Allows defining a portion of the time series.
+#'              With \code{t_lim = NULL} (by default)
+#'              the analysis is performed with the entire time series.
+#' @param thresh_type Determines whether to use a single 'global' GMM,
+#'                    or local GMMs to determine the threshold.
+#'                    Defaults to \code{thresh_type = "local"}.
+#' @param thresh_value Determines threshold as the nth-percentile
+#'                     of the Gaussian Model of the noise component.
+#'                     Defaults to \code{thresh_value = 0.95}.
+#' @param noise_gmm Determines which of the two GMM components
+#'                  should be considered as the noise component.
+#'                  This is only needed if \code{thresh_type = "global"}.
+#'                  Defaults to \code{noise_gmm = 1}.
+#' @param keep_consecutive Logical. If \code{FALSE} (by default),
+#'                         consecutive peak samples exceeding the threshold
+#'                         are removed
+#'                         and only the first (older) sample is retained.
+#' @param min_CountP Probability that two resampled counts could arise
+#'                   from the same Poisson distribution.
+#'                   Defaults to \code{0.95}.
+#'                   This is used to screen peak samples
+#'                   and remove any that fail to pass the minimum-count test.
+#'                   If \code{min_CountP = NULL},
+#'                   the test will not be performed.
+#' @param MinCountP_window Width (in years) of the search window
+#'                         used for the minimum-count test.
+#'                         Defaults to \code{MinCountP_window = 150}.
+#' @param out_dir Path to the output directory
+#'                where \code{*.pdf} figures files are written files.
+#'                Defaults to \code{out_dir = NULL},
+#'                so the default device is used.
+#' @param plotit Logical. If \code{TRUE} (by default),
+#'               results obtained with the selected settings
+#'               are plotted in the display.
+#' @param x_lim Age limits of the x-axis scale (the time scale).
+#'              By default, \code{x_lim = t_lim}.
+#' @param plot_x Logical. If \code{FALSE} (by default),
+#'               the x-axis labels are omitted.
+#' @param plot_neg Logical. If \code{FALSE} (by default), the return intervals
+#'                 for both positive and negative anomalies are plotted.
+#' @param plot_crosses Logical. If \code{TRUE} (by default),
+#'                     crosses are added to indicate the location of the events.
+#' @param plot_neg Logical. If \code{FALSE} (by default),
+#'                 both positive and negative events
+#'                 are marked with colored shaded areas.
+#' @param sens Logical. Determines whether a sensitivity analysis is performed.
+#'             This involves performing the peak-detection analysis
+#'             with different smoothing-window widths (\code{smoothing_yr}),
+#'             and plotting boxplots for the SNI distributions,
+#'             the Return Intervals, and the number of detected events.
+#' @param smoothing_yr_seq The smoothing-window widths used
+#'                         for the sensitivity analysis.
+#'                         If \code{smoothing_yr_seq = NULL} (by default),
+#'                         the analysis is performed
+#'                         for the following smoothing-window widths:
+#'                         500, 600, 700, 800, 900, 1000 years.
+#'
+#' @importFrom graphics boxplot layout
+#'
+#' @export
 peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                             first = NULL, last = NULL, yrInterp = NULL,
                             smoothing_yr = 500, detr_type = "mov.median",
                             thresh_type = "local", thresh_value = 0.95,
                             t_lim = NULL, noise_gmm = 1, keep_consecutive = F,
                             min_CountP = 0.95, MinCountP_window = 150,
-                            series_name = NULL, out_dir = "Figures",
-                            plotit = T, x_lim = t_lim, plot_crosses = T, plot_x = T,
-                            plot_neg = F,
-                            sens = T, smoothing_yr_seq = NULL) {
+                            series_name = NULL, out_dir = NULL,
+                            plotit = TRUE, x_lim = t_lim,
+                            plot_crosses = TRUE, plot_x = TRUE,
+                            plot_neg = FALSE,
+                            sens = TRUE, smoothing_yr_seq = NULL) {
   
   
   ## Initial check-ups #### 

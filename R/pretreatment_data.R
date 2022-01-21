@@ -7,9 +7,9 @@
 #'               \code{c("CmTop", "CmBot", "AgeTop", "AgeBot", "Volume")}
 #'               and additional columns with the data which should be resampled.
 #' @param out Desired return value: \describe{
-#'             \item{"acc_i"}{the function returns resampled accumulation rates}
-#'             \item{"con_i"}{the function returns resampled concentrations}
-#'             \item{"count_i"}{the function returns resampled counts}
+#'             \item{"accI"}{the function returns resampled accumulation rates}
+#'             \item{"conI"}{the function returns resampled concentrations}
+#'             \item{"countI"}{the function returns resampled counts}
 #'            }
 #' @param series.name A string defining the name of the input matrix.
 #'                    Defaults to \code{NA}.

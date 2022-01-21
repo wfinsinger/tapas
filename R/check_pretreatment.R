@@ -1,50 +1,48 @@
-#########################################################################################
-#   check_pretreat.R
-#  ---------------------
-#   Date                 : January 2022
-#   Copyright            : (C) 2022 by Walter Finsinger
-#   Email                : walter.finsinger@umontpellier.fr
-#  ---------------------
-#
-#  ***************************************************************************
-#    
-# Requires a matrix as input with the following columns:
-#   CmTop, CmBot, AgeTop, AgeBot, Volume, and one or more columns with the data which
-#    should be resampled (variables).
-#
-# The user-defined parameters are as follows:
-#     series      ->  the name of the input matrix
-#     
-#
-# Details:
-# This functions does some check-up on the data frame used for
-# the paleofire::pretreatment() function, which requires that the depth and age scales
-# are continuous. In other words, for every i-th row, it requires that
-# - CmBot[i] > CmTop[i],
-# - AgeBot[i] > AgeTop[i],
-# - there shouldn't be duplicate values in the CmTop, CmBot, AgeTop, and AgeBot columns,
-# - CmBot[i] == CmTop[i+1],
-# - AgeBot[i] == AgeTop[i+1].
-# 
-# If:
-# - any CmBot[i] < CmTop[i], or
-# - any AgeBot[i] < AgeTop[i], or
-# - there are duplicate values in one of the columns CmTop, CmBot,
-#    the function returns a fatal error and stops 
-# 
-# If any CmBot[i] < CmTop[i+1]:
-# - the function adds a new row [j = i+1] to fill in the missing CmTop and CmBot values.
-#    Thus, the added samples will have CmTop[j] == CmBot[i] and CmBot[j] == CmTop[i+1].
-#    The age scale values will be: AgeTop[j] == AgeBot[i] and AgeBot[j] == AgeTop[i+1].
-# 
-# If after these checks any AgeTop[i] == AgeBot[i]:
-# - the function removes the flagged rows, and
-# - creates new corrected CmTop and CmBot scales that exclude slumps, such that
-#    CmBot[i] > CmTop[i] and CmBot[i] == CmTop[i+1].
-#    
-#########################################################################################
-
-
+#' Check data frame used for \code{paleofire::pretreatment()} function.
+#'
+#' This functions does some check-up on the data frame used for
+#' the \code{paleofire::pretreatment()} function,
+#' which requires that the depth and age scales are continuous.
+#' In other words, for every i-th row, it requires that \itemize{
+#' \item{\code{CmBot[i] > CmTop[i]}}
+#' \item{\code{AgeBot[i] > AgeTop[i]}}
+#' \item{there shouldn't be duplicate values
+#'       in the \code{CmTop, CmBot, AgeTop}, and \code{AgeBot} columns}
+#' \item{\code{CmBot[i] == CmTop[i+1]}}
+#' \item{\code{AgeBot[i] == AgeTop[i+1]}}
+#' }
+#'
+#' If any of the following is true: \itemize{
+#' \item{any \code{CmBot[i] < CmTop[i]}}
+#' \item{\code{AgeBot[i] < AgeTop[i]}}
+#' \item{there are duplicate values in one of the columns \code{CmTop, CmBot}}
+#' }
+#' .. then the function returns a fatal error and stops.
+#'
+#' The function also fixes a few things:
+#'
+#' If any \code{CmBot[i] < CmTop[i+1]}, then
+#' the function adds a new row \code{[j = i+1]}
+#' to fill in the missing \code{CmTop} and \code{CmBot} values.
+#' Thus, the added samples will have \code{CmTop[j] == CmBot[i]}
+#' and \code{CmBot[j] == CmTop[i+1]}.
+#' The age scale values will be:
+#' \code{AgeTop[j] == AgeBot[i]}
+#' and \code{AgeBot[j] == AgeTop[i+1]}.
+#'
+#' If after these checks any \code{AgeTop[i] == AgeBot[i]}, then
+#' the function *removes the flagged rows*,
+#' and *creates new* corrected \code{CmTop} and \code{CmBot} scales
+#' that exclude slumps,
+#' such that \code{CmBot[i] > CmTop[i]}
+#' and \code{CmBot[i] == CmTop[i+1]}.
+#'
+#' @param series The input data frame. A matrix with the following columns:
+#'    \code{CmTop, CmBot, AgeTop, AgeBot, Volume},
+#'    and one or more columns with the data
+#'    which should be resampled (variables).
+#'
+#' @export
 check_pretreat <- function(series) {
   
   

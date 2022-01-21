@@ -48,7 +48,7 @@
 #   SNI_output list:
 #   $SNI_sm = lowess-smoothed SNI values ()
 #   $SNI_raw = raw SNI values
-#########################################################################################   
+#########################################################################################
 
 
 SNI <- function(ProxyData, BandWidth) {
@@ -121,6 +121,9 @@ SNI <- function(ProxyData, BandWidth) {
     }
     
   }
+  
+  ## Replace NAs with zero (added by Walter)
+  rawSNI[is.na(rawSNI)] <- 0
   
   # Smooth raw values to obtain final SNI
   SNI_sm <- lowess(ages, rawSNI, f = (BandWidth/r)/length(ages), iter = 0)$y

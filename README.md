@@ -12,7 +12,7 @@ Install the development version of PaleoAnomalies with:
 
 ``` r
 # library(devtools)
-devtools::install_github("iago-lito/R-PaleoAnomalies", ref="packaging")
+devtools::install_github("wfinsinger/R-PaleoAnomalies")
 ```
 
 ## Example

@@ -38,3 +38,4 @@ Imports:
     mclust,
     dplyr,
     paleofire
+Remotes: oblarquez/paleofire

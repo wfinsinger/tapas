@@ -146,12 +146,9 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   Peaks.neg <- matrix(data = 0, nrow = length(v), ncol = 1) # Space for negative component
   
   # Get 2 components with Gaussian mixture models for positive values
-  m2 <- mclust::densityMclust(data = v.gmm, G = 2, verbose = F)
-  # summary(m2, parameters=TRUE)
-  # mclust::plot.Mclust(m2, what="classification")
-  # plot(x=m2, what="density", data=v)
-  # summary(m2, parameters=T, classification=T)
-  
+  m2 <- mclust::densityMclust(data = v.gmm, G = 2,
+                              verbose = FALSE, plot = FALSE)
+
   if (m2$parameters$mean[1] == m2$parameters$mean[2]) {
     warning('Poor fit of Gaussian mixture model')
   }
@@ -462,7 +459,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     
     mclust::plot.Mclust(m2, what = "classification")
     
-    h <- hist(x = v, breaks = 50, plot = F)
+    h <- hist(v, breaks = 50, plot = F)
     dens <- hist(v, breaks = 50, plot = F)$density
     plot(h, freq = F, col = "grey", border = "grey",
          xlim = c(min(h$breaks), max(h$breaks)),
@@ -478,9 +475,9 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                   ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
                   axes = F, ylab = '', xlab = '')
     par(new = T)
-    lines(x = c(thresh.pos, thresh.pos), y = c(0, max(dens)), type = "l",
+    lines(c(thresh.pos, thresh.pos), y = c(0, max(dens)), type = "l",
           col = "red", lwd = 1.5)
-    lines(x = c(thresh.neg, thresh.neg), y = c(0, max(dens)), type = "l",
+    lines(c(thresh.neg, thresh.neg), y = c(0, max(dens)), type = "l",
           col = "red", lwd = 1.5)
     mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -1)
     mtext(paste0("propN = ", round(propN[1], 2), ", ", round(propN[2], 2)), side = 3,
@@ -500,9 +497,9 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     abline(h = 0)
     abline(h = thresh.pos, col = "red")
     abline(h = thresh.neg, col = "blue")
-    points(x = ageI[Peaks.pos.final], y = rep(0.9*y.lim[2], length(Peaks.pos.final)),
+    points(ageI[Peaks.pos.final], rep(0.9*y.lim[2], length(Peaks.pos.final)),
            pch = 3, col = "red", lwd = 1.5)
-    points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
+    points(ageI[insig.peaks], rep(0.9*y.lim[2], length(insig.peaks)),
            pch = 16, col = "darkgrey", lwd = 1.5)
     points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
            pch = 3, col = "blue", lwd = 1.5)

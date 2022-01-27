@@ -196,7 +196,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       thresh[i] <- 0
       Thresh.SNI[i] <- 0
     } else {
-      m <- mclust::densityMclust(data = X.gmm, G = 2, verbose = F)
+      m <- mclust::densityMclust(data = X.gmm, G = 2,
+                                 verbose = FALSE, plot = FALSE)
       # plot(x=m, what="density", data=X)
       # summary(m, parameters=T, classification=T)
       # plot.Mclust(m, what="classification")
@@ -243,7 +244,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       
       mclust::plot.Mclust(m, what = "classification")
       
-      h <- hist(x = X, breaks = 50, plot = F)
+      h <- hist(X, breaks = 50, plot = F)
       dens <- hist(X, breaks = 50, plot = F)$density
       plot(h, freq = F, col = "grey", border = "grey",
            xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
@@ -262,9 +263,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
                     ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
                     axes = F, ylab = '', xlab = '')
       par(new = T)
-      lines(x = c(thresh.pos[i], thresh.pos[i]), y = c(0, max(dens)),
+      lines(c(thresh.pos[i], thresh.pos[i]), c(0, max(dens)),
             type = "l", col = "red", lwd = 1.5)
-      lines(x = c(thresh.neg[i], thresh.neg[i]), y = c(0, max(dens)),
+      lines(c(thresh.neg[i], thresh.neg[i]), c(0, max(dens)),
             type = "l", col = "red", lwd = 1.5)
       mtext(paste0(age.i, " years", "; thresh.value = ", thresh.value),
             side = 3, las = 0, line = -1)
@@ -591,7 +592,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     lines(ageI, thresh.neg.sm, col = "blue")
     points(ageI[Peaks.pos.final], rep(0.9*y.lim[2], length(Peaks.pos.final)),
            pch = 3, col = "red", lwd = 1.5)
-    points(x = ageI[insig.peaks], y = rep(0.9*y.lim[2], length(insig.peaks)),
+    points(ageI[insig.peaks], rep(0.9*y.lim[2], length(insig.peaks)),
            pch = 16, col = "darkgrey", lwd = 1.5)
     points(ageI[Peaks.neg.final], rep(0.8*y.lim[2], length(Peaks.neg.final)),
            pch = 3, col = "blue", lwd = 1.5)

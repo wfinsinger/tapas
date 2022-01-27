@@ -45,7 +45,6 @@
 #' @export
 check_pretreat <- function(series) {
   
-  
   ## Gather data ####
   A <- series
   cm <- A[ ,1]

@@ -212,19 +212,19 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       sigmaHat[i, 1] <- sqrt(m$parameters$variance$sigmasq[1])
       sigmaHat[i, 2] <- sqrt(m$parameters$variance$sigmasq[2])
       propN[i, ] <- m$parameters$pro
-      
+
       # Check
       if (muHat[i, 1] == muHat[i, 2]) {
         warning('Poor fit of Gaussian mixture model')
       }
-      
+
       ## Define local threshold
       if (!is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- m$parameters$mean[1] + qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
         thresh.neg[i] <- m$parameters$mean[1] - qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
-        
+
         if (m$parameters$mean[1] < 0) {
           thresh.pos[i] <- 0 + qnorm(p = thresh.value) *
             sqrt(m$parameters$variance$sigmasq)[1]
@@ -233,59 +233,65 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         #noise_i <- X[which(X <= thresh.pos[i] & X >= thresh.neg[i])]
         #sig_i.neg <- X[which(X < thresh.neg[i])]
       }
-      
+
       if (is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- 0
         thresh.neg[i] <- 0
       }
-      
     }
-    
-    
+
+
     # Plot some of the noise and signal distributions
     if (plot.local_thresh == T) {  
-      
+
       if (any(num.plots == i)) {
         # Print plots for positive peaks
-        par(mfrow = c(2,1), mar = c(5,4,1,1))
-        
+        par(mfrow = c(2,1), mar = c(6,4,1,1), oma = c(1,1,1,1))
+
+        # Plot classification
         mclust::plot.Mclust(m, what = "classification")
-        
+
+        # gather data to plot GMMs
         h <- hist(X, breaks = 50, plot = F)
-        dens <- hist(X, breaks = 50, plot = F)$density
+        #dens <- hist(X, breaks = 50, plot = F)$density
+        gmm_sig <- dnorm(x = h$breaks,
+                         mean = muHat[i, 2],
+                         sd = sigmaHat[i, 2])
+        gmm_noise <- dnorm(x = h$breaks,
+                           mean = muHat[i, 1],
+                           sd = sigmaHat[i, 1])
+
+        # Plot GMMs and thresholds
         plot(h, freq = F, col = "grey", border = "grey",
              xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
-             ylab = "Density", xlab = '', main = "Local threshold")
-        # plot(h, freq = F, col = "grey", border = "grey",
-        #      xlim = c(min(h$breaks), max(h$breaks)),
-        #      ylab = "Density", xlab = '', main = "Local threshold")
+             ylab = "Density", xlab = paste(proxy, "(detrended)"),
+             main = "Local threshold")
         par(new = T)
-        curve(dnorm(x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
-              from = min(h$breaks), to = max(h$breaks),
-              ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
-              axes = F, ylab = '', xlab = '')
+        plot(h$breaks, gmm_sig,
+             xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
+             ylim = c(0, max(h$density)), type = "l", col = "blue", lwd = 1.5,
+             axes = F, ylab = '', xlab = '')
         par(new = T)
-        curve(dnorm(x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
-              from = min(h$breaks), to = max(h$breaks),
-              ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
-              axes = F, ylab = '', xlab = '')
+        plot(h$breaks, gmm_noise,
+             xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
+             ylim = c(0, max(h$density)), type = "l", col = "orange", lwd = 1.5,
+             axes = F, ylab = '', xlab = '')
         par(new = T)
-        lines(c(thresh.pos[i], thresh.pos[i]), c(0, max(dens)),
+        lines(c(thresh.pos[i], thresh.pos[i]), c(0, max(h$density)),
               type = "l", col = "red", lwd = 1.5)
-        lines(c(thresh.neg[i], thresh.neg[i]), c(0, max(dens)),
+        lines(c(thresh.neg[i], thresh.neg[i]), c(0, max(h$density)),
               type = "l", col = "red", lwd = 1.5)
         mtext(paste0(age.i, " years", "; thresh.value = ", thresh.value),
               side = 3, las = 0, line = -1)
         # mtext(text=paste0("SNIi pos.= ", round(Thresh.SNI.pos[i], digits=2),
         #                   "SNIi neg.= ", round(Thresh.SNI.neg[i], digits=2)), 
         #       side=3, las=0, line=-2)
-        
         my.plots[[j]] <- recordPlot()
         j <- j + 1
       }
     }
   }
-  
+
   # Print pdf with selected plots that were saved at the end of the loop above
   if (plot.local_thresh == T) {  
     if (!is.null(out.dir)) {

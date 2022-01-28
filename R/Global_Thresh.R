@@ -428,56 +428,67 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peak_duration[i]
       PeakMag_neg_ages[i] <- ageI[Peaks_neg_groups[[i]] [n_groups]]
     }
-    
+
     PeakMag_neg <- as.data.frame(cbind(PeakMag_neg_ages, PeakMag_neg))
     colnames(PeakMag_neg) <- c("ageI", "peak_mag")
-    
+
     rm(PeakMag_neg_val, PeakMag_neg_index, Peak_duration, Peaks_neg_groups)
   } else {
     PeakMag_neg <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
     colnames(PeakMag_neg) <- c("ageI", "peak_mag")
   }
-  
-  
-  
+
+
+
   ## Make summary plots ####
-  
+
   # Plot Gaussian Mixture Model with thresholds and classification (from densityMclust)
-  
+
   ### Get parameters for the PDFs obtained from Gaussian mixture models
   muHat <- m2$parameters$mean
   sigmaHat <- sqrt(m2$parameters$variance$sigmasq)
   propN <- m2$parameters$pro
-  
+
   ## Make pdf
   if (plot.global_thresh == T) {
     if (!is.null(out.dir)) {
     pdf(paste0(out.path, s.name, '_', v.name, '_Global_01_GMM_Evaluation.pdf'),
         onefile = TRUE, paper = "a4")
     }
-    par(mfrow = c(2,1), mar = c(5,4,1,1))
-    
-    mclust::plot.Mclust(m2, what = "classification")
-    
+    par(mfrow = c(2,1), mar = c(6,4,1,1), oma = c(1,1,1,1))
+
+    # Plot classification
+    mclust::plot.Mclust(m2, what = "classification",
+                        xlab = paste(proxy, "(detrended)"))
+
+    # Gather data to plot GMMs
     h <- hist(v, breaks = 50, plot = F)
-    dens <- hist(v, breaks = 50, plot = F)$density
+    gmm_sig <- dnorm(x = h$breaks,
+                     mean = muHat[signal.gmm],
+                     sd = sigmaHat[signal.gmm])
+    gmm_noise <- dnorm(x = h$breaks,
+                       mean = muHat[noise.gmm],
+                       sd = sigmaHat[noise.gmm])
+
+    # Plot GMMs and thresholds
     plot(h, freq = F, col = "grey", border = "grey",
          xlim = c(min(h$breaks), max(h$breaks)),
-         ylab = "Density", xlab = '', main = "Global threshold")
+         ylab = "Density", xlab = paste(proxy, "(detrended)"),
+         main = "Global threshold")
     par(new = T)
-    curve(dnorm(x, mean = muHat[signal.gmm], sd = sigmaHat[signal.gmm]),
-          from = min(h$breaks), to = max(h$breaks),
-          ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
-          axes = F, ylab = '', xlab = '')
+    plot(h$breaks, gmm_sig,
+         xlim = c(min(h$breaks), max(h$breaks)),
+         ylim = c(0, max(h$density)), type = "l", col = "blue", lwd = 1.5,
+         axes = F, ylab = '', xlab = '')
     par(new = T)
-    curve(dnorm(x, mean = muHat[noise.gmm], sd = sigmaHat[noise.gmm]),
-                  from = min(h$breaks), to = max(h$breaks),
-                  ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
-                  axes = F, ylab = '', xlab = '')
+    plot(h$breaks, gmm_noise,
+         xlim = c(min(h$breaks), max(h$breaks)),
+         ylim = c(0, max(h$density)), type = "l", col = "orange", lwd = 1.5,
+         axes = F, ylab = '', xlab = '')
     par(new = T)
-    lines(c(thresh.pos, thresh.pos), y = c(0, max(dens)), type = "l",
+    lines(c(thresh.pos, thresh.pos), y = c(0, max(h$density)), type = "l",
           col = "red", lwd = 1.5)
-    lines(c(thresh.neg, thresh.neg), y = c(0, max(dens)), type = "l",
+    lines(c(thresh.neg, thresh.neg), y = c(0, max(h$density)), type = "l",
           col = "red", lwd = 1.5)
     mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -1)
     mtext(paste0("propN = ", round(propN[1], 2), ", ", round(propN[2], 2)), side = 3,
@@ -485,8 +496,8 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     if (!is.null(out.dir)) {
     dev.off()
     }
-    
-    
+
+
     ## Plot series with trend + threshold + significant peaks
     if (!is.null(out.dir)) {
     pdf(paste0(out.path, s.name, '_', v.name, '_Global_02_ThresholdSeries.pdf'))
@@ -506,7 +517,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     axis(side = 1, labels = F, tick = T)
     axis(2)
     mtext(paste0("thresh.value = ", thresh.value), side = 3, las = 0, line = -0.5)
-    
+
     plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
          ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
          xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
@@ -518,7 +529,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     dev.off()
     }
   }
-  
+
   ## Gather data for output
   out1 <- structure(list(proxy = proxy, ages.thresh = ageI,
                          thresh.value = thresh.value,
@@ -531,12 +542,11 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          PeakMag_pos = PeakMag_pos, PeakMag_neg = PeakMag_neg,
                          RI_neg = RI_neg, RI_pos = RI_pos,
                          x.lim = x.lim))
-  
+
   ## Merge output into input list
   a.out <- append(series, list(out1))
   names(a.out) [5] <- "thresh"
-  
+
   ## Return final output
   return(a.out)
-  
 }

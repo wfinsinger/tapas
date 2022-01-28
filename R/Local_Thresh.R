@@ -57,8 +57,9 @@
 #' @importFrom grDevices recordPlot replayPlot
 #' 
 #' @export
-local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NULL,
-                         thresh.value = 0.95, smoothing.yr = NULL,
+local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
+                         thresh.yr = NULL, thresh.value = 0.95,
+                         smoothing.yr = NULL,
                          keep_consecutive = FALSE,
                          minCountP = 0.95, MinCountP_window = 150,
                          out.dir = NULL, plot.local_thresh = FALSE) {
@@ -129,7 +130,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   
   
   # Create empty list where output data will be stored
-  a.out <- list(span.sm = span.sm, thresh.value = thresh.value, yr.interp = yr.interp)
+  a.out <- list(span.sm = span.sm,
+                thresh.value = thresh.value,
+                yr.interp = yr.interp)
   
   
   # Create space for local variables
@@ -150,7 +153,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   # Define number of plots to print for evaluation of local threshold
   j <- 1
   
-  num.plots <- seq(from = round(n.smooth), to = length(v), by = round(n.smooth/2))
+  num.plots <- seq(from = round(n.smooth),
+                   to = length(v),
+                   by = round(n.smooth/2))
   my.plots <- vector(length(num.plots), mode = 'list')
   
   
@@ -207,19 +212,19 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
       sigmaHat[i, 1] <- sqrt(m$parameters$variance$sigmasq[1])
       sigmaHat[i, 2] <- sqrt(m$parameters$variance$sigmasq[2])
       propN[i, ] <- m$parameters$pro
-
+      
       # Check
       if (muHat[i, 1] == muHat[i, 2]) {
         warning('Poor fit of Gaussian mixture model')
       }
-
+      
       ## Define local threshold
       if (!is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- m$parameters$mean[1] + qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
         thresh.neg[i] <- m$parameters$mean[1] - qnorm(p = thresh.value) *
           sqrt(m$parameters$variance$sigmasq)[1]
-
+        
         if (m$parameters$mean[1] < 0) {
           thresh.pos[i] <- 0 + qnorm(p = thresh.value) *
             sqrt(m$parameters$variance$sigmasq)[1]
@@ -228,68 +233,71 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
         #noise_i <- X[which(X <= thresh.pos[i] & X >= thresh.neg[i])]
         #sig_i.neg <- X[which(X < thresh.neg[i])]
       }
-
+      
       if (is.na(m$parameters$variance$sigmasq[1]) == T) {
         thresh.pos[i] <- 0
         thresh.neg[i] <- 0
       }
       
     }
-
-
+    
+    
     # Plot some of the noise and signal distributions
-    if (any(num.plots == i)) {
-      # Print plots for positive peaks
-      par(mfrow = c(2,1), mar = c(5,4,1,1))
+    if (plot.local_thresh == T) {  
       
-      mclust::plot.Mclust(m, what = "classification")
-      
-      h <- hist(X, breaks = 50, plot = F)
-      dens <- hist(X, breaks = 50, plot = F)$density
-      plot(h, freq = F, col = "grey", border = "grey",
-           xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
-           ylab = "Density", xlab = '', main = "Local threshold")
-      # plot(h, freq = F, col = "grey", border = "grey",
-      #      xlim = c(min(h$breaks), max(h$breaks)),
-      #      ylab = "Density", xlab = '', main = "Local threshold")
-      par(new = T)
-      curve(dnorm(x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
-                    from = min(h$breaks), to = max(h$breaks),
-                    ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
-                    axes = F, ylab = '', xlab = '')
-      par(new = T)
-      curve(dnorm(x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
-                    from = min(h$breaks), to = max(h$breaks),
-                    ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
-                    axes = F, ylab = '', xlab = '')
-      par(new = T)
-      lines(c(thresh.pos[i], thresh.pos[i]), c(0, max(dens)),
-            type = "l", col = "red", lwd = 1.5)
-      lines(c(thresh.neg[i], thresh.neg[i]), c(0, max(dens)),
-            type = "l", col = "red", lwd = 1.5)
-      mtext(paste0(age.i, " years", "; thresh.value = ", thresh.value),
-            side = 3, las = 0, line = -1)
-      # mtext(text=paste0("SNIi pos.= ", round(Thresh.SNI.pos[i], digits=2),
-      #                   "SNIi neg.= ", round(Thresh.SNI.neg[i], digits=2)), 
-      #       side=3, las=0, line=-2)
-      
-      my.plots[[j]] <- recordPlot()
-      j <- j + 1
+      if (any(num.plots == i)) {
+        # Print plots for positive peaks
+        par(mfrow = c(2,1), mar = c(5,4,1,1))
+        
+        mclust::plot.Mclust(m, what = "classification")
+        
+        h <- hist(X, breaks = 50, plot = F)
+        dens <- hist(X, breaks = 50, plot = F)$density
+        plot(h, freq = F, col = "grey", border = "grey",
+             xlim = c(min(X, na.rm = T), max(X, na.rm = T)),
+             ylab = "Density", xlab = '', main = "Local threshold")
+        # plot(h, freq = F, col = "grey", border = "grey",
+        #      xlim = c(min(h$breaks), max(h$breaks)),
+        #      ylab = "Density", xlab = '', main = "Local threshold")
+        par(new = T)
+        curve(dnorm(x, mean = muHat[i, 2], sd = sigmaHat[i, 2]),
+              from = min(h$breaks), to = max(h$breaks),
+              ylim = c(0, max(dens)), type = "l", col = "blue", lwd = 1.5,
+              axes = F, ylab = '', xlab = '')
+        par(new = T)
+        curve(dnorm(x, mean = muHat[i, 1], sd = sigmaHat[i, 1]),
+              from = min(h$breaks), to = max(h$breaks),
+              ylim = c(0, max(dens)), type = "l", col = "orange", lwd = 1.5,
+              axes = F, ylab = '', xlab = '')
+        par(new = T)
+        lines(c(thresh.pos[i], thresh.pos[i]), c(0, max(dens)),
+              type = "l", col = "red", lwd = 1.5)
+        lines(c(thresh.neg[i], thresh.neg[i]), c(0, max(dens)),
+              type = "l", col = "red", lwd = 1.5)
+        mtext(paste0(age.i, " years", "; thresh.value = ", thresh.value),
+              side = 3, las = 0, line = -1)
+        # mtext(text=paste0("SNIi pos.= ", round(Thresh.SNI.pos[i], digits=2),
+        #                   "SNIi neg.= ", round(Thresh.SNI.neg[i], digits=2)), 
+        #       side=3, las=0, line=-2)
+        
+        my.plots[[j]] <- recordPlot()
+        j <- j + 1
+      }
     }
   }
   
   # Print pdf with selected plots that were saved at the end of the loop above
   if (plot.local_thresh == T) {  
     if (!is.null(out.dir)) {
-    pdf(paste0(out.path, s.name, '_', v.name, '_Local_GMM_Evaluation.pdf'),
-        onefile = TRUE, paper = "a4")
+      pdf(paste0(out.path, s.name, '_', v.name, '_Local_GMM_Evaluation.pdf'),
+          onefile = TRUE, paper = "a4")
     }
     par(mfrow = (c(5,5)), mar = c(0.5,1,0.5,1), oma = c(1,1,0.5,1), cex = 0.7)
     for (k in 1:length(num.plots)) {
       replayPlot(my.plots[[k]])
     }
     if (!is.null(out.dir)) {
-    dev.off()
+      dev.off()
     }
   }
   
@@ -330,8 +338,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
   ## Smooth thresholds Lowess smoother
   thresh.pos.sm <- stats::lowess(ageI, thresh.pos, f = span.sm, iter = 1)$y
   thresh.neg.sm <- stats::lowess(ageI, thresh.neg, f = span.sm, iter = 1)$y
-
-
+  
+  
   ## Get peaks ####
   
   ## If keep_consecutive == F ####
@@ -484,7 +492,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     insig.peaks <- NULL
     Peaks.pos.insig <- rep_len(NA, length.out = dim(a) [1])
   }
-
+  
   
   
   ## Gather data to calculate return intervals ####    
@@ -518,9 +526,12 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     Peaks_pos_groups <- split(PeakMag_pos_index,
                               cumsum(c(1, diff(PeakMag_pos_index) != 1)))
     
-    PeakMag_pos <- vector(mode = "numeric", length = length(Peaks_pos_groups))
-    PeakMag_pos_ages <- vector(mode = "numeric", length = length(Peaks_pos_groups))
-    Peak_duration <- vector(mode = "numeric", length = length(Peaks_pos_groups))
+    PeakMag_pos <- vector(mode = "numeric",
+                          length = length(Peaks_pos_groups))
+    PeakMag_pos_ages <- vector(mode = "numeric",
+                               length = length(Peaks_pos_groups))
+    Peak_duration <- vector(mode = "numeric",
+                            length = length(Peaks_pos_groups))
     
     for (i in 1:length(Peaks_pos_groups)) {
       #i = 2
@@ -550,8 +561,10 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     Peaks_neg_groups <- split(PeakMag_neg_index,
                               cumsum(c(1, diff(PeakMag_neg_index) != 1)))
     
-    PeakMag_neg <- vector(mode = "numeric", length = length(Peaks_neg_groups))
-    PeakMag_neg_ages <- vector(mode = "numeric", length = length(Peaks_neg_groups))
+    PeakMag_neg <- vector(mode = "numeric",
+                          length = length(Peaks_neg_groups))
+    PeakMag_neg_ages <- vector(mode = "numeric",
+                               length = length(Peaks_neg_groups))
     Peak_duration <- vector(mode = "numeric", length = length(Peaks_neg_groups))
     
     for (i in 1:length(Peaks_neg_groups)) {
@@ -581,12 +594,12 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     y.lim <- c(min(v, na.rm = T), max(v, na.rm = T))
     
     if (!is.null(out.dir)) {
-    pdf(paste0(out.path, s.name, '_', v.name, '_Local_ThresholdSeries.pdf'))
+      pdf(paste0(out.path, s.name, '_', v.name, '_Local_ThresholdSeries.pdf'))
     }
     par(mfrow = c(2,1), oma  =  c(3,1,0,0), mar = c(1,4,0.5,0.5))
     
-    plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2], xlab = a.names[1],
-         xlim = x.lim)
+    plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2],
+         xlab = a.names[1], xlim = x.lim)
     abline(h = 0)
     lines(ageI, thresh.pos.sm, col = "red")
     lines(ageI, thresh.neg.sm, col = "blue")
@@ -598,7 +611,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
            pch = 3, col = "blue", lwd = 1.5)
     axis(side = 1, labels = T, tick = T)
     axis(2)
-    mtext(paste0("thresh.value  =  ", thresh.value), side = 3, las = 0, line = -0.5)
+    mtext(paste0("thresh.value  =  ", thresh.value), side = 3,
+          las = 0, line = -0.5)
     
     plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
          ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
@@ -609,7 +623,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
     axis(2)
     
     if (!is.null(out.dir)) {
-    dev.off()
+      dev.off()
     }
   }
   
@@ -619,11 +633,14 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL, thresh.yr = NU
                          thresh.value = thresh.value,
                          SNI_pos = SNI_pos, SNI_neg = SNI_neg,
                          thresh.pos = thresh.pos, thresh.neg = thresh.neg,
-                         thresh.pos.sm = thresh.pos.sm, thresh.neg.sm = thresh.neg.sm,
+                         thresh.pos.sm = thresh.pos.sm,
+                         thresh.neg.sm = thresh.neg.sm,
                          peaks.pos = Peaks.pos, peaks.neg = Peaks.neg,
                          peaks.pos.insig = Peaks.pos.insig,
-                         peaks.pos.ages = peaks.pos.ages, peaks.neg.ages = peaks.neg.ages,
-                         PeakMag_pos = PeakMag_pos, PeakMag_neg = PeakMag_neg,
+                         peaks.pos.ages = peaks.pos.ages,
+                         peaks.neg.ages = peaks.neg.ages,
+                         PeakMag_pos = PeakMag_pos,
+                         PeakMag_neg = PeakMag_neg,
                          RI_neg = RI_neg, RI_pos = RI_pos,
                          span.sm = span.sm,
                          x.lim = x.lim))

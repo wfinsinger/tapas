@@ -128,16 +128,6 @@ The dataset can be analysed, for instance, with the following settings
 settings used by [Higuera et
 al. (2009)](https://doi.org/10.1890/07-2019.1).
 
-``` r
-co_loc <- peak_detection(series = co, proxy = "char",
-                                first = -51, last = 7500, yrInterp = 15,
-                                detr_type = "mov.median", sens = F)
-#> [1] "No missing samples detected."
-#> [1] "No slumps detected; the age scale is continuous."
-```
-
-<img src="man/figures/README-peak-detection Code Lake-1.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-2.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-3.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-4.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-5.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-6.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-7.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-8.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-9.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-10.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-11.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-12.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-13.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-14.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-15.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-16.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-17.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-18.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-19.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-20.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-21.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-22.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-23.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-24.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-25.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-26.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-27.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-28.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-29.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-30.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-31.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-32.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-33.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-34.png" width="100%" />
-
 With these settings, the results obtained using *R-PaleoAnomalies*
 strikingly resemble those obtained by [Higuera et
 al. (2009)](https://doi.org/10.1890/07-2019.1) with *CharAnalysis*:

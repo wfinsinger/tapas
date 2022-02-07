@@ -6,6 +6,72 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
+## Rationale
+
+The set of functions gathered under the hood of ***R-PaleoAnomalies***
+is meant to be used for analyzing paleoecological records, when the goal
+is peak detection to reconstruct the occurrence, the return intervals,
+and the magnitude of distinct events.
+
+*R-PaleoAnomalies* builds on *CharAnalysis*
+(<https://github.com/phiguera/CharAnalysis>), a software for analyzing
+sediment-charcoal records written in and compiled with Matlab 7.0 by
+Phil Higuera (Higuera et al., 2009), with significant input by (amongst
+others) Patrick Bartlein (U of OR), Daniel Gavin (U of OR), Jennifer
+Marlon, and Ryan Kelly.
+
+Two main reasons led to the development of *R-PaleoAnomalies*. Firstly,
+as R is an open source product, modifying the program to suit individual
+needs may be more straigthforward. Secondly, an integration and
+inter-operability with other existing R-packages may allow using
+peak-detection analysis in conjunction with other workflows and types of
+paleoecological records (see for instance [(Cagliero et al.,
+2021)](https://doi.org/10.1007/s00334-021-00862-x)).
+
+------------------------------------------------------------------------
+
+## Usage
+
+A typical workflow of the peak-detection analysis includes the following
+steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134): \*
+1.) *resample* the record to equally spaced sampling intervals in time
+(years); \* 2.) *decompose* the resampled record into a long-term trend
+(background component) and peaks (peak component); \* 3.1) *screen* the
+peak component to distinguish signal from noise using + 3.1.1) a unique
+*global* 2-component Gaussian mixture model, or + 3.1.2) *local*
+2-component Gaussian mixture models, \* 3.2) and eventually also screen
+the peak component using a minimum-count test; \* 4.) *evaluate* the
+suitability of the record for peak-detection analysis using the
+signal-to-noise index [(Kelly et al.,
+2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
+
+*R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of
+one dataset type (e.g. different estimates of charcoal abundance).
+Instead, steps 3.) and 4.) are performed for one user-selected variable.
+
+To run your own data, make a new folder within an umbrella folder, and
+save it under a name, e.g., `Data-In`. Then place a file (e.g.,
+`MyData.csv`) in that folder. The input data file will contain the
+sample depths, sample ages, sample volume, and the variable(s). The file
+should have the following formatting: It has headers and at least six
+fields. The first five columns will report the metadata for the samples,
+the subsequent columns contain the variable(s) to be analysed (e.g., the
+abundance of charcoal pieces).
+
+| CmTop | CmBot | AgeTop | AgeBot | Volume | variable1 | variable2 | …   | nth-variable |
+|-------|-------|--------|--------|--------|-----------|-----------|-----|--------------|
+| 0.5   | 1     | -42    | -24    | 3      | 8         | 0.01      | …   | …            |
+| 1     | 1.5   | -24    | 5      | 3      | 18        | 0.005     | …   | …            |
+
+The depths and ages should be arranged in ascending order. Sample ages
+should thus be reported as *calendar ages BP*.
+
+Load the data into the R environment
+
+> MyData \<- read.csv(“./Data-In/MyData.csv”)
+
+------------------------------------------------------------------------
+
 ## Installation
 
 Install the development version of PaleoAnomalies with:
@@ -15,16 +81,74 @@ Install the development version of PaleoAnomalies with:
 devtools::install_github("wfinsinger/R-PaleoAnomalies")
 ```
 
+The `check_pretreat()` function can be used to verify the input data is
+formatted correctly. If the samples in the input file are not
+contiguous, the `check_pretreat()` function will add rows for the
+missing samples. Should the dataset contain samples that were deposited
+in a very short amount of time (e.g., slumps, tephras), for which AgeTop
+= AgeBot, these samples will be flagged and removed, and a new depth
+scale will be created to replace the original one.
+
+> MyData \<- check_pretreat(Mydata)
+
+The functions can either be run individually and stepwise, or the
+wrapper function `peak_detection()` can be used to perform an analysis
+including steps from 1.) to 4.) in one go.
+
+For instance, to analyse the MyData dataset for variable1:
+
+> MyData_peaks \<- peak_detection(series = MyData, proxy = “variable1”)
+
+Individual output plots can be generated with dedicated plotting
+functions:
+
+> Plot.Anomalies(MyData_peaks, plot.neg = F)
+
+> Plot_ReturnIntervals(MyData_peaks)
+
+Alternatively, the analysis can be done step-by-step (see below for
+further details).
+
+------------------------------------------------------------------------
+
 ## Example
 
-The package comes with toy data to play with:
+The package comes with toy data (`co_char_data`) to play with. This is a
+macroscopic charcoal record from ([Code
+Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4),
+Higuera et al., 2009).
 
 ``` r
 library(PaleoAnomalies)
 co <- co_char_data
-min_ages <- min(co$AgeTop)
-max_ages <- max(co$AgeTop)
 ```
+
+The dataset can be analysed, for instance, with the following settings
+(leaving other arguments with their default values). These are the same
+settings used by [Higuera et
+al. (2009)](https://doi.org/10.1890/07-2019.1).
+
+``` r
+co_loc <- peak_detection(series = co, proxy = "char",
+                                first = -51, last = 7500, yrInterp = 15,
+                                detr_type = "mov.median", sens = F)
+#> [1] "No missing samples detected."
+#> [1] "No slumps detected; the age scale is continuous."
+```
+
+<img src="man/figures/README-peak-detection Code Lake-1.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-2.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-3.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-4.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-5.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-6.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-7.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-8.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-9.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-10.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-11.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-12.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-13.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-14.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-15.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-16.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-17.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-18.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-19.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-20.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-21.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-22.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-23.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-24.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-25.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-26.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-27.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-28.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-29.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-30.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-31.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-32.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-33.png" width="100%" /><img src="man/figures/README-peak-detection Code Lake-34.png" width="100%" />
+
+With these settings, the results obtained using *R-PaleoAnomalies*
+strikingly resemble those obtained by [Higuera et
+al. (2009)](https://doi.org/10.1890/07-2019.1) with *CharAnalysis*:
+
+![Code Lake: peak-detection
+outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs")
+
+![Code Lake: reconstructed fire-return intervals
+(FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
+
+Alternatively, the data can be analysed step-by-step:
 
 The first step is to resample the time series with
 `pretreatment_data()`:
@@ -100,125 +224,35 @@ Plot_ReturnIntervals(
 
 ------------------------------------------------------------------------
 
-<!--- Walter's unintegrated README below. --->
-
-The set of functions gathered under the hood of ***R-PaleoAnomalies***
-is meant to be used for analyzing paleoecological records, when the goal
-is peak detection to reconstruct the occurrence, the return intervals,
-and the magnitude of distinct events.
-
-## Rationale for developing *R-PaleoAnomalies*
-
-*R-PaleoAnomalies* builds on *CharAnalysis*
-(<https://github.com/phiguera/CharAnalysis>), a software for analyzing
-sediment-charcoal records written in and compiled with Matlab 7.0 by
-Phil Higuera (Higuera et al., 2009), with significant input by (amongst
-others) Patrick Bartlein (U of OR), Daniel Gavin (U of OR), Jennifer
-Marlon, and Ryan Kelly.
-
-Two main reasons led to the development of *R-PaleoAnomalies*. Firstly,
-as R is an open source product, modifying the program to suit individual
-needs may be more straigthforward. Secondly, an integration and
-inter-operability with other existing R-packages may allow using
-peak-detection analysis in conjunction with other workflows and types of
-paleoecological records (see for instance [Cagliero et al.,
-2021](https://doi.org/10.1007/s00334-021-00862-x)).
-
-------------------------------------------------------------------------
-
-## Usage
-
-A typical workflow of the peak-detection analysis as implemented in
-*CharAnalysis* includes the following steps [Higuera et al.,
-2011](http://dx.doi.org/10.1071/WF09134): \* 1.) *resample* the record
-to equally spaced sampling intervals in time (years); \* 2.) *decompose*
-the resampled record into a long-term trend (background component) and
-peaks (peak component); \* 3.1) *screen* the peak component to
-distinguish signal from noise using + 3.1.1) a unique *global*
-2-component Gaussian mixture model, or + 3.1.2) *local* 2-component
-Gaussian mixture models, \* 3.2) and eventually also screen the peak
-component using a minimum-count test; \* 4.) *evaluate* the suitability
-of the record for peak-detection analysis using the signal-to-noise
-index [Kelly et al.,
-2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
-
-*R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of
-one dataset type (e.g. different estimates of charcoal abundance). Steps
-3.) and 4.) are performed for one user-selected variable.
-
-To run your own data, make a new folder within an umbrella folder, and
-save it under a name, e.g., `Data-In`. Then place a file (e.g.,
-`MyData.csv`) in that folder. The input data file will contain the
-sample depths, sample ages, sample volume, and the variable(s). The file
-should have the following formatting: It has headers and at least six
-fields. The first five columns will report the metadata for the samples,
-the subsequent columns contain the variable(s) to be analysed (e.g., the
-abundance of charcoal pieces).
-
-| CmTop | CmBot | AgeTop | AgeBot | Volume | variable1 | variable2 | …   | nth-variable |
-|-------|-------|--------|--------|--------|-----------|-----------|-----|--------------|
-| 0.5   | 1     | -42    | -24    | 3      | 8         | 0.01      | …   | …            |
-| 1     | 1.5   | -24    | 5      | 3      | 18        | 0.005     | …   | …            |
-
-The depths and ages should be arranged in ascending order. Sample ages
-should thus be reported as *calendar ages BP*.
-
-Load the data into the R environment \> MyData \<-
-read.csv(“./Data-In/MyData.csv”)
-
-Until the packaging is not finished, download the entire
-*R-PaleoAnomalies* program as a .zip or tar.gz archive
-[here](https://github.com/wfinsinger/R-PaleoAnomalies/archive/refs/heads/main.zip).
-Alternatively, download individual files by visiting the GitHub pages.
-
-The `check_pretreat()` function can be used to verify the input data is
-formatted correctly. If the samples in the input file are not
-contiguous, the `check_pretreat()` function will add rows for the
-missing samples. Should the dataset contain samples that were deposited
-in a very short amount of time (e.g., slumps, tephras), for which AgeTop
-= AgeBot, these samples will be flagged and removed, and a new depth
-scale will be created to replace the original one. \> MyData \<-
-check_pretreat(Mydata)
-
-The functions can either be run individually and stepwise, or the
-wrapper function `peak_detection()` can be used to perform an analysis
-including steps from 1.) to 4.) in one go.
-
-For instance, to analyse the MyData dataset for variable1: \>
-MyData_peaks \<- peak_detection(series = MyData, proxy = “variable1”)
-
-Individual output plots can be generated with dedicated plotting
-functions: \> Plot.Anomalies(MyData_peaks, plot.neg = F)
-
-> Plot_ReturnIntervals(MyData_peaks)
-
-------------------------------------------------------------------------
-
 ## Details
 
 -   1.) *resampling* the record to equally spaced sampling intervals in
     time (years) is performed using the `pretreatment_data()` function,
     which loops the `paleofire::pretreatment()` function for all
     variables in the input data frame. The user can choose among the
-    following output data types: resampled accumulation rates (out =
-    “accI”; default), resampled concentrations (out = “conI”), or
-    resampled input data (e.g., if variable1 in the input is charcoal
+    following output data types:
+-   resampled accumulation rates (out = “accI”; default),
+-   resampled concentrations (out = “conI”), or
+-   resampled input data (e.g., if variable1 in the input is charcoal
     counts, with out = “countI” one gets resampled counts).
 -   2.) *decomposition* of the resampled record into a long-term trend
     (background component) and peaks (peak component) is performed with
     the `SeriesDetrend()` function for all variables in the input data
     frame. The user can select the smoothing-window width (in years) as
     well as the type of the detrending. Currently, the following
-    functions are implemented to smooth the timeseries: robust loess
-    (“rob.loess”), robust Lowess (“rob.lowess”), and moving median
-    (“mov.median”; aka Method #4 in CharAnalysis’ Matlab version);
+    functions are implemented to smooth the timeseries: + robust loess
+    (“rob.loess”),
+-   robust Lowess (“rob.lowess”), and
+-   moving median (“mov.median”; aka Method #4 in CharAnalysis’ Matlab
+    version);
 -   3.1) *screen* the peak component to distinguish signal from noise
-    using a unique *global* 2-component Gaussian mixture model, or
-    several *local* 2-component Gaussian mixture models. The 2-component
-    Gaussian mixture models that are produced with the `Global_Thresh()`
-    and `Local_Thresh()` functions are determined using the `mclust` R
-    package [Scrucca et al.,
+    using one or more 2-component Gaussian mixture models that are
+    determined using the `mclust` R package [Scrucca et al.,
     2016](https://doi.org/10.32614/RJ-2016-021).
+-   unique *global* 2-component Gaussian mixture model
+    (`Global_Thresh()`), or
+-   several *local* 2-component Gaussian mixture models
+    (`Local_Thresh()`);
 -   3.2) and eventually also *screen* the peak component using a
     minimum-count test. This part of the `Global_Thresh()` and
     `Local_Thresh()` functions was translated verbatim from
@@ -229,33 +263,7 @@ functions: \> Plot.Anomalies(MyData_peaks, plot.neg = F)
     2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 -   5.) Diagnostic plots showing the sensitivity to different
     smoothing-window widths are produced with the `peak-detection()`
-    function if `sens=TRUE`.
-
-------------------------------------------------------------------------
-
-## Example
-
-*R-PaleoAnomalies* comes with an example dataset, called `co_char_data`
-([Code
-Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4),
-Higuera et al., 2009). It is placed in the folder ‘Data-In’.
-
-The dataset can be loaded into the R environment \>
-load(“./Data-In/co_char_data.rda”)
-
-and analysed, for instance, with the following settings (leaving other
-arguments with their default values) \> co_thresh_loc \<-
-peak_detection(series = co_char_data, proxy = “char”, first = -51, last
-= 7500, yrInterp = 15, detr_type = “mov.median”, sens = F)
-
-With these settings, the results obtained using *R-PaleoAnomalies*
-strikingly resemble those obtained with *CharAnalysis*.
-
-![Code Lake: peak-detection
-outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs")
-
-![Code Lake: reconstructed fire-return intervals
-(FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
+    function if the function’s argument `sens=TRUE`.
 
 ------------------------------------------------------------------------
 

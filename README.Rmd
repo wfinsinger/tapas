@@ -100,7 +100,7 @@ co <- co_char_data
 
 The dataset can be analysed, for instance, with the following settings (leaving other arguments with their default values). These are the same settings used by [Higuera et al. (2009)](https://doi.org/10.1890/07-2019.1).
 
-```{r peak-detection Code Lake, include = FALSE}
+```{r peak-detection Code Lake, fig.keep='none', message=FALSE, warning=FALSE}
 co_loc <- peak_detection(series = co, proxy = "char",
                                 first = -51, last = 7500, yrInterp = 15,
                                 detr_type = "mov.median", sens = F)

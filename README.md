@@ -241,9 +241,10 @@ Plot_ReturnIntervals(
     (background component) and peaks (peak component) is performed with
     the `SeriesDetrend()` function for all variables in the input data
     frame. The user can select the smoothing-window width (in years) as
-    well as the type of the detrending. Currently, the following
-    functions are implemented to smooth the timeseries: + robust loess
-    (“rob.loess”),
+    well as the type of the detrending (e.g. `detr.type = "rob.loess"`).
+    Currently, the following functions are implemented to smooth the
+    timeseries:
+    -   robust loess (“rob.loess”),
     -   robust Lowess (“rob.lowess”), and
     -   moving median (“mov.median”; aka Method #4 in CharAnalysis’
         Matlab version);
@@ -269,20 +270,26 @@ Plot_ReturnIntervals(
 
 ------------------------------------------------------------------------
 
-## Acknowledgements & Credits
+## Credits & Acknowledgements
 
 The development of this set of functions would not have been possible
 without the Matlab-coded templates that were written and made open
-source by Philip Higuera (<https://github.com/phiguera/CharAnalysis>).
-I’m thankful to Dan Gavin for suggesting tweaks to accomodate for
-non-standard data-input formats. His suggestions led to the
-`check_pretreatment()` function. I’m extremely thankful to Petr Kunes
-and several CharAnalysis users who ignited the conversation over the
-past few years about getting that program into R.
+source by Philip Higuera (<https://github.com/phiguera/CharAnalysis>),
+whose features were also based on the programs CHAPS, by Patrick
+Bartlein (U of OR), and Charster, by Daniel Gavin (U of OR), and on the
+Gaussian mixture model by Charles Bouman (Purdue), and benefitted from
+discussions with and testing by members of the Whitlock Paleoecology Lab
+at Montana State University, Dan Gavin, and Ryan Kelly.
+
+We are thankful to Dan Gavin for suggesting tweaks to accomodate for
+non-standard data-input formats for *tapas*. His suggestions led to the
+`check_pretreatment()` function. Petr Kunes and several CharAnalysis
+users who ignited the conversation over the past few years about getting
+that program into R are greatly thanked.
 
 If you use *tapas* in your publications, please cite
 *<https://github.com/wfinsinger/tapas>* and any non-default settings
-applied. The packaging of these functions is in progress.
+applied.
 
 ------------------------------------------------------------------------
 
@@ -290,9 +297,13 @@ applied. The packaging of these functions is in progress.
 
 If you are having problems running *tapas* or if you have any
 suggestions, please use the “Issues” tab. Contributions to this work are
-more than welcome. You can just fork, make changes,and then file a pull
-request. Alternatively, you can get in touch with me to discuss how your
-improvements may fit with ongoing development of add-ons. Thanks!
+more than welcome. *Tapas* is meant as a flexible data-analysis
+environment, just as its real-world counterpart that is based on a “pick
+& choose sides” philosophy. Thus, feel free to fork, make changes, and
+then file a pull request. Alternatively, get in touch to discuss how
+your improvements may fit with ongoing development of add-ons. Thanks!
+
+------------------------------------------------------------------------
 
 ## References
 

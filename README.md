@@ -33,17 +33,21 @@ in conjunction with other workflows and types of paleoecological records
 ## Usage
 
 A typical workflow of the peak-detection analysis includes the following
-steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134): 1.
-*resample* the record to equally spaced sampling intervals in time
-(years), a procedure also called “binning”; 2. *decompose* the resampled
-record into a long-term trend (background component) and peaks (peak
-component); 3. *screen* the peak component to distinguish signal from
-noise using \* 3.1 a unique *global* 2-component Gaussian mixture model,
-or \* 3.2 *local* 2-component Gaussian mixture models, \* 3.3 and
-eventually also screen the peak component using a minimum-count test; 4.
-*evaluate* the suitability of the record for peak-detection analysis
-using the signal-to-noise index [(Kelly et al.,
-2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
+steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
+
+-   1.) *resample* the record to equally spaced sampling intervals in
+    time (years), a procedure also called “binning”
+-   2.) *decompose* the resampled record into a long-term trend
+    (background component) and peaks (peak component)
+-   3.) *screen* the peak component to distinguish signal from noise
+    using
+    -   3.1 a unique *global* 2-component Gaussian mixture model, or
+    -   3.2 *local* 2-component Gaussian mixture models,
+    -   3.3 and eventually also screen the peak component using a
+        minimum-count test
+-   4.) *evaluate* the suitability of the record for peak-detection
+    analysis using the signal-to-noise index [(Kelly et
+    al., 2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
 *tapas* performs steps 1.) and 2.) for several variables of one dataset
 type (e.g. different estimates of charcoal abundance). Instead, steps
@@ -229,10 +233,10 @@ Plot_ReturnIntervals(
     which loops the `paleofire::pretreatment()` function for all
     variables in the input data frame. The user can choose among the
     following output data types:
--   resampled accumulation rates (out = “accI”; default),
--   resampled concentrations (out = “conI”), or
--   resampled input data (e.g., if variable1 in the input is charcoal
-    counts, with out = “countI” one gets resampled counts).
+    -   resampled accumulation rates (out = “accI”; default),
+    -   resampled concentrations (out = “conI”), or
+    -   resampled input data (e.g., if variable1 in the input is
+        charcoal counts, with out = “countI” one gets resampled counts).
 -   2.) *decomposition* of the resampled record into a long-term trend
     (background component) and peaks (peak component) is performed with
     the `SeriesDetrend()` function for all variables in the input data
@@ -240,17 +244,17 @@ Plot_ReturnIntervals(
     well as the type of the detrending. Currently, the following
     functions are implemented to smooth the timeseries: + robust loess
     (“rob.loess”),
--   robust Lowess (“rob.lowess”), and
--   moving median (“mov.median”; aka Method #4 in CharAnalysis’ Matlab
-    version);
+    -   robust Lowess (“rob.lowess”), and
+    -   moving median (“mov.median”; aka Method #4 in CharAnalysis’
+        Matlab version);
 -   3.1) *screen* the peak component to distinguish signal from noise
     using one or more 2-component Gaussian mixture models that are
     determined using the `mclust` R package [Scrucca et al.,
     2016](https://doi.org/10.32614/RJ-2016-021).
--   unique *global* 2-component Gaussian mixture model
-    (`Global_Thresh()`), or
--   several *local* 2-component Gaussian mixture models
-    (`Local_Thresh()`);
+    -   unique *global* 2-component Gaussian mixture model
+        (`Global_Thresh()`), or
+    -   several *local* 2-component Gaussian mixture models
+        (`Local_Thresh()`);
 -   3.2) and eventually also *screen* the peak component using a
     minimum-count test. This part of the `Global_Thresh()` and
     `Local_Thresh()` functions was translated verbatim from

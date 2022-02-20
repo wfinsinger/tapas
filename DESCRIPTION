@@ -1,6 +1,6 @@
-Package: PaleoAnomalies
-Title: Detect Positive and Negative Anomalies in Paleo-Ecological Time Series
-Version: 0.0.1
+Package: tapas
+Title: Trend And Peaks AnalysiS in paleo-ecological time series
+Version: 0.0.2
 Authors@R:
   c(
     person("Walter", "Finsinger", , "walter.finsinger@umontpellier.fr",
@@ -9,21 +9,21 @@ Authors@R:
            role = "com", comment = c(ORCID = "0000-0003-2934-351X"))
     )
 Description: The program proceeds to several steps.
-    First, the time series are virtually resampled to equal sampling intervals.
+    First, the time series are virtually resampled to equal sampling intervals ("prebinning").
     Second, the resampled time series are detrended using a smoothing function.
     Third, a 2-component Gaussian Mixture Model (GMM)
     is fitted to the detrended data.
     One of the components is centred around 0,
     and we set the nth quantile of the gaussian distribution of that component
     to determine the threshold separating the noise from the signal.
-    Eventually, plot figures are produced to visualize
+    Eventually, figures are produced to visualize
       the resampled data,
       the smoothed data,
       the detrended data,
       the GMMs,
       the thresholds and
       the detected anomalies (values beyond the noise threshold).
-    PaleoAnomalies embeds and uses the SNI.R script
+    "tapas" embeds and uses the SNI.R script
     written by Ryan Kelly,
     and available in supplementary materials
     of Kelly et al., (2017) doi:10.1016/j.yqres.2010.07.011.

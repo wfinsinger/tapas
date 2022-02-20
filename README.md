@@ -1,31 +1,31 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# R-PaleoAnomalies
+# R-package: tapas
 
 <!-- badges: start -->
 <!-- badges: end -->
 
 ## Rationale
 
-The set of functions gathered under the hood of ***R-PaleoAnomalies***
-is meant to be used for analyzing paleoecological records, when the goal
-is peak detection to reconstruct the occurrence, the return intervals,
-and the magnitude of distinct events.
+The set of functions gathered under the hood of ***tapas*** is meant to
+be used for analyzing paleoecological records, when the goal is to
+estimate the long-term Trend and detect Peaks to reconstruct the
+occurrence, the return intervals, and the magnitude of distinct events.
 
-*R-PaleoAnomalies* builds on *CharAnalysis*
+*tapas* builds on *CharAnalysis*
 (<https://github.com/phiguera/CharAnalysis>), a software for analyzing
 sediment-charcoal records written in and compiled with Matlab 7.0 by
 Phil Higuera (Higuera et al., 2009), with significant input by (amongst
 others) Patrick Bartlein (U of OR), Daniel Gavin (U of OR), Jennifer
 Marlon, and Ryan Kelly.
 
-Two main reasons led to the development of *R-PaleoAnomalies*. Firstly,
-as R is an open source product, modifying the program to suit individual
-needs may be more straigthforward. Secondly, an integration and
-inter-operability with other existing R-packages may allow using
-peak-detection analysis in conjunction with other workflows and types of
-paleoecological records (see for instance [(Cagliero et al.,
+Two main reasons led to the development of *tapas*. Firstly, as R is an
+open source product, modifying the program to suit individual needs may
+be more straigthforward. Secondly, an integration and inter-operability
+with other existing R-packages may allow using peak-detection analysis
+in conjunction with other workflows and types of paleoecological records
+(see for instance [(Cagliero et al.,
 2021)](https://doi.org/10.1007/s00334-021-00862-x)).
 
 ------------------------------------------------------------------------
@@ -33,21 +33,21 @@ paleoecological records (see for instance [(Cagliero et al.,
 ## Usage
 
 A typical workflow of the peak-detection analysis includes the following
-steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134): \*
-1.) *resample* the record to equally spaced sampling intervals in time
-(years); \* 2.) *decompose* the resampled record into a long-term trend
-(background component) and peaks (peak component); \* 3.1) *screen* the
-peak component to distinguish signal from noise using \* 3.1.1) a unique
-*global* 2-component Gaussian mixture model, or \* 3.1.2) *local*
-2-component Gaussian mixture models, \* 3.2) and eventually also screen
-the peak component using a minimum-count test; \* 4.) *evaluate* the
-suitability of the record for peak-detection analysis using the
-signal-to-noise index [(Kelly et al.,
+steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134): + 1.)
+*resample* the record to equally spaced sampling intervals in time
+(years), a procedure also called “binning”; + 2.) *decompose* the
+resampled record into a long-term trend (background component) and peaks
+(peak component); + 3.1) *screen* the peak component to distinguish
+signal from noise using + 3.1.1) a unique *global* 2-component Gaussian
+mixture model, or + 3.1.2) *local* 2-component Gaussian mixture models,
++ 3.2) and eventually also screen the peak component using a
+minimum-count test; + 4.) *evaluate* the suitability of the record for
+peak-detection analysis using the signal-to-noise index [(Kelly et al.,
 2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
-*R-PaleoAnomalies* performs steps 1.) and 2.) for several variables of
-one dataset type (e.g. different estimates of charcoal abundance).
-Instead, steps 3.) and 4.) are performed for one user-selected variable.
+*tapas* performs steps 1.) and 2.) for several variables of one dataset
+type (e.g. different estimates of charcoal abundance). Instead, steps
+3.) and 4.) are performed for one user-selected variable.
 
 To run your own data, make a new folder within an umbrella folder, and
 save it under a name, e.g., `Data-In`. Then place a file (e.g.,
@@ -78,7 +78,7 @@ Install the development version of PaleoAnomalies with:
 
 ``` r
 # library(devtools)
-devtools::install_github("wfinsinger/R-PaleoAnomalies")
+devtools::install_github("wfinsinger/tapas")
 ```
 
 The `check_pretreat()` function can be used to verify the input data is
@@ -119,7 +119,7 @@ Lake](https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pol
 Higuera et al., 2009).
 
 ``` r
-library(PaleoAnomalies)
+library(tapas)
 co <- co_char_data
 ```
 
@@ -136,8 +136,8 @@ co_loc <- peak_detection(series = co, proxy = "char",
 #> [1] "No slumps detected; the age scale is continuous."
 ```
 
-With these settings, the results obtained using *R-PaleoAnomalies*
-strikingly resemble those obtained by [Higuera et
+With these settings, the results obtained using *tapas* strikingly
+resemble those obtained by [Higuera et
 al. (2009)](https://doi.org/10.1890/07-2019.1) with *CharAnalysis*:
 
 ![Code Lake: peak-detection
@@ -276,15 +276,15 @@ non-standard data-input formats. His suggestions led to the
 and several CharAnalysis users who ignited the conversation over the
 past few years about getting that program into R.
 
-If you use *R-PaleoAnomalies* in your publications, please cite
-*<https://github.com/wfinsinger/R-PaleoAnomalies>* and any non-default
-settings applied. The packaging of these functions is in progress.
+If you use *tapas* in your publications, please cite
+*<https://github.com/wfinsinger/tapas>* and any non-default settings
+applied. The packaging of these functions is in progress.
 
 ------------------------------------------------------------------------
 
 ## Issues & Contributions
 
-If you are having problems running *R-PaleoAnomalies* or if you have any
+If you are having problems running *tapas* or if you have any
 suggestions, please use the “Issues” tab. Contributions to this work are
 more than welcome. You can just fork, make changes,and then file a pull
 request. Alternatively, you can get in touch with me to discuss how your

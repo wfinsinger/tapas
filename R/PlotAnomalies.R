@@ -1,4 +1,4 @@
-#' Plots a summary figure of the PaleoDataAnomalies analysis.
+#' Plots a summary figure of results obtained with 'tapas'.
 #'
 #' Requires output from the \code{\link{global_thresh}()} function.
 #' 

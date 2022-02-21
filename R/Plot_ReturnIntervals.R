@@ -1,4 +1,4 @@
-#' Plot return intervals determined based on the PaleoDataAnomalies analysis.
+#' Plot return intervals determined based on the Trend And Peaks AnalysiS (tapas).
 #'
 #' Requires output from the \code{\link{global_thresh}()} function.
 #'

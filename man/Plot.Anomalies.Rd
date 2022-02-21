@@ -2,7 +2,7 @@
 % Please edit documentation in R/PlotAnomalies.R
 \name{Plot.Anomalies}
 \alias{Plot.Anomalies}
-\title{Plots a summary figure of the PaleoDataAnomalies analysis.}
+\title{Plots a summary figure of results obtained with 'tapas'.}
 \usage{
 Plot.Anomalies(
   series = NULL,

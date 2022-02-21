@@ -1,6 +1,4 @@
-#' TODO: Describe This Data
-#'
-#' This data used for example scripts needs to be described.
+#' Lake-sediment charcoal data from Code lake, as in: Higuera, P. E., L. B. Brubaker, P. M. Anderson, F. S. Hu, and T. A. Brown. 2009. Vegetation mediated the impacts of postglacial climate change on fire regimes in the south-central Brooks Range, Alaska. Ecological Monographs 79:201-219.
 #'
 #' @format A data frame with 471 rows and 7 variables:
 #' \describe{
@@ -15,5 +13,5 @@
 #'                         all the variables listed in the dataset
 #'                         (one column for each variable).}
 #' }
-#' @source TODO: Where does this come from? \url{?}
+#' @source Higuera et al. (2009) \url{https://figshare.com/articles/dataset/Higuera_et_al_2009_lake_sediment_pollen_and_charcoal_data/984310/4}
 "co_char_data"

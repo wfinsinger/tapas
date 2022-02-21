@@ -2,7 +2,7 @@
 % Please edit documentation in R/Plot_ReturnIntervals.R
 \name{Plot_ReturnIntervals}
 \alias{Plot_ReturnIntervals}
-\title{Plot return intervals determined based on the PaleoDataAnomalies analysis.}
+\title{Plot return intervals determined based on the Trend And Peaks AnalysiS (tapas).}
 \usage{
 Plot_ReturnIntervals(series = NULL, x.lim = NULL, plot.x = F, plot.neg = F)
 }

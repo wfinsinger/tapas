@@ -78,7 +78,7 @@ Load the data into the R environment
 
 ## Installation
 
-Install the development version of PaleoAnomalies with:
+Install the development version of *tapas* with:
 
 ``` r
 # library(devtools)

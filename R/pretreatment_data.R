@@ -51,20 +51,23 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
-    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                             nrow = length(ybpI)))
     colnames(int) [1] <- "age"
     int$age <- ybpI
     
-    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                              nrow = length(ybpI)))
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
     
     j = 2
     for (i in 6:ncol(series)) {
-      #i=6
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yrInterp)
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+                                       serie = series[ ,i], Int = T,
+                                       first = first, last = last,
+                                       yrInterp = yrInterp)
       
       raw[ ,j] <- pre.i$acc
       colnames(raw) [j] <- colnames(series) [i]
@@ -87,19 +90,22 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
-    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                             nrow = length(ybpI)))
     colnames(int) [1] <- "age"
     int$age <- ybpI
     
-    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                              nrow = length(ybpI)))
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
     j = 2
     for (i in 6:ncol(series)) {
-      #i = 6
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yrInterp)
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+                                       serie = series[ ,i], Int = T,
+                                       first = first, last = last,
+                                       yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i] / series[ ,5] # non-resampled concentration values
       colnames(raw) [j] <- colnames(series) [i]
@@ -122,19 +128,22 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     raw <- data.frame(ybp)
     colnames(raw) <- "age"
     
-    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    int <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                             nrow = length(ybpI)))
     colnames(int) [1] <- "age"
     int$age <- ybpI
     
-    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4, nrow = length(ybpI)))
+    conI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                              nrow = length(ybpI)))
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
     j = 2
     for (i in 6:ncol(series)) {
-      #i = 6
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5], serie = series[ ,i], Int = F,
-                                 first = first, last = last, yrInterp = yrInterp)
+      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+                                       serie = series[ ,i], Int = T,
+                                       first = first, last = last,
+                                       yrInterp = yrInterp)
       
       raw[ ,j] <- series[ ,i]  # non-resampled count values
       colnames(raw) [j] <- colnames(series) [i]
@@ -152,8 +161,8 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
   }
   
   d.out <- structure(list(list(series = raw, series.name = series.name),
-                          list(series.int = int, series.conI = conI, volI = volI,
-                               yr.interp = yrInterp,
+                          list(series.int = int, series.conI = conI,
+                               volI = volI, yr.interp = yrInterp,
                                type = "pretreatment"), out = out))
   names(d.out) [1] <- "raw"
   names(d.out) [2] <- "int"

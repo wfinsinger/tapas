@@ -116,7 +116,7 @@ check_pretreat <- function(series) {
     
     # add gaps to input data frame
     A <- rbind(A, A_gaps)
-    A <- A[order(A$cmTop), ]
+    A <- A[order(A$CmTop), ]
   } else {
     print("No missing samples detected.")
   }

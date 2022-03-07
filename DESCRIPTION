@@ -1,6 +1,6 @@
 Package: tapas
-Title: Trend And Peaks AnalysiS in paleo-ecological time series
-Version: 0.0.2
+Title: Trend And PeAkS analysis in paleo-ecological time series
+Version: 0.0.3
 Authors@R:
   c(
     person("Walter", "Finsinger", , "walter.finsinger@umontpellier.fr",
@@ -37,5 +37,6 @@ LazyData: true
 Imports: 
     mclust,
     dplyr,
+    stringr,
     paleofire
 Remotes: oblarquez/paleofire

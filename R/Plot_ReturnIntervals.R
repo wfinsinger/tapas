@@ -1,8 +1,12 @@
 #' Plot return intervals determined based on the Trend And Peaks AnalysiS (tapas).
 #'
-#' Requires output from the \code{\link{global_thresh}()} function.
+#' Requires output from one of the following functions:
+#' \code{\link{global_thresh}()}, \code{\link{local_thresh}()},
+#' or \code{\link{peak_detection}()}.
 #'
-#' @param series The output of \code{\link{global_thresh}()}.
+#' @param series The output of \code{\link{global_thresh}()},
+#'               \code{\link{local_thresh}()},
+#'               or \code{\link{peak_detection}()}.
 #' @param x.lim Limit age for the x-axis scale (time scale)
 #' @param plot.x Boolean. If \code{FALSE} (by default),
 #'               The x-axis labels are omitted.

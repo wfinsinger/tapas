@@ -1,11 +1,11 @@
 
 
 ## Load source files ####
-source("./R/check_pretreatment.r")
+source("../R/check_pretreatment.r")
 source("./R/pretreatment_full.r")
 
 ## Load data ####
-load("./Data-In/co_char_data.rda")
+load("../data/co_char_data.rda")
 
 
 ## Shorten the data, such that plots are clearer ####
@@ -17,7 +17,7 @@ co <- co_char_data[1:20, ]
 co_i <- paleofire::pretreatment(params = co[ ,1:5],
                                 serie = co[ ,6],
                                 Int = T)
-plot.CHAR(co_i)
+paleofire::plot.CHAR(co_i)
 
 
 
@@ -29,7 +29,7 @@ co_gaps <- co[-c(2:3, 12), ]
 co_gaps_i <- paleofire::pretreatment(params = co_gaps[ ,1:5],
                                      serie = co_gaps[ ,6],
                                      Int = T)
-plot.CHAR(co_gaps_i)
+paleofire::plot.CHAR(co_gaps_i)
 
 # Add missing samples, and use pretreatment
 co_gaps_checked <- check_pretreat(series = co_gaps)
@@ -39,9 +39,9 @@ co_gaps_checked_i <- paleofire::pretreatment(params = co_gaps_checked[ ,1:5],
 
 # Compare the output
 par(mfrow = c(3,1), mar = c(3,5,1,1), oma = c(2,0,0,0))
-plot.CHAR(co_i)
-plot.CHAR(co_gaps_i)
-plot.CHAR(co_gaps_checked_i)
+paleofire::plot.CHAR(co_i)
+paleofire::plot.CHAR(co_gaps_i)
+paleofire::plot.CHAR(co_gaps_checked_i)
 
 
 
@@ -67,6 +67,6 @@ co_slump_checked_i <- paleofire::pretreatment(params = co_slump_checked[ ,1:5],
 
 # Compare the output
 par(mfrow = c(2,1), mar = c(3,5,1,1), oma = c(2,0,0,0))
-plot.CHAR(co_i)
-plot.CHAR(co_slump_checked_i)
+paleofire::plot.CHAR(co_i)
+paleofire::plot.CHAR(co_slump_checked_i)
 

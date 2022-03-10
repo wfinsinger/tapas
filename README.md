@@ -1,7 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# R-package: tapas
+[![DOI](https://zenodo.org/badge/421092333.svg)](https://zenodo.org/badge/latestdoi/421092333)
+
+# ***tapas*** R-package
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -287,9 +289,10 @@ non-standard data-input formats for *tapas*. His suggestions led to the
 users who ignited the conversation over the past few years about getting
 that program into R are greatly thanked.
 
-If you use *tapas* in your publications, please cite
-*<https://github.com/wfinsinger/tapas>* and any non-default settings
-applied.
+If you use *tapas* in your publication, please cite it as follows:
+Finsinger W., Bonnici I. (2022) - *tapas*: an R package to perform trend
+and peaks analysis. *<https://doi.org/10.5281/zenodo.6344463>* and any
+non-default settings applied.
 
 ------------------------------------------------------------------------
 
@@ -297,7 +300,7 @@ applied.
 
 If you are having problems running *tapas* or if you have any
 suggestions, please use the “Issues” tab. Contributions to this work are
-more than welcome. *Tapas* is meant as a flexible data-analysis
+more than welcome. *tapas* is meant as a flexible data-analysis
 environment, just as its real-world counterpart that is based on a “pick
 & choose sides” philosophy. Thus, feel free to fork, make changes, and
 then file a pull request. Alternatively, get in touch to discuss how

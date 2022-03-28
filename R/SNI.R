@@ -71,19 +71,20 @@
 #'
 #' @export
 SNI <- function(ProxyData, BandWidth) {
-  
+
   # Data setup
   ages <- ProxyData[ ,1]
   CHAR <- ProxyData[ ,2]
   thresh <- ProxyData[ ,3]
-  
-  if (sd(diff(ages)) == 0) { # If resolution (yr/sample) is constant
-    r <- mean(diff(ages)) # r = constant sampling resolution
-  } else {
-    print('Fatal error: Sampling resolution (yr/sample) must be constant.')
-    return()
+
+  r <- mean(diff(ages)) # r = mean sampling resolution  
+
+  if (!sd(diff(ages)) == 0) { # If resolution (yr/sample) is not constant
+    print(paste0('Warning: Sampling resolution (mean: ',r,
+                ' yr/sample) is not constant (sd = ', sd(diff(ages)),').'))
   }
-  
+
+
   # Preallocate some space   
   SNI_output 				<- list()
   #SNI_output$SNI 		<- NA * numeric(length(ages))
@@ -94,7 +95,7 @@ SNI <- function(ProxyData, BandWidth) {
   SNI_output$stdN 	<- NA * numeric(length(ages))
   SNI_output$CF 		<- NA * numeric(length(ages))
   rawSNI 						<- NA * numeric(length(ages))
-  
+
   for (i in 1:length(ages)) { # Perform calculations at each sample age
     # Calculate window indexes
     if ( i < round(0.5*(BandWidth/r)) + 1 ) {  # Samples near beginning (moving window truncated)
@@ -108,26 +109,26 @@ SNI <- function(ProxyData, BandWidth) {
                                     (i + round(0.5*(BandWidth/r))))
       }
     }
-    
+
     # In each moving window...  
-    
+
     # Get CHAR for samples in window (X is entire window population)
     X <- CHAR[SNI_output$winInd[i,1]:SNI_output$winInd[i,2]] 
-    
+
     # inS, inN: boolean indexes of samples counted as S & N, respectively
     inS <- (X >= thresh[SNI_output$winInd[i,1]:SNI_output$winInd[i,2]])
     inN <- !inS
-    
+
     # Fill in S & N populations, means, stds
     SNI_output$popS[[i]] <- X[inS]
     SNI_output$popN[[i]] <- X[inN]  
     SNI_output$meanN[i] <- mean(X[inN])
     SNI_output$stdN[i] <- sd(X[inN])
-    
+
     # Calculate correction factor
     v <- length(SNI_output$popN[[i]]) # d.f. of N
     SNI_output$CF[i] <- (v - 2) / v # SNI = Z * (v-2)/v
-    
+
     # Calculate raw SNI (unsmoothed)
     if ( length(SNI_output$popS[[i]]) > 0) {
       rawSNI[i] <- (mean( (SNI_output$popS[[i]] - SNI_output$meanN[i]) ) 
@@ -135,19 +136,19 @@ SNI <- function(ProxyData, BandWidth) {
     } else {
       rawSNI[i] <- 0 # SNI = 0 by definition when no samples exceed threshold
     }
-    
+
   }
-  
+
   ## Replace NAs with zero (added by Walter)
   rawSNI[is.na(rawSNI)] <- 0
-  
+
   # Smooth raw values to obtain final SNI
   SNI_sm <- lowess(ages, rawSNI, f = (BandWidth/r)/length(ages), iter = 0)$y
   SNI_raw <- rawSNI
-  
+
   # Prepare output
   SNI_output <- as.data.frame(cbind(SNI_raw, SNI_sm))
-  
+
   return(SNI_output)
-  
+
 }

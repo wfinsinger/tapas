@@ -35,7 +35,7 @@ from \code{min(series$AgeTop)} to max(series$AgeBot).}
 \item{yrInterp}{Resolution of the resampled timeseries.}
 }
 \value{
-Resampled data according to \code{out} parameter.
+A list with the resampled data according to \code{out} parameter.
 }
 \description{
 Uses paleofire::pretreatment() function

@@ -29,5 +29,7 @@ both positive and negative anomalies
 are marked with colored shaded areas.}
 }
 \description{
-Requires output from the \code{\link{global_thresh}()} function.
+Requires output from one of the following functions:
+\code{\link{global_thresh}()}, \code{\link{local_thresh}()},
+or \code{\link{peak_detection}()}.
 }

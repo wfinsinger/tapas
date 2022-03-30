@@ -36,6 +36,6 @@ A list similar to \code{series} with additional detrended data
 appended.
 }
 \description{
-Process the output of pretreatment_data() function
+Processes the output of pretreatment_data() function
 to de-trend the time series.
 }

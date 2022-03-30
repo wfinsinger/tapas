@@ -1,7 +1,7 @@
-#' Check data frame used for \code{paleofire::pretreatment()} function.
-#'
+#' Check the input data
+#' 
 #' This functions does some check-up on the data frame used for
-#' the \code{paleofire::pretreatment()} function,
+#' the \code{tapas::pretreatment_data()} function,
 #' which requires that the depth and age scales are continuous.
 #' In other words, for every i-th row, it requires that \itemize{
 #' \item{\code{CmBot[i] > CmTop[i]}}
@@ -17,7 +17,7 @@
 #' \item{\code{AgeBot[i] < AgeTop[i]}}
 #' \item{there are duplicate values in one of the columns \code{CmTop, CmBot}}
 #' }
-#' .. then the function returns a fatal error and stops.
+#' ...the function returns a fatal error and stops.
 #'
 #' The function also fixes a few things:
 #'
@@ -41,6 +41,8 @@
 #'    \code{CmTop, CmBot, AgeTop, AgeBot, Volume},
 #'    and one or more columns with the data
 #'    which should be resampled (variables).
+#'
+#' @return A data frame.
 #'
 #' @export
 check_pretreat <- function(series) {

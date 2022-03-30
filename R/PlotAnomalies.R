@@ -1,6 +1,8 @@
 #' Plots a summary figure of results obtained with 'tapas'.
 #'
-#' Requires output from the \code{\link{global_thresh}()} function.
+#' Requires output from one of the following functions:
+#' \code{\link{global_thresh}()}, \code{\link{local_thresh}()},
+#' or \code{\link{peak_detection}()}.
 #' 
 #' @param series The output of \code{\link{global_thresh}()}.
 #' @param x.lim Limit age for the x-axis scale (time scale).

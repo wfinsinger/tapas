@@ -4,7 +4,7 @@
 
 #' Detrend time series.
 #'
-#' Process the output of pretreatment_data() function
+#' Processes the output of pretreatment_data() function
 #' to de-trend the time series.
 #'
 #' @param series Output of pretreatment_data().

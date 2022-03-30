@@ -3,7 +3,7 @@
 \docType{data}
 \name{co_char_data}
 \alias{co_char_data}
-\title{Lake-sediment charcoal data from Code lake, as in: Higuera, P. E., L. B. Brubaker, P. M. Anderson, F. S. Hu, and T. A. Brown. 2009. Vegetation mediated the impacts of postglacial climate change on fire regimes in the south-central Brooks Range, Alaska. Ecological Monographs 79:201-219.}
+\title{Sedimentary charcoal data (Code Lake)}
 \format{
 A data frame with 471 rows and 7 variables:
 \describe{
@@ -26,6 +26,6 @@ Higuera et al. (2009) \url{https://figshare.com/articles/dataset/Higuera_et_al_2
 co_char_data
 }
 \description{
-Lake-sediment charcoal data from Code lake, as in: Higuera, P. E., L. B. Brubaker, P. M. Anderson, F. S. Hu, and T. A. Brown. 2009. Vegetation mediated the impacts of postglacial climate change on fire regimes in the south-central Brooks Range, Alaska. Ecological Monographs 79:201-219.
+Lake-sediment charcoal data from Code lake, as in: Higuera, PE, LB Brubaker, PM Anderson, FS Hu, and TA Brown (2009) Vegetation mediated the impacts of postglacial climate change on fire regimes in the south-central Brooks Range, Alaska. Ecological Monographs 79:201-219.
 }
 \keyword{datasets}

@@ -67,7 +67,7 @@ Use \code{out.dir = NULL} to plot to current device instead.}
 are produced and written to \code{out.dir} folder.}
 }
 \value{
-Threshold values.
+A list similar to \code{series} with additional data appended.
 }
 \description{
 The script determines threshold values
@@ -83,4 +83,7 @@ with the assumption that the noise component
 is normally distributed around 0 (because input values were detrended!).
 A figure is generated and saved to the \code{output} directory
 and a list is returned with the threshold data for the analyzed proxy.
+}
+\details{
+Requires output from the \code{\link{SeriesDetrend}()} function.
 }

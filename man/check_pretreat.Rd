@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_pretreatment.R
 \name{check_pretreat}
 \alias{check_pretreat}
-\title{Check data frame used for \code{paleofire::pretreatment()} function.}
+\title{Check the input data}
 \usage{
 check_pretreat(series)
 }
@@ -12,9 +12,12 @@ check_pretreat(series)
 and one or more columns with the data
 which should be resampled (variables).}
 }
+\value{
+A data frame.
+}
 \description{
 This functions does some check-up on the data frame used for
-the \code{paleofire::pretreatment()} function,
+the \code{tapas::pretreatment_data()} function,
 which requires that the depth and age scales are continuous.
 In other words, for every i-th row, it requires that \itemize{
 \item{\code{CmBot[i] > CmTop[i]}}
@@ -31,7 +34,7 @@ If any of the following is true: \itemize{
 \item{\code{AgeBot[i] < AgeTop[i]}}
 \item{there are duplicate values in one of the columns \code{CmTop, CmBot}}
 }
-.. then the function returns a fatal error and stops.
+...the function returns a fatal error and stops.
 
 The function also fixes a few things:
 

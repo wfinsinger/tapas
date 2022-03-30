@@ -19,7 +19,7 @@
 #'                   from \code{min(series$AgeTop)} to max(series$AgeBot).
 #' @param yrInterp Resolution of the resampled timeseries.
 #'
-#' @return Resampled data according to \code{out} parameter.
+#' @return A list with the resampled data according to \code{out} parameter.
 #'
 #' @importFrom stats median
 #'
@@ -27,6 +27,9 @@
 pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
                               first=NULL, last=NULL, yrInterp=NULL) {
 
+  # series=co; out="accI"; series.name=NA;
+  # first=NULL; last=NULL; yrInterp=NULL
+  
   ## Gather data ####
   ybp <- series[ ,3]  # sample AgeTop
   ybpB <- series[ ,4] # sample AgeBot
@@ -61,6 +64,10 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
+    countI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                                nrow = length(ybpI)))
+    colnames(countI) [1] <- "age"
+    countI$age <- ybpI
     
     j = 2
     for (i in 6:ncol(series)) {
@@ -78,7 +85,11 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
       conI[ ,j] <- pre.i$conI
       colnames(conI) [j] <- colnames(series) [i]
       
+      countI[ ,j] <- pre.i$countI
+      colnames(countI) [j] <- colnames(series) [i]
+      
       volI <- pre.i$volI
+      cmI <- pre.i$cmI
       
       j = j + 1
     }
@@ -100,6 +111,11 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
+    countI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                                nrow = length(ybpI)))
+    colnames(countI) [1] <- "age"
+    countI$age <- ybpI
+    
     j = 2
     for (i in 6:ncol(series)) {
       pre.i <- paleofire::pretreatment(params = series[ ,1:5],
@@ -116,7 +132,11 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
       conI[ ,j] <- pre.i$conI # resampled concentration values
       colnames(conI) [j] <- colnames(series) [i]
       
+      countI[ ,j] <- pre.i$countI
+      colnames(countI) [j] <- colnames(series) [i]
+      
       volI <- pre.i$volI
+      cmI <- pre.i$cmI
       
       j = j + 1
     }
@@ -138,6 +158,11 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     colnames(conI) [1] <- "age"
     conI$age <- ybpI
     
+    countI <- data.frame(matrix(data = NA, ncol = dim(series)[2] - 4,
+                                nrow = length(ybpI)))
+    colnames(countI) [1] <- "age"
+    countI$age <- ybpI
+    
     j = 2
     for (i in 6:ncol(series)) {
       pre.i <- paleofire::pretreatment(params = series[ ,1:5],
@@ -154,7 +179,11 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
       conI[ ,j] <- pre.i$conI
       colnames(conI) [j] <- colnames(series) [i]
       
+      countI[ ,j] <- pre.i$countI
+      colnames(countI) [j] <- colnames(series) [i]
+      
       volI <- pre.i$volI
+      cmI <- pre.i$cmI
       
       j = j + 1
     }
@@ -162,6 +191,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
   
   d.out <- structure(list(list(series = raw, series.name = series.name),
                           list(series.int = int, series.conI = conI,
+                               series.countI = countI, cmI = cmI,
                                volI = volI, yr.interp = yrInterp,
                                type = "pretreatment"), out = out))
   names(d.out) [1] <- "raw"

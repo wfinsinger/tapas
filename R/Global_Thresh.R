@@ -13,6 +13,8 @@
 #' is normally distributed around 0 (because input values were detrended!).
 #' A figure is generated and saved to the \code{output} directory 
 #' and a list is returned with the threshold data for the analyzed proxy.
+#' 
+#' Requires output from the \code{\link{SeriesDetrend}()} function.
 #'
 #' @param series The output of the \code{SeriesDetrend()} function.
 #' @param proxy Set \code{proxy = "VariableName"} to select the variable
@@ -51,7 +53,7 @@
 #' @param plot.global_thresh Logical. If \code{TRUE}, then \code{*.pdf} files
 #'                           are produced and written to \code{out.dir} folder.
 #'
-#' @return Threshold values.
+#' @return A list similar to \code{series} with additional data appended.
 #' 
 #' @importFrom stats complete.cases dnorm pt qnorm
 #' @importFrom graphics curve hist points
@@ -260,7 +262,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     }
     
     countI_index <- which(colnames(series$int$series.int) == proxy)
-    countI <- series$int$series.conI[ ,countI_index]
+    countI <- series$int$series.countI[ ,countI_index]
     volI <- series$int$volI
     
     # Create space

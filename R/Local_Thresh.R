@@ -406,7 +406,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     }
     
     countI_index <- which(colnames(series$int$series.int) == proxy)
-    countI <- series$int$series.conI[ ,countI_index]
+    countI <- series$int$series.countI[ ,countI_index]
     volI <- series$int$volI
     
     # Create space

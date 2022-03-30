@@ -14,17 +14,29 @@
 #' @importFrom dplyr select pull left_join bind_cols all_of
 #' @export
 tapas_export <- function(series = NULL) {
-
+  
 ## extract data from the list
+cm_i <- series$int$cmI
 age_top_i <- series$int$series.int$age
 vol_i <- series$int$volI
 
 want_proxy <- series$thresh$proxy
 if (series$out == "accI") {
   want_proxy_conc <- stringr::str_remove(want_proxy, "AR")
-  con_i <- dplyr::select(series$int$series.conI, all_of(want_proxy_conc))
+  # con_i <- dplyr::select(series$int$series.conI, all_of(want_proxy_conc))
+  # colnames(con_i) <- "con_i"
+  # count_i  <- dplyr::select(series$int$series.countI, all_of(want_proxy_conc))
+  # colnames(count_i) <- "count_i"
+  
+  con_i <- dplyr::pull(series$int$series.conI, all_of(want_proxy_conc))
+  count_i <- dplyr::pull(series$int$series.countI, all_of(want_proxy_conc))
 } else {
-  con_i <- dplyr::select(series$int$series.conI, all_of(want_proxy))
+  # con_i <- dplyr::select(series$int$series.conI, all_of(want_proxy_conc))
+  # colnames(con_i) <- "con_i"
+  # count_i  <- dplyr::select(series$int$series.countI, all_of(want_proxy_conc))
+  # colnames(count_i) <- "count_i"
+  con_i <- dplyr::pull(series$int$series.conI, all_of(want_proxy_conc))
+  count_i <- dplyr::pull(series$int$series.countI, all_of(want_proxy_conc))
 }
 acc_i <- dplyr::pull(series$int$series.int, want_proxy)
 bkg_trend <- dplyr::pull(series$detr$detr, want_proxy)
@@ -61,10 +73,12 @@ if (length(thresh_final_neg_sm) == 1) {
 }
 
 ## Gather output so far
-output <- cbind(age_top_i, vol_i, con_i, acc_i, bkg_trend,
+output <- cbind(cm_i, age_top_i, vol_i, count_i, con_i,
+                acc_i, bkg_trend,
                 thresh_final_pos, thresh_final_pos_sm,
                 sni_raw, sni_smooth,
                 peaks_pos_insig, peaks_pos_sig)
+output <- as.data.frame(output)
 
 ## Add PeakMag and Return Intervals
 peak_mag <- series$thresh$PeakMag_pos
@@ -74,11 +88,12 @@ output <- dplyr::left_join(output, peak_mag,
 output$peak_mag[is.na(output$peak_mag)] <- 0
 
 
-RI_pos <- dplyr::bind_cols(series$thresh$peaks.pos.ages,
-                           series$thresh$RI_pos)
-colnames(RI_pos) <- c("age_top_i", "RI_pos")
+peaks_pos_ages <- series$thresh$peaks.pos.ages
+RI_pos <- series$thresh$RI_pos
+
+RI_pos <- as.data.frame(cbind(peaks_pos_ages, RI_pos))
 output <- dplyr::left_join(output, RI_pos,
-                           by = "age_top_i")
+                           by = c("age_top_i" = "peaks_pos_ages"))
 
 return(output)
 }

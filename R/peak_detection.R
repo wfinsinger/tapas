@@ -139,7 +139,7 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
   }
   
   if (is.null(proxy) & length(proxies_options) == 1) {
-    proxy <- colnames(series[ ,6])
+    proxy <- colnames(series) [6]
   }
   
   if (!(proxy %in% proxies_options)) {

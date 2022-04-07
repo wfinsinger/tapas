@@ -139,8 +139,9 @@ SNI <- function(ProxyData, BandWidth) {
 
   }
 
-  ## Replace NAs with zero (added by Walter)
+  ## Replace NA and Inf values with zero (added for tapas::)
   rawSNI[is.na(rawSNI)] <- 0
+  rawSNI[is.infinite(rawSNI)] <- 0
 
   # Smooth raw values to obtain final SNI
   SNI_sm <- lowess(ages, rawSNI, f = (BandWidth/r)/length(ages), iter = 0)$y

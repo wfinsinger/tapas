@@ -1,6 +1,6 @@
 Package: tapas
 Title: Trend And PeAkS analysis in paleo-ecological time series
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
   c(
     person("Walter", "Finsinger", , "walter.finsinger@umontpellier.fr",

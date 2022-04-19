@@ -87,7 +87,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   if (is.null(smoothing.yr) == T) {
     smoothing.yr <- series$detr$smoothing.yr
   }
-  
+
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
     if (dim(series$detr$detr)[2] > 2) {
       stop("Fatal error: please specify which proxy you want to use")
@@ -102,12 +102,12 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     a <- cbind(a, series$detr$detr[[proxy]])
     colnames(a)[2] <- proxy
   }
-  
+
   # Further extract parameters from input dataset
   a.names <- colnames(a)
   s.name <- series$detr$series.name
   yr.interp <- series$int$yr.interp
-  
+
   # Determine whether to limit the analysis to a portion of the record
   if (is.null(t.lim) == T) {
     ageI <- a$age
@@ -118,8 +118,8 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     ageI <- a$age[which(a$age <= max(t.lim) & a$age >= min(t.lim))]
   }
   x.lim <- c(max(ageI), min(ageI))
-  
-  
+
+
   # Determine which of the two GMM components should be considered as 'noise'
   if (noise.gmm == 1) {
     signal.gmm <- 2
@@ -127,26 +127,26 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   if (noise.gmm == 2) {
     signal.gmm <- 1
   }
-  
-  
+
+
   # Create empty list where output data will be stored
   a.out <- list(thresh.value = thresh.value, yr.interp = yr.interp)
-  
-  
+
+
   # Create space for local variables
   v <- a[ ,2] # variable
   v.name <- colnames(a)[2]
   v.gmm <- v[which(complete.cases(v))]
   y.lim <- c(min(v.gmm), max(v.gmm))
-  
-  
-  
+
+
+
   # Determine global threshold with 2 components ####
   # 
   # Make space in empty matrices
   Peaks.pos <- matrix(data = 0, nrow = length(v), ncol = 1) # Space for positive component
   Peaks.neg <- matrix(data = 0, nrow = length(v), ncol = 1) # Space for negative component
-  
+
   # Get 2 components with Gaussian mixture models for positive values
   m2 <- mclust::densityMclust(data = v.gmm, G = 2,
                               verbose = FALSE, plot = FALSE)
@@ -154,63 +154,50 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   if (m2$parameters$mean[1] == m2$parameters$mean[2]) {
     warning('Poor fit of Gaussian mixture model')
   }
-  
+
   if (length(m2$parameters$variance$sigmasq) == 1) {
     m2.sigmasq <- m2$parameters$variance$sigmasq
   } else {
     m2.sigmasq <- m2$parameters$variance$sigmasq[noise.gmm]
   }
-  
+
   ## Define global thresholds ####
   thresh.pos <- m2$parameters$mean[noise.gmm] + qnorm(p = thresh.value) * sqrt(m2.sigmasq)
   thresh.neg <- m2$parameters$mean[noise.gmm] - qnorm(p = thresh.value) * sqrt(m2.sigmasq)
-  
+
   ## Get data for the 2 components
   #sig.pos <- v[which(v > thresh.pos)]
   #noise_i <- v[which(v <= thresh.pos & v >= thresh.neg)]
   #sig.neg <- v[which(v < thresh.neg)]
-  
-  
-  
+
+
+
   ## Calculate SNI ####
-  ## 
+
   ## Get resampled values for selected variable (proxy) for selected time interval (t.lim)
   SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
                           series$int$series.int$age >= min(t.lim))
-  
+
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
-  
-  
-  SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh.pos),
+
+  thresh_pos_sni <- SNI_in - series$detr$detr[[proxy]] + thresh.pos
+  SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh_pos_sni),
                  BandWidth = smoothing.yr)
-  
-  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
-  if (all(is.na(SNI_pos$SNI_raw))) {
-    SNI_pos$SNI_raw <- 0
-    SNI_pos$SNI_sm <- 0
-  }
-  
-  SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh.neg),
+
+  thresh_neg_sni <- SNI_in - series$detr$detr[[proxy]] + thresh.neg
+  SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh_neg_sni),
                  BandWidth = smoothing.yr)
-  
-  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
-  if (all(is.na(SNI_neg$SNI_raw))) {
-    SNI_neg$SNI_raw <- 0
-    SNI_neg$SNI_sm <- 0
-  }
-  
   rm(SNI_in, SNI_in_index)
-  
-  
-  
+
+
   ## Get peaks ####
-  ## 
+
   ## If keep_consecutive == F ####
   if (keep_consecutive == F) { # if consecutive peak samples should be removed
-    
+
     Peaks.pos[which(v > thresh.pos)] <- 2
     Peaks.neg[which(v < thresh.neg)] <- 2
-    
+
     # Then remove consecutive peaks
     # For positive peaks
     for (i in 1:(length(Peaks.pos) - 1)) { # For each value in Peaks.pos
@@ -219,7 +206,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.pos[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
-    
+
     for (i in 1:length(Peaks.pos)) {
       if (Peaks.pos[i] < 2) {    # if value < 2
         Peaks.pos[i] <- 0        # mark sample as 0 (unflag Peak)
@@ -227,7 +214,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.pos[i] <- 1        # else (if value=2) mark sample as 1 (flag as Peak)
       }
     }
-    
+
     # For negative peaks
     for (i in 1:(length(Peaks.neg) - 1)) { # For each value in Peaks.neg
       if (Peaks.neg[i] > 0
@@ -235,7 +222,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.neg[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
-    
+
     for (i in 1:length(Peaks.neg)) {
       if (Peaks.neg[i] < 2) {    # if value < 2
         Peaks.neg[i] <- 0        # mark sample as 0 (unflag Peak)
@@ -248,29 +235,29 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     Peaks.pos[which(v > thresh.pos)] <- 1
     Peaks.neg[which(v < thresh.neg)] <- 1
   }
-  
-  
-  
-  
+
+
+
+
   ## Minimum-count Analysis ####
   ## If minCountP is not NULL, screen positive peaks with minimum count test
   if (is.null(minCountP) == F) {
-    
+
     # Set [yr] Years before and after a peak to look for the min. and max. value
     if (is.null(MinCountP_window) == T) {
       MinCountP_window <- round(150/yr.interp) * yr.interp
     }
-    
+
     countI_index <- which(colnames(series$int$series.int) == proxy)
     countI <- series$int$series.countI[ ,countI_index]
     volI <- series$int$volI
-    
+
     # Create space
     d <- rep_len(NA, length.out = dim(a) [1])
     Thresh_minCountP <- rep_len(NA, length.out = dim(a) [1])
-    
+
     peakIndex <- which(Peaks.pos == 1) # Index to find peak samples
-    
+
     if (length(peakIndex) > 1) {                     # Only proceed if there is > 1 peak
       for (i in 1:length(peakIndex)) {               # For each peak identified...
         peakYr <- ageI[peakIndex[i]]      # Find age of peak and window around peak
@@ -297,14 +284,14 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[2] <- windowPeak_in[2] # replace the windowTime_in with the windowPeak_in
         }
-        
+
         # Final index value for search window: window (1) defines oldest sample,
         # window (2) defines youngest sample
         windowSearch <- c(windowTime_in[1], windowTime_in[2])
-        
+
         # search for max and min Peaks.pos within this window.
         # [# cm^-3] Max charcoal concentration after peak.
-        
+
         countMax <- round(max(countI[ windowSearch[2]:peakIndex[i] ]))
         # Index for location of max count.
         countMaxIn <- windowSearch[2] - 1 + max(which(round(countI[windowSearch[2]:peakIndex[i]]) == countMax))
@@ -319,7 +306,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                                     (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
                                                                                (volMin/(volMin + volMax)) * 
                                                                                (volMax/(volMin + volMax))))
-        
+
         # Test statistic
         Thresh_minCountP[peakIndex[i]] <- 1 - pt(q = d[peakIndex[i]], df = Inf)
         # Inverse of the Student's T cdf at 
@@ -332,64 +319,64 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         # cumulative normal distribution.
       }
     }
-    
+
     # Clean Environment
     rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn, peakIndex,
        peakYr, volMax, volMin, windowPeak_in, windowSearch, windowTime, windowTime_in)
-    
-    
+
+
     # Take note of and remove peaks that do not pass the minimum-count screening-peak test
     Peaks.pos.insig <- rep_len(0, length.out = dim(a) [1])
-    
+
     insig.peaks <- intersect(which(Peaks.pos > 0),
                              which(Thresh_minCountP > minCountP)) # Index for
     # Peaks.pos values that also have p-value > minCountP...thus insignificant
     Peaks.pos.insig[insig.peaks] <- 1
     Peaks.pos[insig.peaks] <- 0 # set insignificant peaks to 0
     #Peaks.posThresh[insig.peaks] <- 0
-    
+
   } else {
     insig.peaks <- NULL
     Peaks.pos.insig <- rep_len(NA, length.out = dim(a) [1])
   }
-  
-  
-  
+
+
+
   ## Gather data for plots ####
-  
+
   # Use these for plotting significant peaks
   Peaks.pos.final <- which(Peaks.pos == 1)
   Peaks.neg.final <- which(Peaks.neg == 1)
-  
+
   peaks.pos.ages <- ageI[which(Peaks.pos == 1)]
   peaks.neg.ages <- ageI[which(Peaks.neg == 1)]
-  
-  
+
+
   ## Calculate Event Return Intervals ####
   RI_neg <- c(diff(peaks.neg.ages), NA)
   RI_pos <- c(diff(peaks.pos.ages), NA)
-  
-  
-  
+
+
+
   ## Get peak magnitude ####
   # Peak magnitude (pieces cm-2 peak-1) is the sum of all samples exceeding
   # threshFinalPos for a given peak.
   # The units are derived as follows:
   # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].  
-  
+
   ## Get peak-magnitude values for positive peaks
   if (length(Peaks.pos.final) > 0) {
     PeakMag_pos_val <- v - thresh.pos
     PeakMag_pos_val[PeakMag_pos_val < 0] <- 0
     PeakMag_pos_index <- which(PeakMag_pos_val > 0)
-    
+
     Peaks_pos_groups <- split(PeakMag_pos_index,
                               cumsum(c(1, diff(PeakMag_pos_index) != 1)))
-    
+
     PeakMag_pos <- vector(mode = "numeric", length = length(Peaks_pos_groups))
     PeakMag_pos_ages <- vector(mode = "numeric", length = length(Peaks_pos_groups))
     Peak_duration <- vector(mode = "numeric", length = length(Peaks_pos_groups))
-    
+
     for (i in 1:length(Peaks_pos_groups)) {
       #i = 2
       n_groups <- length(Peaks_pos_groups[[i]])
@@ -399,29 +386,29 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peak_duration[i]
       PeakMag_pos_ages[i] <- ageI[Peaks_pos_groups[[i]] [n_groups]]
     }
-    
+
     PeakMag_pos <- as.data.frame(cbind(PeakMag_pos_ages, PeakMag_pos))
     colnames(PeakMag_pos) <- c("ageI", "peak_mag")
-    
+
     rm(PeakMag_pos_val, PeakMag_pos_index, Peak_duration, Peaks_pos_groups)
   } else {
     PeakMag_pos <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
     colnames(PeakMag_pos) <- c("ageI", "peak_mag")
   }
-  
+
   ## Get peak-magnitude values for negative peaks
   if (length(Peaks.neg.final) > 0) {
     PeakMag_neg_val <- thresh.neg - v
     PeakMag_neg_val[PeakMag_neg_val < 0] <- 0
     PeakMag_neg_index <- which(PeakMag_neg_val > 0)
-    
+
     Peaks_neg_groups <- split(PeakMag_neg_index,
                               cumsum(c(1, diff(PeakMag_neg_index) != 1)))
-    
+
     PeakMag_neg <- vector(mode = "numeric", length = length(Peaks_neg_groups))
     PeakMag_neg_ages <- vector(mode = "numeric", length = length(Peaks_neg_groups))
     Peak_duration <- vector(mode = "numeric", length = length(Peaks_neg_groups))
-    
+
     for (i in 1:length(Peaks_neg_groups)) {
       n_groups <- length(Peaks_neg_groups[[i]])
       Peak_duration[i] <- ageI[ Peaks_neg_groups[[i]] [n_groups] + 1] -

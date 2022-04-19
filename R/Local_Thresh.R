@@ -68,18 +68,18 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   if (keep_consecutive == T & is.null(minCountP) == F) {
     stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
   }
-  
+
   # Determine path to output folder for Figures
   if (plot.local_thresh == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")
-    
+
     if (dir.exists(out.path) == F) {
       dir.create(out.path)
     }
   }
-  
+
   # Extract parameters from input list (i.e. detrended series) ####
-  
+
   # Determines for which of the variables the threshold analysis should be made
   if (is.null(proxy) == T) { # if proxy = NULL, use the data in series$detr$detr
     if (dim(series$detr$detr)[2] > 2) {
@@ -89,29 +89,29 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       a <- series$detr$detr
     }
   }
-  
+
   if (is.null(proxy) == F) { # if we want to select a specific variable
     a <- data.frame(series$detr$detr$age)
     colnames(a) <- "age"
     a <- cbind(a, series$detr$detr[[proxy]])
     colnames(a)[2] <- proxy
   }
-  
+
   # Checks if smoothing.yr and thresh.yr were specified,
   # else use smoothing.yr used for detrending
   if (is.null(smoothing.yr) == T) {
     smoothing.yr <- series$detr$smoothing.yr
   }
-  
+
   if (is.null(thresh.yr) == T) {
     thresh.yr <- series$detr$smoothing.yr
   }
-  
+
   # Further extract parameters from input dataset
   a.names <- colnames(a)
   s.name <- series$detr$series.name
   yr.interp <- series$int$yr.interp
-  
+
   # Determine whether to limit the analysis to a portion of the record
   if (is.null(t.lim) == T) {
     ageI <- a$age
@@ -122,26 +122,26 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     ageI <- a$age[which(a$age <= max(t.lim) & a$age >= min(t.lim))]
   }
   x.lim <- c(max(ageI), min(ageI))
-  
-  
+
+
   # Determine the proportion of datapoints used to smooth local thresholds with loess()
   n.smooth <- round(smoothing.yr/yr.interp)
   span.sm <- n.smooth/dim(a)[1]
-  
-  
+
+
   # Create empty list where output data will be stored
   a.out <- list(span.sm = span.sm,
                 thresh.value = thresh.value,
                 yr.interp = yr.interp)
-  
-  
+
+
   # Create space for local variables
   v <- a[ ,2] # variable
   v.name <- colnames(a)[2]
   v.gmm <- v[which(complete.cases(v))]
   y.lim <- c(min(v.gmm), max(v.gmm))
-  
-  
+
+
   thresh.pos <- matrix(data = NA, nrow = length(v)) # threshold values
   thresh.neg <- matrix(data = NA, nrow = length(v)) # threshold values
   muHat <- data.frame(matrix(data = NA, nrow = length(v), ncol = 2)) # mean of noise distribution
@@ -149,19 +149,19 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   propN <- data.frame(matrix(data = NA, nrow = length(v), ncol = 2)) # proportion of each Cluster-identified distribution
   Peaks.pos <- matrix(data = 0, nrow = length(v), ncol = 1) # positive peaks
   Peaks.neg <- matrix(data = 0, nrow = length(v), ncol = 1) # negative peaks
-  
+
   # Define number of plots to print for evaluation of local threshold
   j <- 1
-  
+
   num.plots <- seq(from = round(n.smooth),
                    to = length(v),
                    by = round(n.smooth/2))
   my.plots <- vector(length(num.plots), mode = 'list')
-  
-  
-  
+
+
+
   # Determine local thresholds with Gaussian mixture models (2 components) ####
-  
+
   # SELECT peak VALUES TO EVALUATE, BASED ON Smoothing.yr
   for (i in 1:length(v)) {  #For each value in the detrended dataseries, find the threshold.
     #i=3
@@ -184,13 +184,13 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       # All samples between first and last 'thrshYr' samples.
       X <- v[(i - round(0.5*(thresh.yr/yr.interp))):(i + round(0.5*(thresh.yr/yr.interp)))]
     }
-    
-    
-    
+
+
+
     ## Estimate local noise distribution with Guassian mixture model ####
-    
+
     X.gmm <- X[which(complete.cases(X))]
-    
+
     if (length(X) < 3) {
       cat("NOTE: Less than 3 peak values in moving window; cannot fit noise distribution.")
       cat("\n      Mean and standard deviation forced to equal 0.") 
@@ -206,7 +206,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       # plot(x=m, what="density", data=X)
       # summary(m, parameters=T, classification=T)
       # plot.Mclust(m, what="classification")
-      
+
       # Get parameters from Gaussian mixture models
       muHat[i, ] <- m$parameters$mean
       sigmaHat[i, 1] <- sqrt(m$parameters$variance$sigmasq[1])
@@ -306,55 +306,41 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       dev.off()
     }
   }
-  
-  
+
+
   ## Calculate SNI ####
-  ## 
-  ## Get resampled values for selected variable (proxy) for selected time interval (t.lim)
+  ## Get resampled values for the selected variable (proxy) for
+  ## the selected time interval (t.lim)
   SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
                           series$int$series.int$age >= min(t.lim))
-  
+
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
-  
-  
-  SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh.pos),
+
+  thresh_pos_sni <- SNI_in - series$detr$detr[[proxy]] + thresh.pos
+  SNI_pos <- SNI(ProxyData = cbind(ageI, SNI_in, thresh_pos_sni),
                  BandWidth = smoothing.yr)
-  
-  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
-  if (all(is.na(SNI_pos$SNI_raw))) {
-    SNI_pos$SNI_raw <- 0
-    SNI_pos$SNI_sm <- 0
-  }
-  
-  
-  SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh.neg),
+
+  thresh_neg_sni <- SNI_in - series$detr$detr[[proxy]] + thresh.neg
+  SNI_neg <- SNI(ProxyData = cbind(ageI, -1 * SNI_in, -1 * thresh_neg_sni),
                  BandWidth = smoothing.yr)
-  
-  ## If SNI = NA (in case all values are > threshold, or all values < threshold)
-  if (all(is.na(SNI_neg$SNI_raw))) {
-    SNI_neg$SNI_raw <- 0
-    SNI_neg$SNI_sm <- 0
-  }
-  
   rm(SNI_in, SNI_in_index)
-  
-  
-  
+
+
   # Smooth local threshold values ####
   ## Smooth thresholds Lowess smoother
   thresh.pos.sm <- stats::lowess(ageI, thresh.pos, f = span.sm, iter = 1)$y
   thresh.neg.sm <- stats::lowess(ageI, thresh.neg, f = span.sm, iter = 1)$y
-  
-  
+
+
   ## Get peaks ####
-  
+
   ## If keep_consecutive == F ####
   if (keep_consecutive == F) {  # if consecutive peak samples should be removed
-    
+
     # Flag values exceeding thresholds
     Peaks.pos[which(v > thresh.pos.sm)] <- 2
     Peaks.neg[which(v < thresh.neg.sm)] <- 2
-    
+
     # Then remove consecutive peaks
     # For positive peaks
     for (i in 1:(length(Peaks.pos) - 1)) { # For each value in Charcoal.peak
@@ -363,7 +349,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.pos[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
-    
+
     for (i in 1:length(Peaks.pos)) {
       if (Peaks.pos[i] < 2) {    # if value < 2
         Peaks.pos[i] <- 0        # mark sample as 0 (unflag Peak)
@@ -371,8 +357,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.pos[i] <- 1        # else (if value=2) mark sample as 1 (flag as Peak)
       }
     }
-    
-    
+
+
     # For negative peaks
     for (i in 1:(length(Peaks.neg) - 1)) { # For each value in Charcoal.peak
       if (Peaks.neg[i] > 0
@@ -380,7 +366,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peaks.neg[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
-    
+
     for (i in 1:length(Peaks.neg)) {
       if (Peaks.neg[i] < 2) {    # if value < 2
         Peaks.neg[i] <- 0        # mark sample as 0 (unflag Peak)
@@ -392,29 +378,29 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     Peaks.pos[which(v > thresh.pos.sm)] <- 1
     Peaks.neg[which(v < thresh.neg.sm)] <- 1
   }
-  
-  
-  
+
+
+
   ## Minimum-count Analysis ####
   ## If minCountP is not NULL, screen positive peaks with minimum count test ####
   if (is.null(minCountP) == F) {
     ## Minimum-count Analysis
-    
+
     # Set [yr] Years before and after a peak to look for the min. and max. value
     if (is.null(MinCountP_window) == T) {
       MinCountP_window <- round(150/yr.interp) * yr.interp
     }
-    
+
     countI_index <- which(colnames(series$int$series.int) == proxy)
     countI <- series$int$series.countI[ ,countI_index]
     volI <- series$int$volI
-    
+
     # Create space
     d <- rep_len(NA, length.out = dim(a) [1])
     Thresh_minCountP <- rep_len(NA, length.out = dim(a) [1])
-    
+
     peakIndex <- which(Peaks.pos == 1) # Index to find peak samples
-    
+
     if (length(peakIndex) > 1) {          # Only proceed if there is > 1 peak
       for (i in 1:length(peakIndex)) {    # For each peak identified...
         peakYr <- ageI[peakIndex[i]]      # Find age of peak and window around peak
@@ -441,31 +427,31 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         if (windowTime_in[2] < windowPeak_in[2]) { # thus, if a peak falls within the time window defined by MinCountP_window
           windowTime_in[2] <- windowPeak_in[2] # replace the windowTime_in with the windowPeak_in
         }
-        
+
         # Final index value for search window: window (1) defines oldest sample,
         # window (2) defines youngest sample
         windowSearch <- c(windowTime_in[1], windowTime_in[2])
-        
+
         # search for max and min Peaks.pos within this window.
         # [# cm^-3] Max charcoal concentration after peak.
         countMax <- round(max(countI[ windowSearch[2]:peakIndex[i] ]))
-        
+
         # Index for location of max count.
         countMaxIn <- windowSearch[2] - 1 + max(which(round(countI[windowSearch[2]:peakIndex[i]]) == countMax))
-        
+
         # [# cm^-3] Min charcoal concentration before peak.
         countMin <- round(min(countI[peakIndex[i]:windowSearch[1] ]))
-        
+
         # Index for location of Min count
         countMinIn <- peakIndex[i] - 1 + min(which(round(countI[peakIndex[i]:windowSearch[1]]) == countMin))
-        
+
         volMax <- volI[countMaxIn]
         volMin <- volI[countMinIn]
         d[ peakIndex[i] ] <- (abs(countMin - (countMin + countMax) *
                                     (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
                                                                                (volMin/(volMin + volMax)) * 
                                                                                (volMax/(volMin + volMax))))
-        
+
         # Test statistic
         Thresh_minCountP[peakIndex[i]] <- 1 - pt(q = d[peakIndex[i]], df = Inf)
         # Inverse of the Student's T cdf at 
@@ -478,67 +464,67 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         # cumulative normal distribution.
       }
     }
-    
+
     # Clean Environment
     rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn, peakIndex,
        peakYr, volMax, volMin, windowPeak_in, windowSearch, windowTime, windowTime_in)
-    
-    
+
+
     # Take note of and remove peaks that do not pass the minimum-count screening-peak test
     Peaks.pos.insig <- rep_len(0, length.out = dim(a) [1])
-    
+
     insig.peaks <- intersect(which(Peaks.pos > 0),
                              which(Thresh_minCountP > minCountP)) # Index for
     # Peaks.pos values that also have p-value > minCountP...thus insignificant
     Peaks.pos.insig[insig.peaks] <- 1
     Peaks.pos[insig.peaks] <- 0 # set insignificant peaks to 0
     #Peaks.posThresh[insig.peaks] <- 0
-    
+
   } else {
     insig.peaks <- NULL
     Peaks.pos.insig <- rep_len(NA, length.out = dim(a) [1])
   }
-  
-  
-  
+
+
+
   ## Gather data to calculate return intervals ####    
-  
+
   ## Plot series with trend + threshold + peaks
   Peaks.pos.final <- which(Peaks.pos == 1)
   Peaks.neg.final <- which(Peaks.neg == 1)
-  
+
   peaks.pos.ages <- ageI[which(Peaks.pos == 1)]
   peaks.neg.ages <- ageI[which(Peaks.neg == 1)]
-  
-  
+
+
   ## Calculate Event Return Intervals
   RI_neg <- c(diff(peaks.neg.ages), NA)
   RI_pos <- c(diff(peaks.pos.ages), NA)
-  
-  
-  
+
+
+
   ## Get peak magnitude ####
   # Peak magnitude (pieces cm-2 peak-1) is the sum of all samples exceeding
   # threshFinalPos for a given peak.
   # The units are derived as follows:
   # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].  
-  
+
   ## Get peak-magnitude values for positive peaks
   if (length(Peaks.pos.final) > 0) {
     PeakMag_pos_val <- v - thresh.pos
     PeakMag_pos_val[PeakMag_pos_val < 0] <- 0
     PeakMag_pos_index <- which(PeakMag_pos_val > 0)
-    
+
     Peaks_pos_groups <- split(PeakMag_pos_index,
                               cumsum(c(1, diff(PeakMag_pos_index) != 1)))
-    
+
     PeakMag_pos <- vector(mode = "numeric",
                           length = length(Peaks_pos_groups))
     PeakMag_pos_ages <- vector(mode = "numeric",
                                length = length(Peaks_pos_groups))
     Peak_duration <- vector(mode = "numeric",
                             length = length(Peaks_pos_groups))
-    
+
     for (i in 1:length(Peaks_pos_groups)) {
       #i = 2
       n_groups <- length(Peaks_pos_groups[[i]])
@@ -548,31 +534,31 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peak_duration[i]
       PeakMag_pos_ages[i] <- ageI[Peaks_pos_groups[[i]] [n_groups]]
     }
-    
+
     PeakMag_pos <- as.data.frame(cbind(PeakMag_pos_ages, PeakMag_pos))
     colnames(PeakMag_pos) <- c("ageI", "peak_mag")
-    
+
     rm(PeakMag_pos_val, PeakMag_pos_index, Peak_duration, Peaks_pos_groups)
   } else {
     PeakMag_pos <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
     colnames(PeakMag_pos) <- c("ageI", "peak_mag")
   }
-  
+
   ## Get peak-magnitude values for negative peaks
   if (length(Peaks.neg.final) > 0) {
     PeakMag_neg_val <- thresh.neg - v
     PeakMag_neg_val[PeakMag_neg_val < 0] <- 0
     PeakMag_neg_index <- which(PeakMag_neg_val > 0)
-    
+
     Peaks_neg_groups <- split(PeakMag_neg_index,
                               cumsum(c(1, diff(PeakMag_neg_index) != 1)))
-    
+
     PeakMag_neg <- vector(mode = "numeric",
                           length = length(Peaks_neg_groups))
     PeakMag_neg_ages <- vector(mode = "numeric",
                                length = length(Peaks_neg_groups))
     Peak_duration <- vector(mode = "numeric", length = length(Peaks_neg_groups))
-    
+
     for (i in 1:length(Peaks_neg_groups)) {
       n_groups <- length(Peaks_neg_groups[[i]])
       Peak_duration[i] <- ageI[ Peaks_neg_groups[[i]] [n_groups] + 1] -
@@ -581,29 +567,29 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         Peak_duration[i]
       PeakMag_neg_ages[i] <- ageI[Peaks_neg_groups[[i]] [n_groups]]
     }
-    
+
     PeakMag_neg <- as.data.frame(cbind(PeakMag_neg_ages, PeakMag_neg))
     colnames(PeakMag_neg) <- c("ageI", "peak_mag")
-    
+
     rm(PeakMag_neg_val, PeakMag_neg_index, Peak_duration, Peaks_neg_groups)
   } else {
     PeakMag_neg <- as.data.frame(matrix(NA, nrow = 1, ncol = 2))
     colnames(PeakMag_neg) <- c("ageI", "peak_mag")
   }
-  
-  
-  
+
+
+
   ## Make summary plots ####
   if (plot.local_thresh == T) {
-    
+
     # Set y-axis limits
     y.lim <- c(min(v, na.rm = T), max(v, na.rm = T))
-    
+
     if (!is.null(out.dir)) {
       pdf(paste0(out.path, s.name, '_', v.name, '_Local_ThresholdSeries.pdf'))
     }
     par(mfrow = c(2,1), oma  =  c(3,1,0,0), mar = c(1,4,0.5,0.5))
-    
+
     plot(ageI, a[ ,2], type = "s", axes = F, ylab = a.names[2],
          xlab = a.names[1], xlim = x.lim)
     abline(h = 0)
@@ -619,7 +605,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     axis(2)
     mtext(paste0("thresh.value  =  ", thresh.value), side = 3,
           las = 0, line = -0.5)
-    
+
     plot(ageI, SNI_pos$SNI_raw, type = "p", xlim = x.lim, col = "grey",
          ylim = c(0, 1.2*max(SNI_pos$SNI_raw, na.rm = T)), axes  =  F,
          xlab  =  "Age (cal yrs BP)", ylab  =  "SNI")
@@ -627,13 +613,13 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     abline(h  =  3, lty  =  "dashed")
     axis(side = 1, labels = T, tick = T)
     axis(2)
-    
+
     if (!is.null(out.dir)) {
       dev.off()
     }
   }
-  
-  
+
+
   ## Prepare output
   out1 <- structure(list(proxy = proxy, ages.thresh = ageI,
                          thresh.value = thresh.value,
@@ -650,10 +636,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          RI_neg = RI_neg, RI_pos = RI_pos,
                          span.sm = span.sm,
                          x.lim = x.lim))
-  
+
   a.out <- append(series, list(out1))
   names(a.out) [5] <- "thresh"
-  
+
   return(a.out)
-  
 }

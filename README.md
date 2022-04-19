@@ -144,13 +144,7 @@ co_loc <- peak_detection(series = co, proxy = "char",
 
 With these settings, the results obtained using *tapas* strikingly
 resemble those obtained by [Higuera et
-al. (2009)](https://doi.org/10.1890/07-2019.1) with *CharAnalysis*:
-
-![Code Lake: peak-detection
-outputs](/README_Figures/01_Code_Lake_peak_detection.jpg "Code Lake: peak-detection outputs")
-
-![Code Lake: reconstructed fire-return intervals
-(FRI)](/README_Figures/02_Code_Lake_FRIs.jpg "Code Lake: reconstructed fire-return intervals (FRI)")
+al. (2009)](https://doi.org/10.1890/07-2019.1) with *CharAnalysis*
 
 Alternatively, the data can be analysed step-by-step:
 
@@ -336,3 +330,11 @@ your improvements may fit with ongoing development of add-ons. Thanks!
 > classification and density estimation using Gaussian finite mixture
 > models. *The R Journal* 8: 289-317
 > [link](https://doi.org/10.32614/RJ-2016-021)
+
+## Bug fixes:
+
+### Version 0.1.1:
+
+-   fixed an error for calculating the SNI index
+-   fixed the data input for the minimum-count test: now uses ‘counts’
+    instead of ‘concentrations’

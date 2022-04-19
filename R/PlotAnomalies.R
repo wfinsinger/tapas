@@ -99,7 +99,7 @@ Plot.Anomalies <- function(series = NULL, x.lim = NULL, plot.crosses = T,
     #      xlim = x.lim, ylim = y.lim, axes = F, ylab = "")
     if (plot.crosses == T) {
       points(x = d$int$series.int$age[Peaks.pos.plot],
-             y = rep(x = 1.1*y.lim[2],length(Peaks.pos.plot)),
+             y = rep(x = 1.1*y.lim[2], length(Peaks.pos.plot)),
              pch = 3, col = "red", lwd = 1.5)
       points(x = d$int$series.int$age[Peaks.neg.plot],
              y = rep(1.15*y.lim[2], length(Peaks.neg.plot)),

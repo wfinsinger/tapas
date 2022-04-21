@@ -15,7 +15,7 @@
 #'            \item{"conI"}{the function returns resampled concentrations}
 #'            \item{"countI"}{the function returns resampled counts}
 #'            }
-#' @param series_name A character string defining the name of the input matrix
+#' @param series_name A character string defining typically the site name
 #'                    (\code{NULL} by default).
 #' @param first,last Age boundaries of the resampled time serie.
 #'                   If unspecified (\code{first=NULL} and \code{last=NULL}),
@@ -109,13 +109,13 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                             plot_crosses = TRUE, plot_x = TRUE,
                             plot_neg = FALSE,
                             sens = TRUE, smoothing_yr_seq = NULL) {
-  
-  
-  ## Initial check-ups #### 
-  
+
+
+  ## Initial check-ups ####
+
   ## Check if data is formatted correctly
   series <- check_pretreat(series)
-  
+
   ## Check if arguments for detrending are coherent
   detr_options <- c("rob.loess", "rob.lowess", "mov.median")
   if (!(detr_type %in% detr_options)) {
@@ -124,10 +124,10 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
       "Accepted values: ", paste(detr_options, collapse = ", "), "."
     )
   }
-  
+
   ## Check if the variable name (proxy) is coherent
   proxies_options <- colnames(series[ 6:dim(series)[2] ])
-  
+
   if (is.null(proxy) & length(proxies_options) > 1) {
     # stop(
     #   "Unrecognized variable name: '", proxy, "'. ",
@@ -137,35 +137,35 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                   "Accepted names: ", paste(proxies_options, collapse = ", "), "."
                 ))
   }
-  
+
   if (is.null(proxy) & length(proxies_options) == 1) {
     proxy <- colnames(series) [6]
   }
-  
+
   if (!(proxy %in% proxies_options)) {
     stop(
       "Unrecognized variable name: '", proxy, "'. ",
       "Accepted names: ", paste(proxies_options, collapse = ", "), "."
     )
   }
-  
-  
+
+
   ## Resample data ####
   d_i <- pretreatment_data(series = series, out = out, series.name = series_name,
                            first = first, last = last, yrInterp = yrInterp)
-  
-  
+
+
   ## Detrend resampled data ####
   d_detr <- SeriesDetrend(series = d_i, smoothing.yr = smoothing_yr,
                           detr.type = detr_type, out.dir = out_dir)
-  
-  
+
+
   ## Screen peaks using GMM-inferred threshold(s) and minimum-count test and ####
   ## evaluate suitability of the record with signal-to-noise index
   if (out == "accI") {
     proxy <- paste0(proxy,"AR")
   }
-  
+
   if (thresh_type == "global") {
     d_thresh <- global_thresh(series = d_detr, proxy = proxy, t.lim = t_lim,
                               thresh.value = thresh_value, noise.gmm = noise_gmm,
@@ -183,45 +183,45 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                              plot.local_thresh = plotit)
     d_thresh$thresh$thresh_type <- "local"
   }
-  
-  
-  
+
+
+
   ## Perform sensitivity analysis ####
   if (sens == T) {
-    
+
     ## Effect of different smoothing-window widths
-    
+
     # Select smoothing windows
     if (is.null(smoothing_yr_seq)) {
       smoothing_yr_seq <- seq(from = 500, to = 1000, by = 100)
     }
-    
+
     ## Prepare space to gather data generated in each loop
     sens_sni_pos <- as.data.frame(matrix(NA, ncol = length(smoothing_yr_seq),
                                          nrow = dim(d_thresh$int$series.int)[1]))
     names(sens_sni_pos) <- c(smoothing_yr_seq)
-    
-    
+
+
     sens_peaks_pos <- as.data.frame(matrix(NA, ncol = 2,
                                            nrow = length(smoothing_yr_seq)))
     sens_peaks_pos[ ,1] <- c(smoothing_yr_seq)
-    
+
     sens_ri_pos <- vector('list', length(smoothing_yr_seq))
     names(sens_ri_pos) <- c(smoothing_yr_seq)
-    
-    
+
+
     ## Perform peak_detection() for each of the smoothing_yr_seq values:
     for (i in seq_along(smoothing_yr_seq)) {
       smoothing_yr <- smoothing_yr_seq[i]
       d_detr_i <- SeriesDetrend(series = d_i, smoothing.yr = smoothing_yr,
                                 detr.type = detr_type, plot_pdf = F)
-      
-      
+
+
       ## Screen peaks using GMM-inferred threshold(s) and minimum-count test and
       ## evaluate suitability of the record with signal-to-noise index
-      
+
       # sens_plots <- F # such that pdf files are not produced for the sensitivity runs
-      
+
       if (thresh_type == "global") {
         d_thresh_i <- global_thresh(series = d_detr_i, proxy = proxy, t.lim = t_lim,
                                     thresh.value = thresh_value, noise.gmm = noise_gmm,
@@ -241,24 +241,24 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                                    plot.local_thresh = F)
         d_thresh_i$thresh$thresh_type <- "local"
       }
-      
+
       # Gather data
       sens_sni_pos[ ,i] <- d_thresh_i$thresh$SNI_pos$SNI_raw
       sens_peaks_pos[i,2] <- sum(d_thresh_i$thresh$peaks.pos)
       sens_ri_pos[[i]] <- d_thresh_i$thresh$RI_pos
     }
-    
+
     ## Replace Inf values with NA values in SNI data frame
     sens_sni_pos <- do.call(data.frame,
                             lapply(sens_sni_pos,
                                    function(x) replace(x,
                                                        is.infinite(x),
                                                        NA)))
-    
+
     ## Plot output of sensitivity analysis ####
     layout(1)
     par(mfrow = c(3,1), mar = c(2,4,2,2), oma = c(2,1,0,1), cex = 1)
-    
+
     boxplot(sens_sni_pos, xlab = "",
             ylab = "SNI",
             notch = F, axes = F,
@@ -270,7 +270,7 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     axis(1, at = 1:length(smoothing_yr_seq), labels = c(smoothing_yr_seq))
     axis(2)
     mtext("smoothing-window width (years)", side = 1, line = 2)
-    
+
     boxplot(sens_ri_pos, xlab = "",
             ylab = "Return intervals", axes = F,
             ylim = c(0, 1.3*max(unlist(sens_ri_pos), na.rm = T)),
@@ -278,8 +278,8 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     axis(1, at = 1:length(smoothing_yr_seq), labels = c(smoothing_yr_seq))
     axis(2)
     mtext("smoothing-window width (years)", side = 1, line = 2)
-    
-    
+
+
     plot(sens_peaks_pos[ ,1], sens_peaks_pos[ ,2],
          ylab = "# of Positive peaks",
          type = "o", col = "blue",
@@ -288,9 +288,9 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     axis(2)
     mtext("smoothing-window width (years)", side = 1, line = 2)
   }
-  
-  
-  
+
+
+
   ## Plot results obtained with the selected parameters ####
   if (plotit == T) {
     layout(1)
@@ -301,9 +301,9 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                          plot.x = plot_x, plot.neg = plot_neg)
     mtext("Age (cal yr BP)", side = 1, line = 2.5)
   }
-  
-  
+
+
   ## Return output to environment ####
   return(d_thresh)
-  
+
 }

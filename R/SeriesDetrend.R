@@ -1,7 +1,3 @@
-#
-#
-#  ***************************************************************************
-
 #' Detrend time series.
 #'
 #' Processes the output of pretreatment_data() function
@@ -32,35 +28,35 @@
 #' @export
 SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.loess",
                           out.dir = NULL, plot_pdf = T) {
-  
+
   # Determine path to Figure-output folder and create folder if it does not exist
   if (plot_pdf == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")
-    
+
     if (dir.exists(out.path) == F) {
       dir.create(out.path)
     }
   }
-  
+
   # Extract data and parameters from input list
   a <- series$int$series.int
   s.name <- series$raw$series.name
   yr.interp <- series$int$yr.interp
-  
+
   # Set Proportion of datapoints used for Loess and Lowess smoothing functions:
   n.smooth <- round(smoothing.yr/yr.interp)
   span <- n.smooth/dim(a)[1]
-  
+
   # Get trends for every variable in dataset
   a.trend <- data.frame(a$age)
   colnames(a.trend) <- "age"
-  
+
   if (detr.type == "rob.lowess") {
     for (i in 2:ncol(a)) {
       a.trend[ ,i] <- lowess(x = a[ ,i], f = span, iter = 4)$y
     }
   }
-  
+
   if (detr.type == "rob.loess") {
     for (i in 2:ncol(a)) {
       loess.i <- loess(formula = a[ ,i] ~ age, data = a, span = span,
@@ -68,7 +64,7 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
       a.trend[ ,i] <- predict(object = loess.i, newdata = a.trend$age)
     }
   }
-  
+
   # Moving median (Method #4 in Matlab version; translated from Matlab version)
   if (detr.type == "mov.median") {
     for (j in 2:ncol(a)) {
@@ -91,22 +87,22 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
       a.trend[ ,j] <- lowess(x = a.trend[ ,j], f = span, iter = 0)$y
     }
   }
-  
+
   colnames(a.trend) <- colnames(a)
-  
-  
+
+
   # Then detrend every variable in dataset
   a.detr <- as.data.frame(a[ ,2:ncol(a)] - a.trend[ ,2:ncol(a.trend)])
   colnames(a.detr) <- colnames(a) [2:ncol(a)]
   a.detr$age <- a.trend$age
   a.detr <- a.detr %>% select("age", everything()) # reorders the columns
   # a.detr <- a.detr[which(complete.cases(a.detr)), ] # removed this because in some datasets some variables are incomplete!
-  
-  
+
+
   # And plot the detrended dataseries
   x.lim <- rev(range(a.detr$age))
   a.names <- colnames(a)
-  
+
   if (plot_pdf == T) {
     if (!is.null(out.dir)) {
       pdf(paste0(out.path, s.name, "_DetrendedSeries.pdf"))
@@ -119,7 +115,7 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
       axis(side = 1, labels = F, tick = T)
       axis(2)
       lines(a.trend$age, a.trend[ ,i], col = "blue4", lwd = 2)
-      
+
       plot(a.detr$age, a.detr[ ,i], type = "s", xlab = "Age", ylab = "Residuals\n(data-trend)",
            axes = F, xlim = x.lim)
       abline(h = 0, col = "red")
@@ -131,14 +127,14 @@ SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.l
       dev.off()
     }
   }
-  
+
   # Prepare output
   out1 <- structure(list(detr = a.detr, smoothing.yr = smoothing.yr,
                          detr.type = detr.type, series.name = s.name))
   out2 <- append(series, list(out1))
   names(out2) [4] <- "detr"
-  
+
   # Get output
   return(out2)
-  
+
 }

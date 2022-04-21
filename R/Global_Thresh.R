@@ -1,5 +1,5 @@
 #' Determine threshold values to extract signal from a detrended timeseries.
-#' 
+#'
 #' The script determines threshold values
 #' to decompose a detrended timeseries
 #' into a *noise* and a *signal* component
@@ -11,9 +11,9 @@
 #' The procedure uses a Gaussian mixture model
 #' with the assumption that the noise component
 #' is normally distributed around 0 (because input values were detrended!).
-#' A figure is generated and saved to the \code{output} directory 
+#' A figure is generated and saved to the \code{output} directory
 #' and a list is returned with the threshold data for the analyzed proxy.
-#' 
+#'
 #' Requires output from the \code{\link{SeriesDetrend}()} function.
 #'
 #' @param series The output of the \code{SeriesDetrend()} function.
@@ -54,7 +54,7 @@
 #'                           are produced and written to \code{out.dir} folder.
 #'
 #' @return A list similar to \code{series} with additional data appended.
-#' 
+#'
 #' @importFrom stats complete.cases dnorm pt qnorm
 #' @importFrom graphics curve hist points
 #'
@@ -64,7 +64,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                           keep_consecutive = F,
                           minCountP = 0.05, MinCountP_window = 150,
                           out.dir = NULL, plot.global_thresh = T) {
-  
+
   # initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
     stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
@@ -74,16 +74,16 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Determine path to output folder for Figures
   if (plot.global_thresh == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")
-  
+
     if (dir.exists(out.path) == F) {
       dir.create(out.path)
     }
   }
 
   # Extract parameters from input list (i.e. the detrended series) ####
-  
+
   # Determines for which of the variables (proxy) in the dataset the analysis should be made
-  # 
+  #
   if (is.null(smoothing.yr) == T) {
     smoothing.yr <- series$detr$smoothing.yr
   }
@@ -142,7 +142,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
 
   # Determine global threshold with 2 components ####
-  # 
+  #
   # Make space in empty matrices
   Peaks.pos <- matrix(data = 0, nrow = length(v), ncol = 1) # Space for positive component
   Peaks.neg <- matrix(data = 0, nrow = length(v), ncol = 1) # Space for negative component
@@ -175,7 +175,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   ## Calculate SNI ####
 
   ## Get resampled values for selected variable (proxy) for selected time interval (t.lim)
-  SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
+  SNI_in_index <- which(series$int$series.int$age <= max(t.lim) &
                           series$int$series.int$age >= min(t.lim))
 
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
@@ -202,7 +202,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     # For positive peaks
     for (i in 1:(length(Peaks.pos) - 1)) { # For each value in Peaks.pos
       if (Peaks.pos[i] > 0
-          && Peaks.pos[i + 1] > 0) {  # if two consecutive values > 0 
+          && Peaks.pos[i + 1] > 0) {  # if two consecutive values > 0
         Peaks.pos[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
@@ -218,7 +218,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     # For negative peaks
     for (i in 1:(length(Peaks.neg) - 1)) { # For each value in Peaks.neg
       if (Peaks.neg[i] > 0
-          && Peaks.neg[i + 1] > 0) {  # if two consecutive values > 0 
+          && Peaks.neg[i + 1] > 0) {  # if two consecutive values > 0
         Peaks.neg[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
       }
     }
@@ -299,23 +299,23 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         countMin <- round(min(countI[peakIndex[i]:windowSearch[1] ]))
         # Index for location of Min count
         countMinIn <- peakIndex[i] - 1 + min(which(round(countI[peakIndex[i]:windowSearch[1]]) == countMin))
-        
+
         volMax <- volI[countMaxIn]
         volMin <- volI[countMinIn]
         d[ peakIndex[i] ] <- (abs(countMin - (countMin + countMax) *
                                     (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
-                                                                               (volMin/(volMin + volMax)) * 
+                                                                               (volMin/(volMin + volMax)) *
                                                                                (volMax/(volMin + volMax))))
 
         # Test statistic
         Thresh_minCountP[peakIndex[i]] <- 1 - pt(q = d[peakIndex[i]], df = Inf)
-        # Inverse of the Student's T cdf at 
+        # Inverse of the Student's T cdf at
         # Thresh_minCountP, with Inf degrees of freedom.
         # From Charster (Gavin 2005):
-        # This is the expansion by Shuie and Bain (1982) of the equation by 
-        # Detre and White (1970) for unequal 'frames' (here, sediment 
-        # volumes). The significance of d is based on the t distribution 
-        # with an infinite degrees of freedom, which is the same as the 
+        # This is the expansion by Shuie and Bain (1982) of the equation by
+        # Detre and White (1970) for unequal 'frames' (here, sediment
+        # volumes). The significance of d is based on the t distribution
+        # with an infinite degrees of freedom, which is the same as the
         # cumulative normal distribution.
       }
     }
@@ -362,7 +362,7 @@ global_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Peak magnitude (pieces cm-2 peak-1) is the sum of all samples exceeding
   # threshFinalPos for a given peak.
   # The units are derived as follows:
-  # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].  
+  # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].
 
   ## Get peak-magnitude values for positive peaks
   if (length(Peaks.pos.final) > 0) {

@@ -1,5 +1,5 @@
 #' Sedimentary charcoal data (Code Lake)
-#' 
+#'
 #' Lake-sediment charcoal data from Code lake, as in: Higuera, PE, LB Brubaker, PM Anderson, FS Hu, and TA Brown (2009) Vegetation mediated the impacts of postglacial climate change on fire regimes in the south-central Brooks Range, Alaska. Ecological Monographs 79:201-219.
 #'
 #' @format A data frame with 471 rows and 7 variables:

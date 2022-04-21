@@ -77,7 +77,7 @@ SNI <- function(ProxyData, BandWidth) {
   CHAR <- ProxyData[ ,2]
   thresh <- ProxyData[ ,3]
 
-  r <- mean(diff(ages)) # r = mean sampling resolution  
+  r <- mean(diff(ages)) # r = mean sampling resolution
 
   if (!sd(diff(ages)) == 0) { # If resolution (yr/sample) is not constant
     print(paste0('Warning: Sampling resolution (mean: ',r,
@@ -85,7 +85,7 @@ SNI <- function(ProxyData, BandWidth) {
   }
 
 
-  # Preallocate some space   
+  # Preallocate some space
   SNI_output 				<- list()
   #SNI_output$SNI 		<- NA * numeric(length(ages))
   SNI_output$winInd	<- matrix(data = NA, nrow = length(ages), ncol = 2)
@@ -99,21 +99,21 @@ SNI <- function(ProxyData, BandWidth) {
   for (i in 1:length(ages)) { # Perform calculations at each sample age
     # Calculate window indexes
     if ( i < round(0.5*(BandWidth/r)) + 1 ) {  # Samples near beginning (moving window truncated)
-      SNI_output$winInd[i, ] <- c(1, (i + round(0.5*(BandWidth/r)))) 
+      SNI_output$winInd[i, ] <- c(1, (i + round(0.5*(BandWidth/r))))
     } else {
       if ( i > length(ages) - round(0.5*(BandWidth/r)) ) { # Samples near end
         SNI_output$winInd[i, ] <- c((i - round(0.5*(BandWidth/r))),
-                                    length(ages) )  
-      } else { 
+                                    length(ages) )
+      } else {
         SNI_output$winInd[i, ] <- c((i - round(0.5*(BandWidth/r))),
                                     (i + round(0.5*(BandWidth/r))))
       }
     }
 
-    # In each moving window...  
+    # In each moving window...
 
     # Get CHAR for samples in window (X is entire window population)
-    X <- CHAR[SNI_output$winInd[i,1]:SNI_output$winInd[i,2]] 
+    X <- CHAR[SNI_output$winInd[i,1]:SNI_output$winInd[i,2]]
 
     # inS, inN: boolean indexes of samples counted as S & N, respectively
     inS <- (X >= thresh[SNI_output$winInd[i,1]:SNI_output$winInd[i,2]])
@@ -121,7 +121,7 @@ SNI <- function(ProxyData, BandWidth) {
 
     # Fill in S & N populations, means, stds
     SNI_output$popS[[i]] <- X[inS]
-    SNI_output$popN[[i]] <- X[inN]  
+    SNI_output$popN[[i]] <- X[inN]
     SNI_output$meanN[i] <- mean(X[inN])
     SNI_output$stdN[i] <- sd(X[inN])
 
@@ -131,7 +131,7 @@ SNI <- function(ProxyData, BandWidth) {
 
     # Calculate raw SNI (unsmoothed)
     if ( length(SNI_output$popS[[i]]) > 0) {
-      rawSNI[i] <- (mean( (SNI_output$popS[[i]] - SNI_output$meanN[i]) ) 
+      rawSNI[i] <- (mean( (SNI_output$popS[[i]] - SNI_output$meanN[i]) )
                     / SNI_output$stdN[i]) * SNI_output$CF[i]
     } else {
       rawSNI[i] <- 0 # SNI = 0 by definition when no samples exceed threshold

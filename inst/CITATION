@@ -1,0 +1,16 @@
+citHeader("To cite use of 'tapas' please use:")
+
+bibentry(bibtype = "Manual",
+  title        = "Tapas: an R package to perform trend and peaks analysis",
+  author       = c(person("Walter", "Finsinger"),
+                   person("Iago", "Bonnici")),
+  publisher    = "Zenodo",
+  year         = "2022",
+  doi          = "10.5281/zenodo.6344463",
+  url          = "https://doi.org/10.5281/zenodo.6344463",
+  textVersion  =
+  paste("Finsinger W., Bonnici I. (2022).",
+        "Tapas: an R package to perform trend and peaks analysis.",
+        "Zenodo",
+        "DOI https://doi.org/10.5281/zenodo.6344463")
+)

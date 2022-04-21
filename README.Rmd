@@ -44,7 +44,7 @@ A typical workflow of the peak-detection analysis includes the following steps [
   + 3.3 and eventually also screen the peak component using a minimum-count test
 * 4.) *evaluate* the suitability of the record for peak-detection analysis using the signal-to-noise index [(Kelly et al., 2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
-*tapas* performs steps 1.) and 2.) for several variables of one dataset type (e.g. different estimates of charcoal abundance). Instead, steps 3.) and 4.) are performed for one user-selected variable.
+*tapas* performs steps 1.) and 2.) for several variables of one dataset type (e.g. different estimates of charcoal abundance) in one go. Instead, steps 3.) and 4.) are performed for one user-selected variable.
 
 To run your own data, make a new folder within an umbrella folder, and save it under a name, e.g., `Data-In`. Then place a file (e.g., `MyData.csv`) in that folder. The input data file will contain the sample depths, sample ages, sample volume, and the variable(s). The file should have the following formatting: It has headers and at least six fields. The first five columns will report the metadata for the samples, the subsequent columns contain the variable(s) to be analysed (e.g., the abundance of charcoal pieces).
 
@@ -218,10 +218,3 @@ Contributions to this work are more than welcome. *tapas* is meant as a flexible
 > Kelly RF, PE Higuera, CM Barrett, FS Hu (2011) A signal-to-noise index to quantify the potential for peak detection in sediment-charcoal records. *Quaternary Research* 75: 11-17 [link](http://dx.doi.org/10.1016/j.yqres.2010.07.011)
 
 > Scrucca L, Fop M, Murphy TB, Raftery AE (2016) mclust 5: clustering, classification and density estimation using Gaussian finite mixture models. *The R Journal* 8: 289-317 [link](https://doi.org/10.32614/RJ-2016-021)
-
-
-## Bug fixes:
-
-### Version 0.1.1:
-- fixed an error for calculating the SNI index
-- fixed the data input for the minimum-count test: now uses 'counts' instead of 'concentrations'

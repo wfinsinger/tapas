@@ -24,8 +24,8 @@ and additional columns with the data which should be resampled.}
 \item{"countI"}{the function returns resampled counts}
 }}
 
-\item{series.name}{A string defining the name of the input matrix.
-Defaults to \code{NA}.}
+\item{series.name}{A string defining typically the site name. Defaults to
+\code{NA}.}
 
 \item{first, last}{Age boundaries of the resampled time serie.
 If unspecified (\code{first=NULL} and \code{last=NULL}),
@@ -35,9 +35,10 @@ from \code{min(series$AgeTop)} to max(series$AgeBot).}
 \item{yrInterp}{Resolution of the resampled timeseries.}
 }
 \value{
-A list with the resampled data according to \code{out} parameter.
+A list with the resampled (binned) data according to
+\code{out} parameter.
 }
 \description{
-Uses paleofire::pretreatment() function
+Uses the paleofire::pretreatment() function
 to virtually resample timeseries at equal sampling intervals.
 }

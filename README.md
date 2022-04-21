@@ -52,8 +52,8 @@ steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
     al., 2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
 *tapas* performs steps 1.) and 2.) for several variables of one dataset
-type (e.g. different estimates of charcoal abundance). Instead, steps
-3.) and 4.) are performed for one user-selected variable.
+type (e.g. different estimates of charcoal abundance) in one go.
+Instead, steps 3.) and 4.) are performed for one user-selected variable.
 
 To run your own data, make a new folder within an umbrella folder, and
 save it under a name, e.g., `Data-In`. Then place a file (e.g.,
@@ -330,11 +330,3 @@ your improvements may fit with ongoing development of add-ons. Thanks!
 > classification and density estimation using Gaussian finite mixture
 > models. *The R Journal* 8: 289-317
 > [link](https://doi.org/10.32614/RJ-2016-021)
-
-## Bug fixes:
-
-### Version 0.1.1:
-
--   fixed an error for calculating the SNI index
--   fixed the data input for the minimum-count test: now uses ‘counts’
-    instead of ‘concentrations’

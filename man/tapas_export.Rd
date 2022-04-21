@@ -15,7 +15,10 @@ or \code{\link{peak_detection}()}.}
 A data frame.
 }
 \description{
-Requires output from one of the following functions:
+Requires an output from one of the following functions:
 \code{\link{global_thresh}()}, \code{\link{local_thresh}()},
 or \code{\link{peak_detection}()}.
+}
+\author{
+Walter Finsinger
 }

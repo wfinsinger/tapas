@@ -103,7 +103,7 @@ the test will not be performed.}
 used for the minimum-count test.
 Defaults to \code{MinCountP_window = 150}.}
 
-\item{series_name}{A character string defining the name of the input matrix
+\item{series_name}{A character string defining typically the site name
 (\code{NULL} by default).}
 
 \item{out_dir}{Path to the output directory

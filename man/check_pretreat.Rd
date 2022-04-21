@@ -54,3 +54,6 @@ that exclude slumps,
 such that \code{CmBot[i] > CmTop[i]}
 and \code{CmBot[i] == CmTop[i+1]}.
 }
+\author{
+Walter Finsinger
+}

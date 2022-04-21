@@ -13,7 +13,8 @@ Plot.Anomalies(
 )
 }
 \arguments{
-\item{series}{The output of \code{\link{global_thresh}()}.}
+\item{series}{The output of \code{\link{global_thresh}()},
+\code{\link{local_thresh}()}, or \code{\link{peak_detection}()}.}
 
 \item{x.lim}{Limit age for the x-axis scale (time scale).}
 
@@ -32,4 +33,7 @@ are marked with colored shaded areas.}
 Requires output from one of the following functions:
 \code{\link{global_thresh}()}, \code{\link{local_thresh}()},
 or \code{\link{peak_detection}()}.
+}
+\author{
+Walter Finsinger
 }

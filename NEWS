@@ -1,0 +1,23 @@
+-- tapas 0.1.1 20/04/2022 -----------------------------------------------------
+
+* Got rid of trailing horizontal whitespaces
+
+* Fixed issue in pretreatment_data() arising when only one variable is included.
+
+* Fixed issue with the SNI as it did not call the correct data.
+
+* Added a new function "export_tapas()"", gathers in one data.frame the output
+  of the peak_detection(), local_thresh(), or global_thresh() functions. Many
+  thanks to Kristen Beck for suggesting this.
+
+* The selection of values to be evaluated with the local GMMs is now simply
+  based on the "smoothing.yr" parameter. Previously, the selection was based on
+  their index, which was more tedious.
+
+* Fixed issue with "Plot.Anomalies()", as y-axis labels were not printed
+  correctly.
+
+
+-- tapas 0.1.0 22/02/2022 -----------------------------------------------------
+
+* Initial release of the package

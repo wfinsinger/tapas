@@ -12,14 +12,14 @@
 #' The procedure uses a Gaussian mixture model
 #' on the assumption that the noise component
 #' is normally distributed around 0 (the values were detrended!).
-#' 
+#'
 #' Requires an output from the \code{\link{SeriesDetrend}()} function.
 #'
 #' @param series Output from the \code{\link{SeriesDetrend}()} function.
 #' @param proxy Set \code{proxy = "VariableName"}
 #'               to select the variable for the peak-detection analysis.
 #'               If the dataset includes only one variable,
-#'               proxy does not need to be specified. 
+#'               proxy does not need to be specified.
 #' @param t.lim Allows defining a portion of the time series.
 #'              With \code{t.lim = NULL} (by default),
 #'              the analysis will be performed using the entire timeseries.
@@ -33,7 +33,7 @@
 #'                  from the \code{smoothing.yr} value
 #'                  set in the \code{\link{SeriesDetrend}()} function.
 #' @param smoothing.yr Width of moving window for computing SNI.
-#' 
+#'
 #' @param keep_consecutive Logical. If \code{FALSE} (by default),
 #'                         consecutive peak samples exceeding the threshold
 #'                         are removed
@@ -55,7 +55,7 @@
 #'                          Defaults to \code{FALSE}.
 #'
 #' @importFrom grDevices recordPlot replayPlot
-#' 
+#'
 #' @export
 local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          thresh.yr = NULL, thresh.value = 0.95,
@@ -63,7 +63,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          keep_consecutive = FALSE,
                          minCountP = 0.95, MinCountP_window = 150,
                          out.dir = NULL, plot.local_thresh = FALSE) {
-  
+
   # Initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
     stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")
@@ -98,7 +98,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   }
 
   # Checks if smoothing.yr and thresh.yr were specified,
-  # else use smoothing.yr used for detrending
+  # else use smoothing.yr (inherited from SeriesDetrend)
   if (is.null(smoothing.yr) == T) {
     smoothing.yr <- series$detr$smoothing.yr
   }
@@ -163,28 +163,11 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Determine local thresholds with Gaussian mixture models (2 components) ####
 
   # SELECT peak VALUES TO EVALUATE, BASED ON Smoothing.yr
-  for (i in 1:length(v)) {  #For each value in the detrended dataseries, find the threshold.
-    #i=3
+  for (i in 1:length(v)) {  #For each value in the detrended data series
     age.i <- a[i, 1]
-    #cat(paste0("Calculating ", i, "th local threshold of ", length(v)))
-    #i=28
-    if (i < round(0.5*(thresh.yr/yr.interp)) + 1) { # First 'thresh.yr' samples.
-      #         X = v(1:round(0.5*(thresh.yr/r))); % Pre June 2009.
-      #         X = v(1:round(thresh.yr/r)); % Modified, June 2009, PEH.
-      X <- v[1:round(0.5*(thresh.yr/yr.interp)) + i] # Modified, % June 2009, PEH.
-    }
-    if (i > (length(v) - round(0.5*(thresh.yr/yr.interp)))) {  # Last 'thresh.yr' samples.
-      #             X = v(length(v)-...
-      #                 round((thresh.yr/r)):end);   % Pre June 2009.
-      X <- v[(i - round(0.5*(thresh.yr/yr.interp))):length(v)]   # Modified, June 2009, PEH.
-      # As recommended by RK, this uses samples from 
-      # a half-window before i, all the way to end of record.
-    }
-    if (i >= round(0.5*(thresh.yr/yr.interp)) + 1 && i <= (length(v) - round(0.5*(thresh.yr/yr.interp)))) {
-      # All samples between first and last 'thrshYr' samples.
-      X <- v[(i - round(0.5*(thresh.yr/yr.interp))):(i + round(0.5*(thresh.yr/yr.interp)))]
-    }
-
+    X_i <- a[which(a$age > (age.i - thresh.yr) &
+                     a$age < (age.i + thresh.yr)), ]
+    X <- X_i[ ,2]
 
 
     ## Estimate local noise distribution with Guassian mixture model ####
@@ -193,7 +176,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
     if (length(X) < 3) {
       cat("NOTE: Less than 3 peak values in moving window; cannot fit noise distribution.")
-      cat("\n      Mean and standard deviation forced to equal 0.") 
+      cat("\n      Mean and standard deviation forced to equal 0.")
       cat("\n      Consider longer smoothing window (thresh.yr).")
       muHat[i, ] <- 0
       sigmaHat[i, ] <- 10^-100
@@ -242,7 +225,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
 
     # Plot some of the noise and signal distributions
-    if (plot.local_thresh == T) {  
+    if (plot.local_thresh == T) {
 
       if (any(num.plots == i)) {
         # Print plots for positive peaks
@@ -284,7 +267,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         mtext(paste0(age.i, " years", "; thresh.value = ", thresh.value),
               side = 3, las = 0, line = -1)
         # mtext(text=paste0("SNIi pos.= ", round(Thresh.SNI.pos[i], digits=2),
-        #                   "SNIi neg.= ", round(Thresh.SNI.neg[i], digits=2)), 
+        #                   "SNIi neg.= ", round(Thresh.SNI.neg[i], digits=2)),
         #       side=3, las=0, line=-2)
         my.plots[[j]] <- recordPlot()
         j <- j + 1
@@ -293,7 +276,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   }
 
   # Print pdf with selected plots that were saved at the end of the loop above
-  if (plot.local_thresh == T) {  
+  if (plot.local_thresh == T) {
     if (!is.null(out.dir)) {
       pdf(paste0(out.path, s.name, '_', v.name, '_Local_GMM_Evaluation.pdf'),
           onefile = TRUE, paper = "a4")
@@ -311,7 +294,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   ## Calculate SNI ####
   ## Get resampled values for the selected variable (proxy) for
   ## the selected time interval (t.lim)
-  SNI_in_index <- which(series$int$series.int$age <= max(t.lim) & 
+  SNI_in_index <- which(series$int$series.int$age <= max(t.lim) &
                           series$int$series.int$age >= min(t.lim))
 
   SNI_in <- series$int$series.int[[proxy]] [SNI_in_index]
@@ -345,8 +328,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     # For positive peaks
     for (i in 1:(length(Peaks.pos) - 1)) { # For each value in Charcoal.peak
       if (Peaks.pos[i] > 0
-          && Peaks.pos[i + 1] > 0) {  # if two consecutive values > 0 
-        Peaks.pos[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
+          && Peaks.pos[i + 1] > 0) {  # if two consecutive values > 0
+        Peaks.pos[i] <- 1     # keep first as 2, mark subsequent (earlier) as 1
       }
     }
 
@@ -354,7 +337,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
       if (Peaks.pos[i] < 2) {    # if value < 2
         Peaks.pos[i] <- 0        # mark sample as 0 (unflag Peak)
       } else {
-        Peaks.pos[i] <- 1        # else (if value=2) mark sample as 1 (flag as Peak)
+        Peaks.pos[i] <- 1   # else (if value=2) mark sample as 1 (flag as Peak)
       }
     }
 
@@ -362,16 +345,16 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     # For negative peaks
     for (i in 1:(length(Peaks.neg) - 1)) { # For each value in Charcoal.peak
       if (Peaks.neg[i] > 0
-          && Peaks.neg[i + 1] > 0) {  # if two consecutive values > 0 
-        Peaks.neg[i] <- 1           # keep first as 2, mark subsequent (earlier) as 1
+          && Peaks.neg[i + 1] > 0) {  # if two consecutive values > 0
+        Peaks.neg[i] <- 1   # keep first as 2, mark subsequent (earlier) as 1
       }
     }
 
     for (i in 1:length(Peaks.neg)) {
-      if (Peaks.neg[i] < 2) {    # if value < 2
-        Peaks.neg[i] <- 0        # mark sample as 0 (unflag Peak)
+      if (Peaks.neg[i] < 2) {  # if value < 2
+        Peaks.neg[i] <- 0   # mark sample as 0 (unflag Peak)
       } else {
-        Peaks.neg[i] <- 1        # else (if value=2) mark sample as 1 (flag as Peak)
+        Peaks.neg[i] <- 1  # else (if value=2) mark sample as 1 (flag as Peak)
       }
     }
   } else {
@@ -449,25 +432,26 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
         volMin <- volI[countMinIn]
         d[ peakIndex[i] ] <- (abs(countMin - (countMin + countMax) *
                                     (volMin/(volMin + volMax))) - 0.5)/(sqrt((countMin + countMax) *
-                                                                               (volMin/(volMin + volMax)) * 
+                                                                               (volMin/(volMin + volMax)) *
                                                                                (volMax/(volMin + volMax))))
 
         # Test statistic
         Thresh_minCountP[peakIndex[i]] <- 1 - pt(q = d[peakIndex[i]], df = Inf)
-        # Inverse of the Student's T cdf at 
+        # Inverse of the Student's T cdf at
         # Thresh_minCountP, with Inf degrees of freedom.
         # From Charster (Gavin 2005):
-        # This is the expansion by Shuie and Bain (1982) of the equation by 
-        # Detre and White (1970) for unequal 'frames' (here, sediment 
-        # volumes). The significance of d is based on the t distribution 
-        # with an infinite degrees of freedom, which is the same as the 
+        # This is the expansion by Shuie and Bain (1982) of the equation by
+        # Detre and White (1970) for unequal 'frames' (here, sediment
+        # volumes). The significance of d is based on the t distribution
+        # with an infinite degrees of freedom, which is the same as the
         # cumulative normal distribution.
       }
     }
 
     # Clean Environment
-    rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn, peakIndex,
-       peakYr, volMax, volMin, windowPeak_in, windowSearch, windowTime, windowTime_in)
+    rm(MinCountP_window, d, countMax, countMaxIn, countMin, countMinIn,
+       peakIndex, peakYr, volMax, volMin, windowPeak_in, windowSearch,
+       windowTime, windowTime_in)
 
 
     # Take note of and remove peaks that do not pass the minimum-count screening-peak test
@@ -487,7 +471,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
 
 
-  ## Gather data to calculate return intervals ####    
+  ## Gather data to calculate return intervals ####
 
   ## Plot series with trend + threshold + peaks
   Peaks.pos.final <- which(Peaks.pos == 1)
@@ -507,7 +491,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Peak magnitude (pieces cm-2 peak-1) is the sum of all samples exceeding
   # threshFinalPos for a given peak.
   # The units are derived as follows:
-  # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].  
+  # [pieces cm-2 yr-1] * [yr peak-1] = [pieces cm-2 peak-1].
 
   ## Get peak-magnitude values for positive peaks
   if (length(Peaks.pos.final) > 0) {

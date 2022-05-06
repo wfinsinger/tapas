@@ -1,5 +1,11 @@
 -- tapas 0.1.1 20/04/2022 -----------------------------------------------------
 
+* Slightly modified the local_thresh() function. Now it also accomodates
+  discontinuous and/or non-binned data sets. Though, this is currently at
+  a work-in-progress stage, as the SeriesDetrend() function still requires
+  continuous and binned temporal series (i.e. an output from the
+  pretreatment_data() function).
+
 * Got rid of trailing horizontal whitespaces
 
 * Fixed issue in pretreatment_data() arising when only one variable is included.

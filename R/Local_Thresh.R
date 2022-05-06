@@ -78,6 +78,11 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
     }
   }
 
+  ## Added on 22/04/2022
+  if (is.null(series$detr$smoothing.yr) == T && is.null(smoothing.yr)) {
+    stop("Fatal error: please specify the argument 'smoothing.yr'")
+  }
+
   # Extract parameters from input list (i.e. detrended series) ####
 
   # Determines for which of the variables the threshold analysis should be made
@@ -110,7 +115,13 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Further extract parameters from input dataset
   a.names <- colnames(a)
   s.name <- series$detr$series.name
-  yr.interp <- series$int$yr.interp
+
+  ## Added on 22/04/2022
+  if (is.null(series$int$yr.interp) == TRUE) {
+    yr.interp <- mean(diff(a$age))
+  } else {
+    yr.interp <- series$int$yr.interp
+  }
 
   # Determine whether to limit the analysis to a portion of the record
   if (is.null(t.lim) == T) {
@@ -124,7 +135,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   x.lim <- c(max(ageI), min(ageI))
 
 
-  # Determine the proportion of datapoints used to smooth local thresholds with loess()
+  # Determine the proportion of datapoints used to smooth local thresholds
+  # with stats::lowess()
   n.smooth <- round(smoothing.yr/yr.interp)
   span.sm <- n.smooth/dim(a)[1]
 
@@ -165,8 +177,8 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # SELECT peak VALUES TO EVALUATE, BASED ON Smoothing.yr
   for (i in 1:length(v)) {  #For each value in the detrended data series
     age.i <- a[i, 1]
-    X_i <- a[which(a$age > (age.i - thresh.yr) &
-                     a$age < (age.i + thresh.yr)), ]
+    X_i <- a[which(a$age > (age.i - (thresh.yr/2)) &
+                     a$age < (age.i + (thresh.yr/2))), ]
     X <- X_i[ ,2]
 
 

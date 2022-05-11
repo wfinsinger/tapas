@@ -1,6 +1,13 @@
+-- tapas 0.1.2 10/05/2022 -----------------------------------------------------
+
+* Added two functions (tapas2mgcv and mgcv2tapas) that allow determine the
+  'background trend' with a GAM-fitted model. This allows to by-pass the
+  SeriesDetrend() function.
+
+
 -- tapas 0.1.1 20/04/2022 -----------------------------------------------------
 
-* Slightly modified the local_thresh() function. Now it also accomodates
+* Slightly modified the local_thresh() function. Now it also accommodates
   discontinuous and/or non-binned data sets. Though, this is currently at
   a work-in-progress stage, as the SeriesDetrend() function still requires
   continuous and binned temporal series (i.e. an output from the

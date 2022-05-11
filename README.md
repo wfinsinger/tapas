@@ -224,38 +224,47 @@ Plot_ReturnIntervals(
 ## Details
 
 A typical workflow of the peak-detection analysis includes the following
-steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134): \*
-1.) *resampling* the record to equally spaced sampling intervals in time
-(years) is performed using the `pretreatment_data()` function, which
-loops the `paleofire::pretreatment()` function for all variables in the
-input data frame. The user can choose among the following output data
-types: + resampled accumulation rates (out = “accI”; default), +
-resampled concentrations (out = “conI”), or + resampled input data
-(e.g., if variable1 in the input is charcoal counts, with out = “countI”
-one gets resampled counts). \* 2.) *decomposition* of the resampled
-record into a long-term trend (background component) and peaks (peak
-component) is performed with the `SeriesDetrend()` function for all
-variables in the input data frame. The user can select the
-smoothing-window width (in years) as well as the type of the detrending
-(e.g. `detr.type = "rob.loess"`). Currently, the following functions are
-implemented to smooth the temporal series: + robust loess (“rob.loess”),
-+ robust Lowess (“rob.lowess”), and + moving median (“mov.median”; aka
-Method #4 in CharAnalysis’ Matlab version); \* 3.1) *screen* the peak
-component to distinguish signal from noise using one or more 2-component
-Gaussian mixture models that are determined using the `mclust` R package
-[Scrucca et al., 2016](https://doi.org/10.32614/RJ-2016-021). + a unique
-*global* 2-component Gaussian mixture model (`Global_Thresh()`), or +
-several *local* 2-component Gaussian mixture models (`Local_Thresh()`);
-\* 3.2) and eventually also *screen* the peak component using a
-minimum-count test. This part of the `Global_Thresh()` and
-`Local_Thresh()` functions was translated verbatim from *CharAnalysis*.
-\* 4.) *evaluate* the suitability of the record for peak-detection
-analysis using the signal-to-noise index [SNI; R code from Supplementary
-Material to Kelly et al.,
-2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011). \* 5.) Diagnostic
-plots showing the sensitivity to different smoothing-window widths are
-produced with the `peak-detection()` function if the function’s argument
-`sens=TRUE`.
+steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
+
+-   1.) *resampling* the record to equally spaced sampling intervals in
+    time (years) is performed using the `pretreatment_data()` function,
+    which loops the `paleofire::pretreatment()` function for all
+    variables in the input data frame. The user can choose among the
+    following output data types:
+    -   resampled accumulation rates (out = “accI”; default),
+    -   resampled concentrations (out = “conI”), or
+    -   resampled input data (e.g., if variable1 in the input is
+        charcoal counts, with out = “countI” one gets resampled counts).
+-   2.) *decomposition* of the resampled record into a long-term trend
+    (background component) and peaks (peak component) is performed with
+    the `SeriesDetrend()` function for all variables in the input data
+    frame. The user can select the smoothing-window width (in years) as
+    well as the type of the detrending (e.g. `detr.type = "rob.loess"`).
+    Currently, the following functions are implemented to smooth the
+    temporal series:
+    -   robust loess (“rob.loess”),
+    -   robust Lowess (“rob.lowess”), and
+    -   moving median (“mov.median”; aka Method #4 in CharAnalysis’
+        Matlab version);
+-   3.1) *screen* the peak component to distinguish signal from noise
+    using one or more 2-component Gaussian mixture models that are
+    determined using the `mclust` R package [Scrucca et al.,
+    2016](https://doi.org/10.32614/RJ-2016-021).
+    -   a unique *global* 2-component Gaussian mixture model
+        (`Global_Thresh()`), or
+    -   several *local* 2-component Gaussian mixture models
+        (`Local_Thresh()`);
+-   3.2) and eventually also *screen* the peak component using a
+    minimum-count test. This part of the `Global_Thresh()` and
+    `Local_Thresh()` functions was translated verbatim from
+    *CharAnalysis*.
+-   4.) *evaluate* the suitability of the record for peak-detection
+    analysis using the signal-to-noise index [SNI; R code from
+    Supplementary Material to Kelly et al.,
+    2011](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
+-   5.) Diagnostic plots showing the sensitivity to different
+    smoothing-window widths are produced with the `peak-detection()`
+    function if the function’s argument `sens=TRUE`.
 
 Since v0.1.2, a GAM-modeled trend can be used as well for the
 *decomposition* step, though the procedure is a little bit more tedious,

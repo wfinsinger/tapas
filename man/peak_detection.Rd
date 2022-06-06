@@ -18,7 +18,7 @@ peak_detection(
   t_lim = NULL,
   noise_gmm = 1,
   keep_consecutive = F,
-  min_CountP = 0.95,
+  min_CountP = 0.05,
   MinCountP_window = 150,
   series_name = NULL,
   out_dir = NULL,

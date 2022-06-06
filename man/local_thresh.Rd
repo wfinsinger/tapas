@@ -12,7 +12,7 @@ local_thresh(
   thresh.value = 0.95,
   smoothing.yr = NULL,
   keep_consecutive = FALSE,
-  minCountP = 0.95,
+  minCountP = 0.05,
   MinCountP_window = 150,
   out.dir = NULL,
   plot.local_thresh = FALSE

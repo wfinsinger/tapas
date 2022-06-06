@@ -48,8 +48,8 @@ steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
     -   3.3 and eventually also screen the peak component using a
         minimum-count test,
 -   4.) *evaluate* the suitability of the record for peak-detection
-    analysis using the signal-to-noise index [(Kelly et
-    al., 2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
+    analysis using the signal-to-noise index [(Kelly et al.,
+    2011)](http://dx.doi.org/10.1016/j.yqres.2010.07.011).
 
 *tapas* performs steps 1.) and 2.) for several variables of one dataset
 type (e.g. different estimates of charcoal abundance) in one go.
@@ -244,7 +244,7 @@ steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
     temporal series:
     -   robust loess (“rob.loess”),
     -   robust Lowess (“rob.lowess”), and
-    -   moving median (“mov.median”; aka Method #4 in CharAnalysis’
+    -   moving median (“mov.median”; aka Method \#4 in CharAnalysis’
         Matlab version);
 -   3.1) *screen* the peak component to distinguish signal from noise
     using one or more 2-component Gaussian mixture models that are

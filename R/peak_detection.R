@@ -99,22 +99,21 @@
 #'
 #' @export
 peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
-                            first = NULL, last = NULL, yrInterp = NULL,
-                            smoothing_yr = 500, detr_type = "mov.median",
-                            thresh_type = "local", thresh_value = 0.95,
-                            t_lim = NULL, noise_gmm = 1, keep_consecutive = F,
-                            min_CountP = 0.95, MinCountP_window = 150,
-                            series_name = NULL, out_dir = NULL,
-                            plotit = TRUE, x_lim = t_lim,
-                            plot_crosses = TRUE, plot_x = TRUE,
-                            plot_neg = FALSE,
-                            sens = TRUE, smoothing_yr_seq = NULL) {
-
+                           first = NULL, last = NULL, yrInterp = NULL,
+                           smoothing_yr = 500, detr_type = "mov.median",
+                           thresh_type = "local", thresh_value = 0.95,
+                           t_lim = NULL, noise_gmm = 1, keep_consecutive = F,
+                           min_CountP = 0.05, MinCountP_window = 150,
+                           series_name = NULL, out_dir = NULL,
+                           plotit = TRUE, x_lim = t_lim,
+                           plot_crosses = TRUE, plot_x = TRUE,
+                           plot_neg = FALSE,
+                           sens = TRUE, smoothing_yr_seq = NULL) {
 
   ## Initial check-ups ####
 
   ## Check if data is formatted correctly
-  series <- check_pretreat(series)
+  series <- tapas::check_pretreat(series)
 
   ## Check if arguments for detrending are coherent
   detr_options <- c("rob.loess", "rob.lowess", "mov.median")
@@ -134,8 +133,8 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     #   "Accepted names: ", paste(proxies_options, collapse = ", "), "."
     # )
     stop(paste0("Fatal error: Unrecognized variable name (proxy = ). ",
-                  "Accepted names: ", paste(proxies_options, collapse = ", "), "."
-                ))
+                "Accepted names: ", paste(proxies_options, collapse = ", "), "."
+    ))
   }
 
   if (is.null(proxy) & length(proxies_options) == 1) {
@@ -151,13 +150,14 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
 
 
   ## Resample data ####
-  d_i <- pretreatment_data(series = series, out = out, series.name = series_name,
-                           first = first, last = last, yrInterp = yrInterp)
+  d_i <- tapas::pretreatment_data(series = series, out = out,
+                                  series.name = series_name,
+                                  first = first, last = last, yrInterp = yrInterp)
 
 
   ## Detrend resampled data ####
-  d_detr <- SeriesDetrend(series = d_i, smoothing.yr = smoothing_yr,
-                          detr.type = detr_type, out.dir = out_dir)
+  d_detr <- tapas::SeriesDetrend(series = d_i, smoothing.yr = smoothing_yr,
+                                 detr.type = detr_type, out.dir = out_dir)
 
 
   ## Screen peaks using GMM-inferred threshold(s) and minimum-count test and ####
@@ -167,20 +167,28 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
   }
 
   if (thresh_type == "global") {
-    d_thresh <- global_thresh(series = d_detr, proxy = proxy, t.lim = t_lim,
-                              thresh.value = thresh_value, noise.gmm = noise_gmm,
-                              smoothing.yr = smoothing_yr,
-                              keep_consecutive = keep_consecutive, minCountP = min_CountP,
-                              MinCountP_window = MinCountP_window, out.dir = out_dir,
-                              plot.global_thresh = plotit)
+    d_thresh <- tapas::global_thresh(series = d_detr, proxy = proxy,
+                                     t.lim = t_lim,
+                                     thresh.value = thresh_value,
+                                     noise.gmm = noise_gmm,
+                                     smoothing.yr = smoothing_yr,
+                                     keep_consecutive = keep_consecutive,
+                                     minCountP = min_CountP,
+                                     MinCountP_window = MinCountP_window,
+                                     out.dir = out_dir,
+                                     plot.global_thresh = plotit)
     d_thresh$thresh$thresh_type <- "global"
   } else {
-    d_thresh <- local_thresh(series = d_detr, proxy = proxy, t.lim = t_lim,
-                             thresh.value = thresh_value, thresh.yr = smoothing_yr,
-                             smoothing.yr = smoothing_yr,
-                             keep_consecutive = keep_consecutive, minCountP = min_CountP,
-                             MinCountP_window = MinCountP_window, out.dir = out_dir,
-                             plot.local_thresh = plotit)
+    d_thresh <- tapas::local_thresh(series = d_detr, proxy = proxy,
+                                    t.lim = t_lim,
+                                    thresh.value = thresh_value,
+                                    thresh.yr = smoothing_yr,
+                                    smoothing.yr = smoothing_yr,
+                                    keep_consecutive = keep_consecutive,
+                                    minCountP = min_CountP,
+                                    MinCountP_window = MinCountP_window,
+                                    out.dir = out_dir,
+                                    plot.local_thresh = plotit)
     d_thresh$thresh$thresh_type <- "local"
   }
 
@@ -223,22 +231,26 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
       # sens_plots <- F # such that pdf files are not produced for the sensitivity runs
 
       if (thresh_type == "global") {
-        d_thresh_i <- global_thresh(series = d_detr_i, proxy = proxy, t.lim = t_lim,
-                                    thresh.value = thresh_value, noise.gmm = noise_gmm,
-                                    smoothing.yr = smoothing_yr,
-                                    keep_consecutive = keep_consecutive,
-                                    minCountP = min_CountP,
-                                    MinCountP_window = MinCountP_window,
-                                    plot.global_thresh = F)
+        d_thresh_i <- tapas::global_thresh(series = d_detr_i, proxy = proxy,
+                                           t.lim = t_lim,
+                                           thresh.value = thresh_value,
+                                           noise.gmm = noise_gmm,
+                                           smoothing.yr = smoothing_yr,
+                                           keep_consecutive = keep_consecutive,
+                                           minCountP = min_CountP,
+                                           MinCountP_window = MinCountP_window,
+                                           plot.global_thresh = F)
         d_thresh_i$thresh$thresh_type <- "global"
       } else {
-        d_thresh_i <- local_thresh(series = d_detr_i, proxy = proxy, t.lim = t_lim,
-                                   thresh.value = thresh_value, thresh.yr = smoothing_yr,
-                                   smoothing.yr = smoothing_yr,
-                                   keep_consecutive = keep_consecutive,
-                                   minCountP = min_CountP,
-                                   MinCountP_window = MinCountP_window,
-                                   plot.local_thresh = F)
+        d_thresh_i <- tapas::local_thresh(series = d_detr_i, proxy = proxy,
+                                          t.lim = t_lim,
+                                          thresh.value = thresh_value,
+                                          thresh.yr = smoothing_yr,
+                                          smoothing.yr = smoothing_yr,
+                                          keep_consecutive = keep_consecutive,
+                                          minCountP = min_CountP,
+                                          MinCountP_window = MinCountP_window,
+                                          plot.local_thresh = F)
         d_thresh_i$thresh$thresh_type <- "local"
       }
 
@@ -296,7 +308,8 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
     layout(1)
     par(mfrow = c(2,1), mar = c(0,5,2,0.5), oma = c(4,1,0,0))
     Plot.Anomalies(series = d_thresh, x.lim = x_lim,
-                   plot.crosses = plot_crosses, plot.x = F, plot.neg = plot_neg)
+                   plot.crosses = plot_crosses, plot.x = F,
+                   plot.neg = plot_neg)
     Plot_ReturnIntervals(series = d_thresh, x.lim = x_lim,
                          plot.x = plot_x, plot.neg = plot_neg)
     mtext("Age (cal yr BP)", side = 1, line = 2.5)
@@ -305,5 +318,4 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
 
   ## Return output to environment ####
   return(d_thresh)
-
 }

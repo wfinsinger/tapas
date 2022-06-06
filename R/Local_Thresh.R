@@ -61,7 +61,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          thresh.yr = NULL, thresh.value = 0.95,
                          smoothing.yr = NULL,
                          keep_consecutive = FALSE,
-                         minCountP = 0.95, MinCountP_window = 150,
+                         minCountP = 0.05, MinCountP_window = 150,
                          out.dir = NULL, plot.local_thresh = FALSE) {
 
   # Initial check-up of input parameters ####

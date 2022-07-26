@@ -137,8 +137,9 @@ al. (2009)](https://doi.org/10.1890/07-2019.1).
 co_loc <- peak_detection(series = co, proxy = "char",
                                 first = -51, last = 7500, yrInterp = 15,
                                 detr_type = "mov.median", sens = F)
-#> [1] "No missing samples detected."
-#> [1] "No slumps detected; the age scale is continuous."
+#> [1] "No slump samples detected."
+#> [1] "The depth scale is continuous"
+#> [1] "The age scale is continuous"
 ```
 
 With these settings, the results obtained using *tapas* strikingly

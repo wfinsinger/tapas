@@ -27,15 +27,16 @@ tapas_export <- function(series = NULL) {
   vol_i <- series$int$volI
 
   want_proxy <- series$thresh$proxy
+
   if (series$out == "accI") {
     want_proxy_conc <- stringr::str_remove(want_proxy, "AR")
-
     con_i <- dplyr::pull(series$int$series.conI, all_of(want_proxy_conc))
     count_i <- dplyr::pull(series$int$series.countI, all_of(want_proxy_conc))
   } else {
-    con_i <- dplyr::pull(series$int$series.conI, all_of(want_proxy_conc))
-    count_i <- dplyr::pull(series$int$series.countI, all_of(want_proxy_conc))
+    con_i <- dplyr::pull(series$int$series.conI, all_of(want_proxy))
+    count_i <- dplyr::pull(series$int$series.countI, all_of(want_proxy))
   }
+
   acc_i <- dplyr::pull(series$int$series.int, want_proxy)
   bkg_trend <- dplyr::pull(series$detr$detr, want_proxy)
   sni_raw <- series$thresh$SNI_pos$SNI_raw
@@ -52,6 +53,7 @@ tapas_export <- function(series = NULL) {
   }
 
   thresh_final_pos_sm <- series$thresh$thresh.pos.sm
+
   if (length(thresh_final_pos_sm) == 1) {
     thresh_final_pos_sm <- rep_len(thresh_final_pos_sm,
                                    length.out = length(age_top_i))

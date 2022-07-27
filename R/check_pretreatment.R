@@ -171,7 +171,8 @@ check_pretreat <- function(series) {
     smpl_thickn <- A[ ,2] - A[ ,1]
 
     cm_corr <- cumsum(smpl_thickn) - smpl_thickn[1]
-    cmB_corr <- cm_corr + smpl_thickn
+    cmB_corr <- c(cm_corr[2:length(cm_corr)],
+                  cm_corr[length(cm_corr)] + smpl_thickn[length(smpl_thickn)])
 
     A[ ,1] <- cm_corr
     A[ ,2] <- cmB_corr

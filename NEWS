@@ -1,5 +1,8 @@
 -- tapas 0.1.2 10/05/2022 -----------------------------------------------------
 
+* Added the plot_raw() function to produce a polygon plot and optionally
+   overlay that with a bar plot of the raw input data (01/12/2022).
+
 * Added two functions (tapas2mgcv and mgcv2tapas) that allow determine the
   'background trend' with a GAM-fitted model. This allows to by-pass the
   SeriesDetrend() function.
@@ -19,7 +22,7 @@
 
 * Fixed issue with the SNI as it did not call the correct data.
 
-* Added a new function "export_tapas()"", gathers in one data.frame the output
+* Added a new function export_tapas() that gathers in one data.frame the output
   of the peak_detection(), local_thresh(), or global_thresh() functions. Many
   thanks to Kristen Beck for suggesting this.
 

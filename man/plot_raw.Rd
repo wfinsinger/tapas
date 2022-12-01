@@ -2,29 +2,41 @@
 % Please edit documentation in R/plot_raw.R
 \name{plot_raw}
 \alias{plot_raw}
-\title{Plots the raw input data as a polygon and bar plots against age}
+\title{Plots the raw input data as a polygon and optionally also bar plots against age}
 \usage{
-plot_raw(series = NULL, proxy = NULL, my_col = "grey", bars = FALSE)
+plot_raw(
+  series = NULL,
+  proxy = NULL,
+  my_col = "grey",
+  bars = FALSE,
+  y_lim = NULL,
+  y_lab = NULL
+)
 }
 \arguments{
 \item{series}{The input data frame. A matrix with the following columns:
 \code{CmTop, CmBot, AgeTop, AgeBot, Volume},
-and one or more columns with the data
-which should be re-sampled (variables).}
+and one or more columns with the data which should be re-sampled (variables).}
 
 \item{proxy}{a character string with the name of the selected variable. By
-default (proxy = NULL) the 6th column of the input data frame is selected.}
+default (i.e. \code{proxy = NULL}), the 6th column of the input data
+frame is selected.}
 
 \item{my_col}{a character string defining the color for the polygon.}
 
-\item{bars}{logical. By default bars = FALSE. If bars = TRUE, a bar plot is
-added as an overlay, with sample ages estimated as mid-sample ages.}
+\item{bars}{logical. By default \code{bars = FALSE}. If \code{bars = TRUE},
+a bar plot is added as an overlay, with sample ages estimated as
+mid-sample ages.}
+
+\item{y_lim}{a numeric vector of length 2, giving the y coordinates range.}
+
+\item{y_lab}{a title for the y axis.}
 }
 \value{
 A plot.
 }
 \description{
-This functions produces a polygon plot and optionally overlays a bar plot of
+The functions produces a polygon plot and optionally overlays a bar plot of
 the raw input data.
 }
 \author{

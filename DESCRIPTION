@@ -1,7 +1,7 @@
 Package: tapas
 Title: Trend And PeAkS analysis in paleo-ecological time series
-Version: 0.1.2
-Date: 10-05-2022
+Version: 0.1.3
+Date: 03-01-2023
 Authors@R:
   c(
     person("Walter", "Finsinger", , "walter.finsinger@umontpellier.fr",
@@ -11,7 +11,7 @@ Authors@R:
     )
 Description: Tapas proceeds through several steps to assess trend and peaks for
     paleoecological temporal time series.
-    First, the time series can be virtually resampled to equal sampling
+    First, the time series can be virtually re-sampled to equal sampling
     intervals ("prebinning").
     Second, the resampled time series is detrended using a smoothing function.
     Third, one 'global', or several 'local' 2-component Gaussian Mixture Model(s)
@@ -19,7 +19,7 @@ Description: Tapas proceeds through several steps to assess trend and peaks for
     One of the components is centred around 0, and the nth quantile of
     the gaussian distribution of that component is set to determine the threshold
     separating the noise from the signal.
-    Eventually, figures can be produced to visualize the resampled data,
+    Eventually, figures can be produced to visualize the re-sampled data,
     the smoothed data, the detrended data, the GMMs, the thresholds, and
     the detected peaks (values beyond the noise threshold).
     To evaluate the suitability for peak detection of a temporal series,
@@ -38,5 +38,6 @@ Imports:
     dplyr,
     stringr,
     paleofire,
-    mgcv
+    mgcv,
+    changepoint
 Remotes: oblarquez/paleofire

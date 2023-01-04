@@ -1,3 +1,10 @@
+-- tapas 0.1.3 03/01/2023 -----------------------------------------------------
+
+* Added the cpts_ar() function that determines zone boundaries for single proxy
+   accumulation-rate records based on a change-point analysis, and checks for
+   the influence of sediment-accumulation rates on the detected change points.
+
+
 -- tapas 0.1.2 10/05/2022 -----------------------------------------------------
 
 * Added the plot_raw() function to produce a polygon plot and optionally

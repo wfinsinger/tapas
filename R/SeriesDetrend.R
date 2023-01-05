@@ -29,6 +29,10 @@
 SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.loess",
                           out.dir = NULL, plot_pdf = T) {
 
+  ## Put the user’s layout settings back in place when the function is done
+  opar <- par("mfrow", "mar", "oma", "cex")
+  on.exit(par(opar))
+
   # Determine path to Figure-output folder and create folder if it does not exist
   if (plot_pdf == T && !is.null(out.dir)) {
     out.path <- paste0("./", out.dir, "/")

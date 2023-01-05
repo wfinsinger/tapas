@@ -80,6 +80,9 @@ mgcv2tapas <- function(series = NULL,
                        series.name = NA,
                        plotit = TRUE) {
 
+  ## Put the user’s layout settings back in place when the function is done
+  opar <- par("mfrow", "mar", "oma", "cex")
+  on.exit(par(opar))
 
   ## Extract data ####
 
@@ -126,7 +129,7 @@ mgcv2tapas <- function(series = NULL,
   if (data_type == "accI" | data_type == "acc") {
     y_conc <- y_raw * abs(age_top - age_bot)
     y_counts <- y_conc * volI
-    y_name <- stringr::str_replace(y_var_name, "AR", "")
+    y_name <- stringr::str_replace(as.character(y_var_name), "AR", "")
   }
 
   ## If data_type is Concentrations:

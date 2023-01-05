@@ -64,6 +64,10 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          minCountP = 0.05, MinCountP_window = 150,
                          out.dir = NULL, plot.local_thresh = FALSE) {
 
+  ## Put the user’s layout settings back in place when the function is done
+  opar <- par("mfrow", "mar", "oma", "cex")
+  on.exit(par(opar))
+
   # Initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {
     stop("Fatal error: inconsistent choice of arguments. If keep_consecutive=T, set minCountP=NULL.")

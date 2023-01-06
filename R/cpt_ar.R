@@ -115,6 +115,23 @@
 #' ## change-point analysis with higher penalty value
 #' co_i_cpts_8logn <- cpts_ar(co_i, proxy = "char", pen_val = "8*log(n)")
 #'
+#' ## Change-point analysis with the 'red noise' record (no change point)
+#' rdn <- tapas::red_noise
+#' rdn_i <- tapas::pretreatment_data(rdn)
+#' rdn_i_cpts <- tapas::cpts_ar(rdn_i, proxy = "char")
+#'
+#'
+#' ## As in the example above, but introducing a step-wise increase in the
+#' ## sediment-accumulation rate [cm/yr]
+#' ## NB: sar = 1/sediment-deposition time [yr/cm]
+#' sdt <- c(rep_len(10, length.out = 100), rep_len(25, length.out = 360))
+#' a_bot <- cumsum(sdt)
+#' rdn2 <- rdn[1:length(a_bot), ]
+#' rdn2$age_bot <- a_bot
+#' rdn2$age_top <- a_bot - sdt
+#' rdn2_i <- tapas::pretreatment_data(rdn2, yrInterp = 25)
+#' rdn2_i_cpts <- tapas::cpts_ar(rdn2_i, proxy = "char")
+#'
 #' @author Walter Finsinger
 #'
 #' @importFrom changepoint cpt.meanvar cpts
@@ -122,8 +139,6 @@
 #' @importFrom stats approx runif
 #'
 #' @export cpts_ar
-#'
-
 
 cpts_ar <- function(serie, series_name = NULL, proxy = NULL, n_rand = 1000,
                     bootstrap = FALSE, rand_ds_distr = "uniform",

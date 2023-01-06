@@ -39,5 +39,7 @@ Imports:
     stringr,
     paleofire,
     mgcv,
-    changepoint
+    changepoint,
+    stats,
+    graphics
 Remotes: oblarquez/paleofire

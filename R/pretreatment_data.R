@@ -22,6 +22,10 @@
 #' @return A list with the resampled (binned) data according to
 #'         \code{out} parameter.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' co_i <- tapas::pretreatment_data(co)
+#'
 #' @importFrom stats median
 #'
 #' @export

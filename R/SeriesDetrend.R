@@ -20,13 +20,19 @@
 #' @return A list similar to \code{series} with additional detrended data
 #'         appended.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' co_i <- tapas::pretreatment_data(co)
+#' co_i_detr <- tapas::SeriesDetrend(co_i, smoothing.yr = 1000)
+#'
 #' @importFrom dplyr %>% select everything
 #' @importFrom stats loess lowess predict
 #' @importFrom grDevices dev.off pdf
 #' @importFrom graphics abline axis lines mtext par
 #'
 #' @export
-SeriesDetrend <- function(series = NULL, smoothing.yr = NULL, detr.type = "rob.loess",
+SeriesDetrend <- function(series = NULL, smoothing.yr = NULL,
+                          detr.type = "rob.loess",
                           out.dir = NULL, plot_pdf = T) {
 
   ## Put the user’s layout settings back in place when the function is done

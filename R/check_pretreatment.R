@@ -48,10 +48,11 @@
 #'
 #' @author Walter Finsinger
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' co_check <- tapas::check_pretreat(co)
+#'
 check_pretreat <- function(series) {
-
-  # series <- Mchar_counts[ ,1:6]
-  # series <- series[-(10:13), ]
 
   ## Gather data --------------------------------------------------------------
   A <- series

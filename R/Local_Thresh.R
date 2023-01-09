@@ -54,6 +54,16 @@
 #'                          and written in the \code{out.dir} folder.
 #'                          Defaults to \code{FALSE}.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' tapas::plot_raw(co)
+#' co_i <- tapas::pretreatment_data(co)
+#' co_detr <- tapas::SeriesDetrend(co_i, smoothing.yr = 1000)
+#' co_loc <- tapas::local_thresh(co_detr, proxy = "charAR",
+#'                                 plot.local_thresh = TRUE)
+#'
+#' @author Walter Finsinger
+#'
 #' @importFrom grDevices recordPlot replayPlot
 #'
 #' @export
@@ -63,10 +73,6 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
                          keep_consecutive = FALSE,
                          minCountP = 0.05, MinCountP_window = 150,
                          out.dir = NULL, plot.local_thresh = FALSE) {
-
-  ## Put the user’s layout settings back in place when the function is done
-  opar <- par("mfrow", "mar", "oma", "cex")
-  on.exit(par(opar))
 
   # Initial check-up of input parameters ####
   if (keep_consecutive == T & is.null(minCountP) == F) {

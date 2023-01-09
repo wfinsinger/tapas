@@ -84,3 +84,15 @@ is normally distributed around 0 (the values were detrended!).
 \details{
 Requires an output from the \code{\link{SeriesDetrend}()} function.
 }
+\examples{
+co <- tapas::co_char_data
+tapas::plot_raw(co)
+co_i <- tapas::pretreatment_data(co)
+co_detr <- tapas::SeriesDetrend(co_i, smoothing.yr = 1000)
+co_loc <- tapas::local_thresh(co_detr, proxy = "charAR",
+                                plot.local_thresh = TRUE)
+
+}
+\author{
+Walter Finsinger
+}

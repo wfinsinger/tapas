@@ -11,6 +11,11 @@
 #'
 #' @return A data frame.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' co_loc <- tapas::peak_detection(co, proxy = "char")
+#' co_glob_exp <- tapas::tapas_export(co_loc)
+#'
 #' @importFrom stringr str_remove
 #'
 #' @importFrom dplyr select pull left_join bind_cols all_of

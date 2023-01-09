@@ -54,6 +54,11 @@ that exclude slumps,
 such that \code{CmBot[i] > CmTop[i]}
 and \code{CmBot[i] == CmTop[i+1]}.
 }
+\examples{
+co <- tapas::co_char_data
+co_check <- tapas::check_pretreat(co)
+
+}
 \author{
 Walter Finsinger
 }

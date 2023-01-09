@@ -39,6 +39,10 @@ A plot.
 The functions produces a polygon plot and optionally overlays a bar plot of
 the raw input data.
 }
+\examples{
+co <- tapas::co_char_data
+tapas::plot_raw(co)
+}
 \author{
 Walter Finsinger
 }

@@ -22,6 +22,9 @@
 #'
 #' @author Walter Finsinger
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' tapas::plot_raw(co)
 
 plot_raw <- function(series = NULL, proxy = NULL, my_col = "grey",
                      bars = FALSE, y_lim = NULL, y_lab = NULL) {

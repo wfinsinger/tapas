@@ -42,3 +42,8 @@ A list with the resampled (binned) data according to
 Uses the paleofire::pretreatment() function
 to virtually resample timeseries at equal sampling intervals.
 }
+\examples{
+co <- tapas::co_char_data
+co_i <- tapas::pretreatment_data(co)
+
+}

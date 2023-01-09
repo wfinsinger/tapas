@@ -19,6 +19,12 @@ Requires an output from one of the following functions:
 \code{\link{global_thresh}()}, \code{\link{local_thresh}()},
 or \code{\link{peak_detection}()}.
 }
+\examples{
+co <- tapas::co_char_data
+co_loc <- tapas::peak_detection(co, proxy = "char")
+co_glob_exp <- tapas::tapas_export(co_loc)
+
+}
 \author{
 Walter Finsinger
 }

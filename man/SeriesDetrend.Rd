@@ -39,3 +39,9 @@ appended.
 Processes the output of pretreatment_data() function
 to de-trend the time series.
 }
+\examples{
+co <- tapas::co_char_data
+co_i <- tapas::pretreatment_data(co)
+co_i_detr <- tapas::SeriesDetrend(co_i, smoothing.yr = 1000)
+
+}

@@ -55,6 +55,15 @@
 #'
 #' @return A list similar to \code{series} with additional data appended.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' tapas::plot_raw(co)
+#' co_i <- tapas::pretreatment_data(co)
+#' co_detr <- tapas::SeriesDetrend(co_i, smoothing.yr = 1000)
+#' co_glob <- tapas::global_thresh(co_detr, proxy = "charAR")
+#'
+#' @author Walter Finsinger
+#'
 #' @importFrom stats complete.cases dnorm pt qnorm
 #' @importFrom graphics curve hist points
 #'

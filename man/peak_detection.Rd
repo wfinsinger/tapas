@@ -38,7 +38,7 @@ peak_detection(
 and one or more columns with the data to be resampled.}
 
 \item{out}{Desired return value: \describe{
-\item{"accI"}{the function returns resampled accumulation rates}
+\item{"accI"}{the function returns resampled accumulation rates (default)}
 \item{"conI"}{the function returns resampled concentrations}
 \item{"countI"}{the function returns resampled counts}
 }}
@@ -65,7 +65,7 @@ for the local thresholds}
 \item{detr_type}{Smoothing function used: \describe{
 \item{"rob.loess"}{robust Loess}
 \item{"rob.lowess"}{robust Lowess with 4 iterations}
-\item{"mov.mode"}{moving median (aka. method #4
+\item{"mov.median"}{moving median (aka. method #4
 in Matlab CharAnalysis version)}
 }}
 
@@ -147,4 +147,12 @@ This wrapper function calls the following functions in correct order:
 \code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()},
 \code{\link{local_thresh}()}, \code{\link{Plot.Anomalies}()},
 and \code{Plot_ReturnIntervals()}.
+}
+\examples{
+co <- tapas::co_char_data
+co_loc <- tapas::peak_detection(co, proxy = "char")
+
+}
+\author{
+Walter Finsinger
 }

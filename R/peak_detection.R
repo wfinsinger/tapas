@@ -11,7 +11,7 @@
 #'               \code{AgeBot}, \code{Volume},
 #'               and one or more columns with the data to be resampled.
 #' @param out Desired return value: \describe{
-#'            \item{"accI"}{the function returns resampled accumulation rates}
+#'            \item{"accI"}{the function returns resampled accumulation rates (default)}
 #'            \item{"conI"}{the function returns resampled concentrations}
 #'            \item{"countI"}{the function returns resampled counts}
 #'            }
@@ -31,7 +31,7 @@
 #' @param detr_type Smoothing function used: \describe{
 #'              \item{"rob.loess"}{robust Loess}
 #'              \item{"rob.lowess"}{robust Lowess with 4 iterations}
-#'              \item{"mov.mode"}{moving median (aka. method #4
+#'              \item{"mov.median"}{moving median (aka. method #4
 #'                                in Matlab CharAnalysis version)}
 #'            }
 #' @param proxy Select variable for the peak-detection analysis
@@ -95,6 +95,12 @@
 #'                         for the following smoothing-window widths:
 #'                         500, 600, 700, 800, 900, 1000 years.
 #'
+#' @examples
+#' co <- tapas::co_char_data
+#' co_loc <- tapas::peak_detection(co, proxy = "char")
+#'
+#' @author Walter Finsinger
+#'
 #' @importFrom graphics boxplot layout
 #'
 #' @export
@@ -109,6 +115,10 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
                            plot_crosses = TRUE, plot_x = TRUE,
                            plot_neg = FALSE,
                            sens = TRUE, smoothing_yr_seq = NULL) {
+
+  ## Put the user’s layout settings back in place when the function is done
+  opar <- par("mfrow", "mar", "oma", "cex")
+  on.exit(par(opar))
 
   ## Initial check-ups ####
 

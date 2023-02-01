@@ -4,7 +4,6 @@
 #' Finsinger W, Kelly R, Fevre J, Magyari EK (2014) A guide to screening
 #' charcoal peaks in macrocharcoal-area records for fire-episodes
 #' reconstructions. The Holocene 24: 1002–1008: doi:10.1177/0959683614534737.
-.
 #'
 #' @format A data frame with 242 rows and 7 variables:
 #' \describe{
@@ -17,6 +16,5 @@
 #'   \item{char_a}{sum of charcoal-particle areas (mm2)}
 #' }
 #' @source
-#' modified from Finsinger et al. (2009)
-#' \url{https://github.com/wfinsinger/ARCO/blob/master/data_in/arco_Smpl.csv}
+#' modified from Finsinger et al. (2009) \url{https://github.com/wfinsinger/ARCO/blob/master/data_in/arco_Smpl.csv}
 "br_data"

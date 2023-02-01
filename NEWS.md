@@ -1,6 +1,10 @@
 
 # tapas 0.1.3
 
+- Added sample data sets to run examples for arco() function.
+
+- Added the arco() function to screen charcoal-area records.
+
 - Added two sample data sets (rand_peaks) and (red_noise) for users to
   play around.
 

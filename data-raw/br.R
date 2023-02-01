@@ -12,7 +12,7 @@ if (!file.exists("./br_sdl.csv")) {
     "https://raw.githubusercontent.com/wfinsinger/ARCO/master/data_in/arco_Seedle.csv",
     "./br_sdl.csv")
 }
-br_sdl <- read_csv("./br_Sdl.csv", col_names = TRUE, col_types = "n")
+br_sdl <- read.csv("./br_Sdl.csv", header = TRUE)
 
 ## NOT RUN #####
 # # Format data.frame for peak-identification analysis  -------------------------
@@ -37,7 +37,7 @@ br_sdl <- read_csv("./br_Sdl.csv", col_names = TRUE, col_types = "n")
 #                                char_c, char_a))
 # write_csv(br_data, "./br_data.csv", col_names = TRUE)
 
-br_data <- read_csv("./br_data.csv", col_names = TRUE, col_types = "n")
+br_data <- read.csv("./br_data.csv", header = TRUE)
 
 # Write output ----------------------------------------------------------------
 usethis::use_data(br_sdl, overwrite = TRUE)

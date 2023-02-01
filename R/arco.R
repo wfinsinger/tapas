@@ -62,9 +62,12 @@
 #' @author Ryan Kelly
 #' @author Walter Finsinger
 #'
-#' @importFrom stats quantile loess predict
+#' @importFrom stats quantile lm
 #' @importFrom dplyr select all_of count relocate
-#' @importFrom graphics boxplot
+#' @importFrom graphics boxplot legend
+#' @importFrom tidyselect last_col
+#' @importFrom grDevices grey
+#' @importFrom rlang .data
 #'
 #' @export
 
@@ -84,7 +87,7 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   # -------------------- SETUP -------------------- #
 
   ## Put the user’s layout settings back in place when the function is done
-  opar <- par("mfrow", "mar", "oma", "cex", "cex.lab")
+  opar <- par("mfrow", "mar", "mai", "oma", "cex", "cex.lab")
   on.exit(par(opar))
 
   # ----- LOAD files with Charcoal per sample and of Seedles
@@ -120,10 +123,10 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
     S <- Seedle
   }
 
-  sdl_counts <- S %>% dplyr::count(Depth, name = "SdlCounts")
+  sdl_counts <- S %>% dplyr::count(.data$Depth, name = "SdlCounts")
   sdl <- merge(Seedle.file, sdl_counts, by = "Depth", all.x = TRUE)
   sdl$SdlCounts[is.na(sdl$SdlCounts)] <- 0
-  Seedle <- sdl %>% dplyr::relocate(SdlArea, .after = last_col())
+  Seedle <- sdl %>% dplyr::relocate(.data$SdlArea, .after = last_col())
 
   rm(S, sdl_counts, sdl)
 
@@ -293,8 +296,7 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   comp.perc$frag <- comp.perc$SmplCount/comp.perc$SmplArea
 
 
-
-  ### New CharAnalysis output file that reflects peak-area screening ###
+  ### New output file that reflects peak-area screening ###
 
   # First change "peaks Final", "peaks Insig.", and "peak Mag"
   CA.dat.out <- CA.dat       # Start with the original CA data
@@ -342,7 +344,7 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   plot(Smpl$SmplCount, Smpl$SmplArea,
        ylab = expression(Charcoal~area~(C[A]~mm^{2})), pch = 20,
        xlim = (range(Smpl$SmplCount)), xaxt = "n")
-  abline(lm(Smpl$SmplArea ~ Smpl$SmplCount))
+  abline(stats::lm(Smpl$SmplArea ~ Smpl$SmplCount))
   plot(Smpl$SmplCount, Smpl$SmplCount/Smpl$SmplArea,
        ylab = expression(C["#"]/C[A] - ratio), pch = 20,
        xlim = (range(Smpl$SmplCount)))
@@ -359,14 +361,15 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
 
 
   # Boxplot comparison screened and unscreened samples #####
+  all_sdl_val <- valAllSdl.perc %>% dplyr::filter(.data$SdlCounts > 0)
+  all_sdl_val$val[is.na(all_sdl_val$val)] <- 0
+
   par(mai = c(1,1,0.5,0.5), cex.axis = 1.2, cex.lab = 1.3)
-  graphics::boxplot(SdlArea~val, data = valAllSdl.perc,
-                    subset = SdlCounts > 0,
+  graphics::boxplot(SdlArea ~ val, data = all_sdl_val,
                     names = c("non signif. peaks", "signif. peaks"),
                     xlab = "",
                     ylab = expression(paste("Particle area (mm"^"2",")")),
                     notch = TRUE, varwidth = TRUE)
-
 
   # Main Diagnostic plot ####
   # (Screened CA and CC peaks that failed screening test = grey dots)
@@ -384,8 +387,8 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
               rep(y.lim, each = 2), col = "lightcyan", border = NA)
     }
 
-    lines(CA.age, CA.cpeak, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
     lines(CA.age, CA.thresh, col = 2)
 
     points(CA.age[peak.ind.notpass] + CA.res/2,
@@ -409,8 +412,9 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
               rep(y.lim, each = 2), col = "lightcyan", border = NA)
     }
 
-    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
+          col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
 
     points(CA.age[peak.ind.notpass] + CA.res/2,
            rep(0.9*y.lim[2], length(peak.ind.notpass)),
@@ -423,8 +427,8 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
     plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
          ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
 
-    lines(CC.age, CC.cpeak, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
     lines(CC.age,CC.thresh, col = 2)
 
     ind <- which(CC.dat[ ,12] == 1)
@@ -448,8 +452,8 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
       polygon(c(underthresh.interval[i,],rev(underthresh.interval[i,])),
               rep(y.lim, each = 2), col = "lightcyan", border = NA)
     }
-    lines(CA.age, CA.cpeak, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
     lines(CA.age, CA.thresh, col = 2)
 
     points(CA.age[peak.ind.screened] + CA.res/2,
@@ -471,8 +475,9 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
       polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
               rep(y.lim, each = 2), col = "lightcyan", border = NA)
     }
-    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
+          col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
     points(CA.age[peak.ind.screened] + CA.res/2,
            rep(0.9*y.lim[2], length(peak.ind.screened)),
            col = "red", pch = 3, lwd = 2)
@@ -493,15 +498,15 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
     }
     points(Smpl$Age_calBP, Smpl$frag,
            xlim = rev(range(CA.age)), pch = 16, cex = 1)
-    abline(h = 0, col = grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
 
 
     y.lim <- c(min(CC.cpeak) + 0.01, 1.2*max(CC.cpeak))
     plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
          ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
 
-    lines(CC.age, CC.cpeak, type = 's', col = grey(0.5))
-    abline(h = 0, col = grey(0.5))
+    lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
+    abline(h = 0, col = grDevices::grey(0.5))
     lines(CC.age, CC.thresh, col = 2)
     ind <- which(CC.dat[ ,12] == 1)
     points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
@@ -519,8 +524,8 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   y.lim <- c(min(CA.cpeak), 1.7*max(CA.cpeak))
   plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
        ylab = expression(CHAR[A]*~mm^{2}), xlab = "Age cal BP")
-  lines(CA.age, CA.cpeak, type = 's', col = grey(0.5))
-  abline(h = 0, col = grey(0.5))
+  lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
+  abline(h = 0, col = grDevices::grey(0.5))
   lines(CA.age, CA.thresh, col = 2)
   ind <- which(CA.dat[ ,13] == 1)
   points(CA.age[ind] + CA.res/2, rep(0.8*y.lim[2], length(ind)), pch = 16,
@@ -534,11 +539,11 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   ind <- which(CC.dat[,13] == 1)
   points(CA.age[ind] + CA.res/2, rep(0.7*y.lim[2], length(ind)),
          pch = 18, cex = 1.0)
-  legend("topright", bty = 'n', legend = c(expression(CHAR[A]*~screened),
-                                           expression(CHAR[C]*~screened),
-                                           "Unscreened"),
-         pch = c(17,18,16), col = c("black","black","grey"),
-         ncol = 2, cex = .8)
+  graphics::legend("topright", bty = 'n',
+                   legend = c(expression(CHAR[A]*~screened),
+                              expression(CHAR[C]*~screened), "Unscreened"),
+                   pch = c(17,18,16), col = c("black","black","grey"),
+                   ncol = 2, cex = .8)
 
 
   ## FRI plots - with boxplots -------
@@ -553,7 +558,7 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
        ylab = expression(CHAR[A]*~FRI), xaxt = "n")
   points(FRI.CA[,2], FRI.CA[,3], pch = 16, col = "grey", cex = 0.7)
   points(FRI.CAs[,2], FRI.CAs[,3], pch = 17, cex = 0.9)
-  legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
+  graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
          pch = c(17,16), col = c("black","grey"), ncol = 2, cex = .8)
   graphics::boxplot(FRI.CA[,3], FRI.CAs[,3], axes = TRUE, varwidth = TRUE,
                     ylab = expression(CHAR[A]*~FRI))
@@ -563,7 +568,7 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   points(FRI.CC[,2], FRI.CC[,3], pch = 16, col = "grey", cex = 0.7)
   points(FRI.CCs[,2], FRI.CCs[,3], pch = 18, cex = 1.0)
   mtext("Age (cal yr BP)", side = 1, outer = TRUE, line = 2.5, cex = 1)
-  legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
+  graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
          pch = c(18,16), col = c("black","grey"), ncol = 2, cex = .8)
   graphics::boxplot(FRI.CC[ ,3], FRI.CCs[ ,3], axes = TRUE, varwidth = TRUE,
                     names = c("unscreened", "screened"),

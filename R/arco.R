@@ -30,11 +30,24 @@
 #'   (with replacement) from all samples within a focal window, which is
 #'   centered on the peak and has a full span of win.width.
 #'   By default \code{win.width = 1000}.
-#' @param breakage Logical. If \code{breakege = FALSE}, plots also
+#' @param breakage Logical. If \code{breakage = FALSE}, plots also
 #'   C#/CA-ratios in one of the diagnostic plots. By default
 #'   \code{breakage = FALSE}.
 #'
 #' @details
+#' This screening procedure is specific for data sets comprising charcoal
+#' numbers (counts) and areas. It screens the charcoal-area estimates with
+#' respect to the count sums. The method begins with a charcoal-area data set
+#' analysed by existing methods to identify peaks representing fire episodes,
+#' e.g. the \code{peak_detection()} function with the argument
+#' \code{min_CountP = NULL}). To screen these peaks, the method uses bootstrap
+#' resampling of charcoal-particle areas observed in a user-defined subsection
+#' of the data set around each peak (by default \code{win.width = 1000}to
+#' obtain the range of likely charcoal areas for different counts. Peaks with
+#' total area within the likely range of bootstrapped samples (e.g. p > 0.05)
+#' are flagged as potentially unreliable, whereas samples with total area
+#' significantly greater than expected by chance are deemed robust indicators
+#' of past fire episodes.
 #'
 #' @references
 #' Finsinger, W., R. Kelly, J. Fevre, and E.K. Magyari. 2014. A guide to
@@ -53,11 +66,7 @@
 #' @importFrom dplyr select all_of count relocate
 #' @importFrom graphics boxplot
 #'
-#' @examples
-#'
-#'
 #' @export
-
 
 arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
                  n.boot = 10000, thresh.prob = 0.95, win.width = 1000,

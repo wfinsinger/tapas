@@ -7,8 +7,9 @@
 #'
 #' @param Seedle.file A data frame with charcoal-particle areas. Should have as
 #'  many rows as the number of charcoal particles and two columns in the
-#'  following order: Column 1: Top depth of samples;
-#'  Column 2: Charcoal-particle areas.
+#'  following order:
+#'    - Column 1: Top depth of samples;
+#'    - Column 2: Charcoal-particle areas.
 #' @param Smpl.file A data frame with as many rows as the number of samples and
 #'   seven columns in the following order: \code{CmTop, CmBot, AgeTop, AgeBot,
 #'   volume, charcoal counts, charcoal areas}.
@@ -30,24 +31,35 @@
 #'   (with replacement) from all samples within a focal window, which is
 #'   centered on the peak and has a full span of win.width.
 #'   By default \code{win.width = 1000}.
+#' @param plotit Logical. If \code{plotit = FALSE} (default), plots are not
+#'   sent to the device.
 #' @param breakage Logical. If \code{breakage = FALSE}, plots also
 #'   C#/CA-ratios in one of the diagnostic plots. By default
 #'   \code{breakage = FALSE}.
+#' @param storedat Logical. If \code{storedat = TRUE}, the function returns
+#'   also other output data related to charcoal-particle areas.
 #'
 #' @details
 #' This screening procedure is specific for data sets comprising charcoal
 #' numbers (counts) and areas. It screens the charcoal-area estimates with
-#' respect to the count sums. The method begins with a charcoal-area data set
-#' analysed by existing methods to identify peaks representing fire episodes,
-#' e.g. the \code{peak_detection()} function with the argument
-#' \code{min_CountP = NULL}). To screen these peaks, the method uses bootstrap
-#' resampling of charcoal-particle areas observed in a user-defined subsection
-#' of the data set around each peak (by default \code{win.width = 1000}to
-#' obtain the range of likely charcoal areas for different counts. Peaks with
-#' total area within the likely range of bootstrapped samples (e.g. p > 0.05)
-#' are flagged as potentially unreliable, whereas samples with total area
+#' respect to the number and size of charcoal particles.
+#'
+#' The method begins with a charcoal-area data set analysed by existing
+#' methods to identify peaks representing fire episodes, e.g. the
+#' \code{peak_detection()} function with the argument
+#' \code{min_CountP = NULL}).
+#' To screen these peaks, the method uses bootstrap resampling of
+#' charcoal-particle areas observed in a user-defined subsection of the data
+#' set around each peak (by default \code{win.width = 1000} to obtain the range
+#' of likely charcoal areas for different counts. Peaks with total area within
+#' the likely range of bootstrapped samples (e.g. p > 0.05) are flagged as
+#' potentially unreliable, whereas peak samples with total area
 #' significantly greater than expected by chance are deemed robust indicators
 #' of past fire episodes.
+#'
+#' @returns
+#' By default (as with \code{storedat = FALSE}), the function returns a
+#' list with the same structure as the input list (FireA.file).
 #'
 #' @references
 #' Finsinger, W., R. Kelly, J. Fevre, and E.K. Magyari. 2014. A guide to
@@ -72,17 +84,9 @@
 #' @export
 
 arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
-                 n.boot = 10000, thresh.prob = 0.95, win.width = 1000,
-                 breakage = FALSE) {
+                     n.boot = 10000, thresh.prob = 0.95, win.width = 1000,
+                     plotit = FALSE, breakage = FALSE, storedat = FALSE) {
 
-  # Seedle.file = br_sdl
-  # Smpl.file = br_data
-  # FireA.file = char_a_peaks_exp
-  # FireC.file = char_c_peaks_exp
-  # n.boot = 10000
-  # thresh.prob = 0.95
-  # win.width = 1000
-  # breakage = T
 
   # -------------------- SETUP -------------------- #
 
@@ -101,17 +105,17 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
   colnames(Smpl) <- c("Depth", "Age_calBP", "SmplCount", "SmplArea")
 
   # LOAD files with Fire history derived from tapas
-  CA.dat <- FireA.file
-  CA.dat <- CA.dat[complete.cases(CA.dat[ ,1]), ]
+  ca_temp <- tapas::tapas_export(FireA.file)
+  CA.dat <- ca_temp[complete.cases(ca_temp$cm_i), ]
 
   # tapas output, with Charcoal counts WITH pMinCount
-  CC.dat <- FireC.file
-  CC.dat <- CC.dat[complete.cases(CC.dat[ ,1]), ]
+  cc_temp <- tapas::tapas_export(FireC.file)
+  CC.dat <- cc_temp[complete.cases(cc_temp$cm_i), ]
 
   # Define minimum-area bootstrapping function
   b.stat <- function(seedle.areas, sample.size, n.boot, thresh.prob) {
     rj.resample <- matrix(sample(seedle.areas, sample.size*n.boot,
-                                replace = T), nrow = n.boot)
+                                 replace = T), nrow = n.boot)
     rj.sum <- apply(rj.resample, 1, sum)
     return(stats::quantile(rj.sum, probs = thresh.prob))
   }
@@ -336,255 +340,268 @@ arco <- function(Seedle.file, Smpl.file, FireA.file, FireC.file,
 
   ## PLOTS --------------------
 
-  ## Plots Seedle_area, C#/CA-ratio, and Sample Area vs Char_counts ####
-  par(mfrow = c(3,1), cex = 1, mar = c(0.5, 6, 0.5, 1), oma = c(5,1,1,1))
-  plot(Seedle$SdlCounts, Seedle$SdlArea,
-       ylab = expression(Particle~area~mm^{2}),
-       pch = 20, xlim = (range(Smpl$SmplCount)), xaxt = "n")
-  plot(Smpl$SmplCount, Smpl$SmplArea,
-       ylab = expression(Charcoal~area~(C[A]~mm^{2})), pch = 20,
-       xlim = (range(Smpl$SmplCount)), xaxt = "n")
-  abline(stats::lm(Smpl$SmplArea ~ Smpl$SmplCount))
-  plot(Smpl$SmplCount, Smpl$SmplCount/Smpl$SmplArea,
-       ylab = expression(C["#"]/C[A] - ratio), pch = 20,
-       xlim = (range(Smpl$SmplCount)))
-  mtext(expression(Pieces~sample^{-1}),
-        side = 1, outer = TRUE, line = 3, cex = 1.5)
+  if (plotit == TRUE) {
+    ## Plots Seedle_area, C#/CA-ratio, and Sample Area vs Char_counts ####
+    par(mfrow = c(3,1), cex = 1, mar = c(0.5, 6, 0.5, 1), oma = c(5,1,1,1))
+    plot(Seedle$SdlCounts, Seedle$SdlArea,
+         ylab = expression(Particle~area~mm^{2}),
+         pch = 20, xlim = (range(Smpl$SmplCount)), xaxt = "n")
+    plot(Smpl$SmplCount, Smpl$SmplArea,
+         ylab = expression(Charcoal~area~(C[A]~mm^{2})), pch = 20,
+         xlim = (range(Smpl$SmplCount)), xaxt = "n")
+    abline(stats::lm(Smpl$SmplArea ~ Smpl$SmplCount))
+    plot(Smpl$SmplCount, Smpl$SmplCount/Smpl$SmplArea,
+         ylab = expression(C["#"]/C[A] - ratio), pch = 20,
+         xlim = (range(Smpl$SmplCount)))
+    mtext(expression(Pieces~sample^{-1}),
+          side = 1, outer = TRUE, line = 3, cex = 1.5)
 
 
-  ## Boxplot of seedle areas for validated peak samples ####
-  par(mfrow = c(1,1), cex.lab = 1.2, mar = c(0.5,6,0.5,5), oma = c(5,1,1,1))
-  graphics::boxplot(SdlArea ~ Age_calBP, data = valSdl.perc, las = 2,
-                    varwidth = TRUE, notch = FALSE,
-                    ylab = expression(paste("Particle area (mm"^"2",")")))
-  mtext("Age (cal yrs BP)", side = 1, outer = TRUE, line = 3, cex = 1.2)
+    ## Boxplot of seedle areas for validated peak samples ####
+    par(mfrow = c(1,1), cex.lab = 1.2, mar = c(0.5,6,0.5,5), oma = c(5,1,1,1))
+    graphics::boxplot(SdlArea ~ Age_calBP, data = valSdl.perc, las = 2,
+                      varwidth = TRUE, notch = FALSE,
+                      ylab = expression(paste("Particle area (mm"^"2",")")))
+    mtext("Age (cal yrs BP)", side = 1, outer = TRUE, line = 3, cex = 1.2)
 
 
-  # Boxplot comparison screened and unscreened samples #####
-  all_sdl_val <- valAllSdl.perc %>% dplyr::filter(.data$SdlCounts > 0)
-  all_sdl_val$val[is.na(all_sdl_val$val)] <- 0
+    # Boxplot comparison screened and unscreened samples #####
+    all_sdl_val <- valAllSdl.perc %>% dplyr::filter(.data$SdlCounts > 0)
+    all_sdl_val$val[is.na(all_sdl_val$val)] <- 0
 
-  par(mai = c(1,1,0.5,0.5), cex.axis = 1.2, cex.lab = 1.3)
-  graphics::boxplot(SdlArea ~ val, data = all_sdl_val,
-                    names = c("non signif. peaks", "signif. peaks"),
-                    xlab = "",
-                    ylab = expression(paste("Particle area (mm"^"2",")")),
-                    notch = TRUE, varwidth = TRUE)
+    par(mai = c(1,1,0.5,0.5), cex.axis = 1.2, cex.lab = 1.3)
+    graphics::boxplot(SdlArea ~ val, data = all_sdl_val,
+                      names = c("non signif. peaks", "signif. peaks"),
+                      xlab = "",
+                      ylab = expression(paste("Particle area (mm"^"2",")")),
+                      notch = TRUE, varwidth = TRUE)
 
-  # Main Diagnostic plot ####
-  # (Screened CA and CC peaks that failed screening test = grey dots)
-  if (breakage == TRUE) {
-    par(mfrow = c(3,1), mar = c(0.5, 5, 0.5, 5), oma = c(5,1,1,1))
-    y.lim <- c(min(CA.cpeak), 1.2*max(CA.cpeak))
-    plot(0,0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(CHAR[A]*~"residuals"), xaxt = "n", cex = 1)
-    for (i in 1:n.peak) {
-      polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "mistyrose", border = NA)
+
+    # Main Diagnostic plot ####
+    # (Screened CA and CC peaks that failed screening test = grey dots)
+    if (breakage == TRUE) {
+      par(mfrow = c(3,1), mar = c(0.5, 5, 0.5, 5), oma = c(5,1,1,1))
+      y.lim <- c(min(CA.cpeak), 1.2*max(CA.cpeak))
+      plot(0,0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(CHAR[A]*~"residuals"), xaxt = "n", cex = 1)
+      for (i in 1:n.peak) {
+        polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "mistyrose", border = NA)
+      }
+      for (i in 1:(n.peak + 1)) {
+        polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "lightcyan", border = NA)
+      }
+
+      lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+      lines(CA.age, CA.thresh, col = 2)
+
+      points(CA.age[peak.ind.notpass] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.notpass)),
+             col = "gray", pch = 16, cex = 1)
+      points(CA.age[peak.ind.screened] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.screened)),
+             col = 2, pch = 3, lwd = 2)
+
+
+      y.lim <- c(min(Smpl$SmplCount), 1.2*max(Smpl$SmplCount))
+      plot(0, 0, type = 'n', xlim = rev(range(CA.age)),
+           ylim = y.lim, ylab = expression(Char.~counts~(pieces*~sample^{"-1"})),
+           xaxt = "n", cex = 1)
+      for (i in 1:nrow(overthresh.interval)) {
+        polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "mistyrose", border = NA)
+      }
+      for (i in 1:(n.peak + 1)) {
+        polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "lightcyan", border = NA)
+      }
+
+      lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
+            col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+
+      points(CA.age[peak.ind.notpass] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.notpass)),
+             col = "gray", pch = 16, cex = 1)
+      points(CA.age[peak.ind.screened] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.screened)),
+             col = 2, pch = 3, lwd = 2)
+
+      y.lim <- c(min(CC.cpeak) + 0.01, 1.2*max(CC.cpeak))
+      plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
+
+      lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+      lines(CC.age,CC.thresh, col = 2)
+
+      ind <- which(CC.dat[ ,12] == 1)
+      points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
+             col = "gray", pch = 16, cex = 1)
+      ind = which(CC.dat[ ,13] == 1)
+      points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
+             col = "red", pch = 3, lwd = 2)
+
+      mtext(("Age (cal yrs BP)"), side = 1, line = 2.5, cex = 1)
+    } else {
+      par(mfrow = c(4,1), mar = c(0.5, 5, 0.5, 5), oma = c(5,1,1,1))
+      y.lim = c(min(CA.cpeak), 1.2*max(CA.cpeak))
+      plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(CHAR[A]*~"residuals"), xaxt = "n", cex = 1)
+      for (i in 1:n.peak) {
+        polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "mistyrose", border = NA)
+      }
+      for (i in 1:(n.peak + 1)) {
+        polygon(c(underthresh.interval[i,],rev(underthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "lightcyan", border = NA)
+      }
+      lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+      lines(CA.age, CA.thresh, col = 2)
+
+      points(CA.age[peak.ind.screened] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.screened)),
+             col = "red", pch = 3, lwd = 2)
+      points(CA.age[peak.ind.notpass] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.notpass)),
+             col = "gray", pch = 16, cex = 1)
+
+
+      y.lim = c(min(Smpl$SmplCount), 1.2*max(Smpl$SmplCount))
+      plot(0,0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(Pieces*~sample^{"-1"}), xaxt = "n", cex = 1)
+      for (i in 1:nrow(overthresh.interval)) {
+        polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "mistyrose", border = NA)
+      }
+      for (i in 1:(n.peak + 1)) {
+        polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "lightcyan", border = NA)
+      }
+      lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
+            col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+      points(CA.age[peak.ind.screened] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.screened)),
+             col = "red", pch = 3, lwd = 2)
+      points(CA.age[peak.ind.notpass] + CA.res/2,
+             rep(0.9*y.lim[2], length(peak.ind.notpass)),
+             col = "gray", pch = 16, cex = 1)
+
+      y.lim <- c(0, 1.2*max(Smpl$frag, na.rm = TRUE))
+      plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(C["#"]/C[A] - ratio), xaxt = "n", cex = 1)
+      for (i in 1:nrow(overthresh.interval)) {
+        polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "mistyrose", border = NA)
+      }
+      for (i in 1:(n.peak + 1)) {
+        polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
+                rep(y.lim, each = 2), col = "lightcyan", border = NA)
+      }
+      points(Smpl$Age_calBP, Smpl$frag,
+             xlim = rev(range(CA.age)), pch = 16, cex = 1)
+      abline(h = 0, col = grDevices::grey(0.5))
+
+
+      y.lim <- c(min(CC.cpeak) + 0.01, 1.2*max(CC.cpeak))
+      plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+           ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
+
+      lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
+      abline(h = 0, col = grDevices::grey(0.5))
+      lines(CC.age, CC.thresh, col = 2)
+      ind <- which(CC.dat[ ,12] == 1)
+      points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
+             col = "gray", pch = 16, cex = 1)
+      ind <- which(CC.dat[ ,13] == 1)
+      points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
+             col = "red", pch = 3, lwd = 2)
+
+      mtext(("Age (cal yrs BP)"), side = 1, line = 2.5, cex = 1)
     }
-    for (i in 1:(n.peak + 1)) {
-      polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "lightcyan", border = NA)
-    }
 
+
+    # Plots comparison between fire events #####
+    par(mfrow = c(1, 1))
+    y.lim <- c(min(CA.cpeak), 1.7*max(CA.cpeak))
+    plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
+         ylab = expression(CHAR[A]*~mm^{2}), xlab = "Age cal BP")
     lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
     abline(h = 0, col = grDevices::grey(0.5))
     lines(CA.age, CA.thresh, col = 2)
+    ind <- which(CA.dat[ ,13] == 1)
+    points(CA.age[ind] + CA.res/2, rep(0.8*y.lim[2], length(ind)), pch = 16,
+           col = "grey", cex = 0.7)
+    ind <- peak.ind.screened
+    points(CA.age[ind] + CA.res/2, rep(0.8*y.lim[2], length(ind)),
+           pch = 17, cex = 0.9)
+    ind <- which(CC.dat[,12] == 1)
+    points(CA.age[ind] + CA.res/2, rep(0.7*y.lim[2], length(ind)), pch = 16,
+           col = "grey", cex = 0.8)
+    ind <- which(CC.dat[,13] == 1)
+    points(CA.age[ind] + CA.res/2, rep(0.7*y.lim[2], length(ind)),
+           pch = 18, cex = 1.0)
+    graphics::legend("topright", bty = 'n',
+                     legend = c(expression(CHAR[A]*~screened),
+                                expression(CHAR[C]*~screened), "Unscreened"),
+                     pch = c(17,18,16), col = c("black","black","grey"),
+                     ncol = 2, cex = .8)
 
-    points(CA.age[peak.ind.notpass] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.notpass)),
-           col = "gray", pch = 16, cex = 1)
-    points(CA.age[peak.ind.screened] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.screened)),
-           col = 2, pch = 3, lwd = 2)
 
-
-    y.lim <- c(min(Smpl$SmplCount), 1.2*max(Smpl$SmplCount))
-    plot(0, 0, type = 'n', xlim = rev(range(CA.age)),
-         ylim = y.lim, ylab = expression(Char.~counts~(pieces*~sample^{"-1"})),
-         xaxt = "n", cex = 1)
-    for (i in 1:nrow(overthresh.interval)) {
-      polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "mistyrose", border = NA)
+    ## FRI plots - with boxplots -------
+    if (all(is.na(FRI.CAs$FRI) == TRUE)) {
+      ymax_FRI.CAs <- max(FRI.CA$FRI, na.rm = TRUE)
+    } else {
+      ymax_FRI.CAs <- max(FRI.CAs$FRI, na.rm = TRUE)
     }
-    for (i in 1:(n.peak + 1)) {
-      polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "lightcyan", border = NA)
-    }
+    par(mfrow = c(2,2), mar = c(0.5, 4, 0.5, 0), oma = c(5,1,1,1), cex.lab = 1)
+    y.lim <- c(min(FRI.CA$FRI, na.rm = T), 1.3*ymax_FRI.CAs)
+    plot(0, 0, type = "n", ylim = y.lim, xlim = rev(range(CA.age)),
+         ylab = expression(CHAR[A]*~FRI), xaxt = "n")
+    points(FRI.CA[,2], FRI.CA[,3], pch = 16, col = "grey", cex = 0.7)
+    points(FRI.CAs[,2], FRI.CAs[,3], pch = 17, cex = 0.9)
+    graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
+                     pch = c(17,16), col = c("black","grey"), ncol = 2, cex = .8)
+    graphics::boxplot(FRI.CA[,3], FRI.CAs[,3], axes = TRUE, varwidth = TRUE,
+                      ylab = expression(CHAR[A]*~FRI))
+    y.lim <- c(min(FRI.CC$FRI, na.rm = T), 1.3*max(FRI.CCs$FRI, na.rm = T))
+    plot(0, 0, type = "n", ylim = y.lim, xlim = rev(range(CA.age)),
+         ylab = expression(CHAR["#"]*~FRI))
+    points(FRI.CC[,2], FRI.CC[,3], pch = 16, col = "grey", cex = 0.7)
+    points(FRI.CCs[,2], FRI.CCs[,3], pch = 18, cex = 1.0)
+    mtext("Age (cal yr BP)", side = 1, outer = TRUE, line = 2.5, cex = 1)
+    graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
+                     pch = c(18,16), col = c("black","grey"), ncol = 2, cex = .8)
+    graphics::boxplot(FRI.CC[ ,3], FRI.CCs[ ,3], axes = TRUE, varwidth = TRUE,
+                      names = c("unscreened", "screened"),
+                      ylab = expression(CHAR["#"]*~FRI))
 
-    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
-          col = grDevices::grey(0.5))
-    abline(h = 0, col = grDevices::grey(0.5))
-
-    points(CA.age[peak.ind.notpass] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.notpass)),
-           col = "gray", pch = 16, cex = 1)
-    points(CA.age[peak.ind.screened] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.screened)),
-           col = 2, pch = 3, lwd = 2)
-
-    y.lim <- c(min(CC.cpeak) + 0.01, 1.2*max(CC.cpeak))
-    plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
-
-    lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
-    abline(h = 0, col = grDevices::grey(0.5))
-    lines(CC.age,CC.thresh, col = 2)
-
-    ind <- which(CC.dat[ ,12] == 1)
-    points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
-           col = "gray", pch = 16, cex = 1)
-    ind = which(CC.dat[ ,13] == 1)
-    points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
-           col = "red", pch = 3, lwd = 2)
-
-    mtext(("Age (cal yrs BP)"), side = 1, line = 2.5, cex = 1)
-  } else {
-    par(mfrow = c(4,1), mar = c(0.5, 5, 0.5, 5), oma = c(5,1,1,1))
-    y.lim = c(min(CA.cpeak), 1.2*max(CA.cpeak))
-    plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(CHAR[A]*~"residuals"), xaxt = "n", cex = 1)
-    for (i in 1:n.peak) {
-      polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "mistyrose", border = NA)
-    }
-    for (i in 1:(n.peak + 1)) {
-      polygon(c(underthresh.interval[i,],rev(underthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "lightcyan", border = NA)
-    }
-    lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
-    abline(h = 0, col = grDevices::grey(0.5))
-    lines(CA.age, CA.thresh, col = 2)
-
-    points(CA.age[peak.ind.screened] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.screened)),
-           col = "red", pch = 3, lwd = 2)
-    points(CA.age[peak.ind.notpass] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.notpass)),
-           col = "gray", pch = 16, cex = 1)
-
-
-    y.lim = c(min(Smpl$SmplCount), 1.2*max(Smpl$SmplCount))
-    plot(0,0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(Pieces*~sample^{"-1"}), xaxt = "n", cex = 1)
-    for (i in 1:nrow(overthresh.interval)) {
-      polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "mistyrose", border = NA)
-    }
-    for (i in 1:(n.peak + 1)) {
-      polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "lightcyan", border = NA)
-    }
-    lines(Smpl$Age_calBP, Smpl$SmplCount, type = 's',
-          col = grDevices::grey(0.5))
-    abline(h = 0, col = grDevices::grey(0.5))
-    points(CA.age[peak.ind.screened] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.screened)),
-           col = "red", pch = 3, lwd = 2)
-    points(CA.age[peak.ind.notpass] + CA.res/2,
-           rep(0.9*y.lim[2], length(peak.ind.notpass)),
-           col = "gray", pch = 16, cex = 1)
-
-    y.lim <- c(0, 1.2*max(Smpl$frag, na.rm = TRUE))
-    plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(C["#"]/C[A] - ratio), xaxt = "n", cex = 1)
-    for (i in 1:nrow(overthresh.interval)) {
-      polygon(c(overthresh.interval[i,], rev(overthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "mistyrose", border = NA)
-    }
-    for (i in 1:(n.peak + 1)) {
-      polygon(c(underthresh.interval[i,], rev(underthresh.interval[i,])),
-              rep(y.lim, each = 2), col = "lightcyan", border = NA)
-    }
-    points(Smpl$Age_calBP, Smpl$frag,
-           xlim = rev(range(CA.age)), pch = 16, cex = 1)
-    abline(h = 0, col = grDevices::grey(0.5))
-
-
-    y.lim <- c(min(CC.cpeak) + 0.01, 1.2*max(CC.cpeak))
-    plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-         ylab = expression(CHAR["#"]*~"residuals"), cex = 1)
-
-    lines(CC.age, CC.cpeak, type = 's', col = grDevices::grey(0.5))
-    abline(h = 0, col = grDevices::grey(0.5))
-    lines(CC.age, CC.thresh, col = 2)
-    ind <- which(CC.dat[ ,12] == 1)
-    points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
-           col = "gray", pch = 16, cex = 1)
-    ind <- which(CC.dat[ ,13] == 1)
-    points(CC.age[ind], rep(0.7*y.lim[2], length(ind)),
-           col = "red", pch = 3, lwd = 2)
-
-    mtext(("Age (cal yrs BP)"), side = 1, line = 2.5, cex = 1)
+    # Boxplot of charcoal-particle areas of samples that passed the screening test
+    par(mfrow = c(1,1), mar = c(2, 5, 1, 1), cex = 1.2)
+    graphics::boxplot(SdlArea ~ Age_calBP, data = valSdl.perc,
+                      varwidth = TRUE, notch = FALSE, las = 2,
+                      xlab = "",
+                      ylab = expression(paste("Particle area (mm"^"2",")")))
+    mtext("Age (cal yrs BP)", side = 1, line = 4, cex = 1.2)
   }
 
-
-  # Plots comparison between fire events #####
-  par(mfrow = c(1, 1))
-  y.lim <- c(min(CA.cpeak), 1.7*max(CA.cpeak))
-  plot(0, 0, type = 'n', xlim = rev(range(CA.age)), ylim = y.lim,
-       ylab = expression(CHAR[A]*~mm^{2}), xlab = "Age cal BP")
-  lines(CA.age, CA.cpeak, type = 's', col = grDevices::grey(0.5))
-  abline(h = 0, col = grDevices::grey(0.5))
-  lines(CA.age, CA.thresh, col = 2)
-  ind <- which(CA.dat[ ,13] == 1)
-  points(CA.age[ind] + CA.res/2, rep(0.8*y.lim[2], length(ind)), pch = 16,
-         col = "grey", cex = 0.7)
-  ind <- peak.ind.screened
-  points(CA.age[ind] + CA.res/2, rep(0.8*y.lim[2], length(ind)),
-         pch = 17, cex = 0.9)
-  ind <- which(CC.dat[,12] == 1)
-  points(CA.age[ind] + CA.res/2, rep(0.7*y.lim[2], length(ind)), pch = 16,
-         col = "grey", cex = 0.8)
-  ind <- which(CC.dat[,13] == 1)
-  points(CA.age[ind] + CA.res/2, rep(0.7*y.lim[2], length(ind)),
-         pch = 18, cex = 1.0)
-  graphics::legend("topright", bty = 'n',
-                   legend = c(expression(CHAR[A]*~screened),
-                              expression(CHAR[C]*~screened), "Unscreened"),
-                   pch = c(17,18,16), col = c("black","black","grey"),
-                   ncol = 2, cex = .8)
-
-
-  ## FRI plots - with boxplots -------
-  if (all(is.na(FRI.CAs$FRI) == TRUE)) {
-    ymax_FRI.CAs <- max(FRI.CA$FRI, na.rm = TRUE)
-  } else {
-    ymax_FRI.CAs <- max(FRI.CAs$FRI, na.rm = TRUE)
-  }
-  par(mfrow = c(2,2), mar = c(0.5, 4, 0.5, 0), oma = c(5,1,1,1), cex.lab = 1)
-  y.lim <- c(min(FRI.CA$FRI, na.rm = T), 1.3*ymax_FRI.CAs)
-  plot(0, 0, type = "n", ylim = y.lim, xlim = rev(range(CA.age)),
-       ylab = expression(CHAR[A]*~FRI), xaxt = "n")
-  points(FRI.CA[,2], FRI.CA[,3], pch = 16, col = "grey", cex = 0.7)
-  points(FRI.CAs[,2], FRI.CAs[,3], pch = 17, cex = 0.9)
-  graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
-         pch = c(17,16), col = c("black","grey"), ncol = 2, cex = .8)
-  graphics::boxplot(FRI.CA[,3], FRI.CAs[,3], axes = TRUE, varwidth = TRUE,
-                    ylab = expression(CHAR[A]*~FRI))
-  y.lim <- c(min(FRI.CC$FRI, na.rm = T), 1.3*max(FRI.CCs$FRI, na.rm = T))
-  plot(0, 0, type = "n", ylim = y.lim, xlim = rev(range(CA.age)),
-       ylab = expression(CHAR["#"]*~FRI))
-  points(FRI.CC[,2], FRI.CC[,3], pch = 16, col = "grey", cex = 0.7)
-  points(FRI.CCs[,2], FRI.CCs[,3], pch = 18, cex = 1.0)
-  mtext("Age (cal yr BP)", side = 1, outer = TRUE, line = 2.5, cex = 1)
-  graphics::legend("topleft", bty = 'n', legend = c("Screened", "Unscreened"),
-         pch = c(18,16), col = c("black","grey"), ncol = 2, cex = .8)
-  graphics::boxplot(FRI.CC[ ,3], FRI.CCs[ ,3], axes = TRUE, varwidth = TRUE,
-                    names = c("unscreened", "screened"),
-                    ylab = expression(CHAR["#"]*~FRI))
-
-  # Boxplot of charcoal-particle areas of samples that passed the screening test
-  par(mfrow = c(1,1), mar = c(2, 5, 1, 1), cex = 1.2)
-  graphics::boxplot(SdlArea ~ Age_calBP, data = valSdl.perc,
-                    varwidth = TRUE, notch = FALSE, las = 2,
-                    xlab = "",
-                    ylab = expression(paste("Particle area (mm"^"2",")")))
-  mtext("Age (cal yrs BP)", side = 1, line = 4, cex = 1.2)
+  ## Create new FireA.file with screened peaks
+  fire_a_out <- FireA.file
+  fire_a_out$thresh$RI_pos <- FRI.CAs$FRI
+  fire_a_out$thresh$peaks.pos.age <- FRI.CAs$age_top_i
+  fire_a_out$thresh$peaks.pos <- CA.dat.out$peaks_pos_sig
+  fire_a_out$thresh$peaks.pos.insig <- CA.dat.out$peaks_pos_insig
 
 
   ## Gather output ------------------
-  d_out <- structure(list(ca_dat_out = CA.dat.out, comp_perc = comp.perc))
+  if (storedat == FALSE) {
+    d_out <- fire_a_out
+  } else {
+    d_out <- structure(list(fire_a_out = fire_a_out, comp_perc = comp.perc))
+  }
   return(d_out)
-
 }

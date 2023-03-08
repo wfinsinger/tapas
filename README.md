@@ -320,7 +320,7 @@ your improvements may fit with ongoing development of add-ons. Thanks!
 > Meloni F, Bentaleb I, Motta R, Garbarino M, Lingua E, Finsinger W
 > (2022) Legacies of past human activities on one of the largest
 > old-growth forests in south-east European mountains. *Vegetation
-> History and Archaeobotany*, online available
+> History and Archaeobotany* 31: 415-430
 > [link](https://doi.org/10.1007/s00334-021-00862-x).
 
 > Higuera PE, LB Brubaker, PM Anderson, FS Hu, TA Brown (2009)
@@ -331,7 +331,7 @@ your improvements may fit with ongoing development of add-ons. Thanks!
 > Higuera PE, Gavin DG, Bartlein PJ, Hallett DJ (2010) Peak detection in
 > sediment–charcoal records: impacts of alternative data analysis
 > methods on fire-history interpretations. *International Journal of
-> Wildland Fire* 19: 996. [link](http://dx.doi.org/10.1071/WF09134)
+> Wildland Fire* 19: 996 [link](http://dx.doi.org/10.1071/WF09134)
 
 > Kelly RF, PE Higuera, CM Barrett, FS Hu (2011) A signal-to-noise index
 > to quantify the potential for peak detection in sediment-charcoal

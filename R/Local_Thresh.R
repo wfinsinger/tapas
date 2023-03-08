@@ -175,6 +175,9 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
   # Define number of plots to print for evaluation of local threshold
   j <- 1
 
+  if (round(n.smooth) > length(v)) {
+    stop("Fatal error: choose shorter smoothing-window width (smoothing.yr)")
+  }
   num.plots <- seq(from = round(n.smooth),
                    to = length(v),
                    by = round(n.smooth/2))

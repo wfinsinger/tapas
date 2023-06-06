@@ -520,7 +520,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
   ## Get peak-magnitude values for positive peaks
   if (length(Peaks.pos.final) > 0) {
-    PeakMag_pos_val <- v - thresh.pos
+    PeakMag_pos_val <- v - thresh.pos.sm
     PeakMag_pos_val[PeakMag_pos_val < 0] <- 0
     PeakMag_pos_index <- which(PeakMag_pos_val > 0)
 
@@ -555,7 +555,7 @@ local_thresh <- function(series = NA, proxy = NULL, t.lim = NULL,
 
   ## Get peak-magnitude values for negative peaks
   if (length(Peaks.neg.final) > 0) {
-    PeakMag_neg_val <- thresh.neg - v
+    PeakMag_neg_val <- thresh.neg.sm - v
     PeakMag_neg_val[PeakMag_neg_val < 0] <- 0
     PeakMag_neg_index <- which(PeakMag_neg_val > 0)
 

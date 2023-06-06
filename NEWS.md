@@ -1,6 +1,8 @@
 
 # tapas 0.1.3
 
+- Corrected calculation of peak magnitude (06/06/2023).
+
 - Added sample data sets to run examples for arco() function.
 
 - Added the arco() function to screen charcoal-area records.

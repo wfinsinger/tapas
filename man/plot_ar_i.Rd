@@ -44,7 +44,7 @@ written as \code{accInit}.}
 Requires an object returned by the tapas::pretreatment() function.
 Non-resampled accumulation rates are presented using grey bars. The re-sampled
 accumulation rates at equal sampling intervals are presented by a black curve.
-Modified from the plot.CHAR() function (paleofire v1.1 R package).
+Modified from the plot.CHAR() function (paleofire v1.2.4 R package).
 }
 \examples{
 \dontrun{

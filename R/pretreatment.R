@@ -4,7 +4,7 @@
 #' originally developed by Philip Higuera for "CharAnalysis" (see
 #' https://github.com/phiguera/CharAnalysis/tree/master). It has been translated
 #' from the Matlab-coded CharPretreatment.m function by Olivier Blarquez and was
-#' included in the paleofire v1.1 R package (https://github.com/oblarquez/paleofire).
+#' included in the paleofire v1.2.4 R package (https://github.com/oblarquez/paleofire).
 #' The function is now included in the tapas R package because the paleofire R
 #' package is currently not being updated.
 #'

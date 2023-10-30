@@ -1,7 +1,7 @@
 
 # tapas 0.1.3
 
-- Added the pretreatment() from the paleofire v1.1 R package (30/10/2023).
+- Added the pretreatment() from the paleofire v1.2.4 R package (30/10/2023).
 
 - Corrected the calculation of peak magnitude (06/06/2023).
 

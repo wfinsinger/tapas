@@ -314,6 +314,13 @@ your improvements may fit with ongoing development of add-ons. Thanks!
 
 ------------------------------------------------------------------------
 
+## News
+
+For the latest news, see
+<https://github.com/wfinsinger/tapas/blob/main/NEWS.md>.
+
+------------------------------------------------------------------------
+
 ## References
 
 > Cagliero E, Morresi D, Paradis L, Curović M, Spalević V, Marchi N,

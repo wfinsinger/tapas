@@ -2,7 +2,7 @@
 % Please edit documentation in R/pretreatment_data.R
 \name{pretreatment_data}
 \alias{pretreatment_data}
-\title{Pre-process data by resampling all columns.}
+\title{Pre-process data by re-sampling all columns.}
 \usage{
 pretreatment_data(
   series = NULL,
@@ -39,11 +39,14 @@ A list with the resampled (binned) data according to
 \code{out} parameter.
 }
 \description{
-Uses the paleofire::pretreatment() function
-to virtually resample timeseries at equal sampling intervals.
+Uses the tapas::pretreatment() function to virtually re-sample time series
+at equal sampling intervals.
 }
 \examples{
 co <- tapas::co_char_data
 co_i <- tapas::pretreatment_data(co)
 
+}
+\author{
+Walter Finsinger
 }

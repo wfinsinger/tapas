@@ -37,11 +37,9 @@ Imports:
     mclust,
     dplyr,
     stringr,
-    paleofire,
     mgcv,
     changepoint,
     stats,
     graphics,
     tidyselect,
     rlang
-Remotes: oblarquez/paleofire

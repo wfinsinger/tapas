@@ -1,7 +1,7 @@
-#' Pre-process data by resampling all columns.
+#' Pre-process data by re-sampling all columns.
 #'
-#' Uses the paleofire::pretreatment() function
-#' to virtually resample timeseries at equal sampling intervals.
+#' Uses the tapas::pretreatment() function to virtually re-sample time series
+#'  at equal sampling intervals.
 #'
 #' @param series A matrix with the following first columns:
 #'               \code{c("CmTop", "CmBot", "AgeTop", "AgeBot", "Volume")}
@@ -21,6 +21,8 @@
 #'
 #' @return A list with the resampled (binned) data according to
 #'         \code{out} parameter.
+#'
+#' @author Walter Finsinger
 #'
 #' @examples
 #' co <- tapas::co_char_data
@@ -71,7 +73,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
 
     j = 2
     for (i in 6:ncol(series)) {
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+      pre.i <- tapas::pretreatment(params = series[ ,1:5],
                                        serie = series[ ,i], Int = T,
                                        first = first, last = last,
                                        yrInterp = yrInterp)
@@ -118,7 +120,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
 
     j = 2
     for (i in 6:ncol(series)) {
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+      pre.i <- tapas::pretreatment(params = series[ ,1:5],
                                        serie = series[ ,i], Int = T,
                                        first = first, last = last,
                                        yrInterp = yrInterp)
@@ -165,7 +167,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
 
     j = 2
     for (i in 6:ncol(series)) {
-      pre.i <- paleofire::pretreatment(params = series[ ,1:5],
+      pre.i <- tapas::pretreatment(params = series[ ,1:5],
                                        serie = series[ ,i], Int = T,
                                        first = first, last = last,
                                        yrInterp = yrInterp)

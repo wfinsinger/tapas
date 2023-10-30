@@ -215,6 +215,11 @@ Contributions to this work are more than welcome. *tapas* is meant as a flexible
 
 ***
 
+## News
+For the latest news, see https://github.com/wfinsinger/tapas/blob/main/NEWS.md.
+
+***
+
 ## References
 > Cagliero E, Morresi D, Paradis L, Curović M, Spalević V, Marchi N, Meloni F, Bentaleb I, Motta R, Garbarino M, Lingua E, Finsinger W (2022) Legacies of past human activities on one of the largest old-growth forests in south-east European mountains. *Vegetation History and Archaeobotany* 31: 415-430 [link](https://doi.org/10.1007/s00334-021-00862-x).
 

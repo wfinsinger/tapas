@@ -1,7 +1,9 @@
 
 # tapas 0.1.3
 
-- Corrected calculation of peak magnitude (06/06/2023).
+- Added the pretreatment() from the paleofire v1.1 R package (30/10/2023).
+
+- Corrected the calculation of peak magnitude (06/06/2023).
 
 - Added sample data sets to run examples for arco() function.
 
@@ -29,10 +31,10 @@
 - Slightly modified the local_thresh() function. Now it also
   accommodates discontinuous and/or non-binned data sets. Though, this
   is currently at a work-in-progress stage, as the SeriesDetrend()
-  function still requires continuous and binned temporal series (i.e. an
+  function still requires continuous and binned temporal series (i.e. an
   output from the pretreatment_data() function).
 
-- Got rid of trailing horizontal whitespaces
+- Got rid of trailing horizontal white spaces.
 
 - Fixed issue in pretreatment_data() arising when only one variable is
   included.

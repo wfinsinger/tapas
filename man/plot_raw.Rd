@@ -10,13 +10,16 @@ plot_raw(
   my_col = "grey",
   bars = FALSE,
   y_lim = NULL,
-  y_lab = NULL
+  x_lab = NULL,
+  y_lab = NULL,
+  main = NULL,
+  ...
 )
 }
 \arguments{
 \item{series}{The input data frame. A matrix with the following columns:
-\code{CmTop, CmBot, AgeTop, AgeBot, Volume},
-and one or more columns with the data which should be re-sampled (variables).}
+\code{CmTop, CmBot, AgeTop, AgeBot, Volume}, and one or more columns with
+the data which should be re-sampled (variables).}
 
 \item{proxy}{a character string with the name of the selected variable. By
 default (i.e. \code{proxy = NULL}), the 6th column of the input data
@@ -30,13 +33,21 @@ mid-sample ages.}
 
 \item{y_lim}{a numeric vector of length 2, giving the y coordinates range.}
 
-\item{y_lab}{a title for the y axis.}
+\item{x_lab}{Optional. A character string specifying the units of the age
+scale. By default \code{xlab = NULL} and the x-axis scale label
+is written as \code{age}.}
+
+\item{y_lab}{Optional. A character string specifying the y-axis label.}
+
+\item{main}{Optional. A character string specifying the main plot title.}
+
+\item{\dots}{\dots{}}
 }
 \value{
 A plot.
 }
 \description{
-The functions produces a polygon plot and optionally overlays a bar plot of
+The function produces a polygon plot and optionally overlays a bar plot of
 the raw input data.
 }
 \examples{

@@ -23,7 +23,6 @@
 #' @param \dots \dots{}
 #'
 #' @author Olivier Blarquez
-#' @author Walter Finsinger
 #'
 #' @examples
 #' \dontrun{

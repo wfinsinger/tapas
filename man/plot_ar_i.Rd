@@ -61,6 +61,4 @@ tapas::plot_ar_i(co_CHAR)
 }
 \author{
 Olivier Blarquez
-
-Walter Finsinger
 }

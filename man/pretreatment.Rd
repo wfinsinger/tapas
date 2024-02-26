@@ -34,7 +34,7 @@ if NULL, yrInterp is automatically specified as the median resolution of the
 record.}
 }
 \value{
-Returns an object of the class "proxy_ar_i" having the output structure:
+Returns an object of the class "proxy_ar_i" including:
 \item{cmI}{interpolated depths}
 \item{ybpI}{interpolated ages}
 \item{accI}{accumulation rates}
@@ -48,6 +48,12 @@ included in the paleofire v1.2.4 R package (https://github.com/oblarquez/paleofi
 The function is now included in the tapas R package because the paleofire R
 package is currently not being updated.
 }
+\details{
+Note: The code has been modified to calculate sediment-accumulation
+rates in a different way: now the code uses explicit sample
+thicknesses and sample-deposition times rather than diff(depth)
+and diff(age).
+}
 \examples{
 \dontrun{
 # Load raw charcoal data:
@@ -55,9 +61,9 @@ co <- tapas::co_char_data
 c <- co[, 6] # charcoal counts
 p <- co[, 1:5] # CmTop, CmBot, AgeTop, AgeBot, Volume
 
-# Calculates charcoal accumulation rate (CHAR, as pieces cm-2 yr-1)
+# Calculate charcoal accumulation rate (CHAR, as pieces cm-2 yr-1)
 co_CHAR <- tapas::pretreatment(params = p, serie = c, Int = TRUE)
-plot(co_CHAR)
+tapas::plot_ar_i(co_CHAR)
 }
 }
 \author{

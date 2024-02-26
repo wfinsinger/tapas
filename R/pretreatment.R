@@ -23,7 +23,7 @@
 #'  if NULL, yrInterp is automatically specified as the median resolution of the
 #'  record.
 #'
-#' @return Returns an object of the class "proxy_ar_i" having the output structure:
+#' @return Returns an object of the class "proxy_ar_i" including:
 #' \item{cmI}{interpolated depths}
 #' \item{ybpI}{interpolated ages}
 #' \item{accI}{accumulation rates}
@@ -32,6 +32,11 @@
 #'
 #' @author Olivier Blarquez
 #'
+#' @details Note: The code has been modified to calculate sediment-accumulation
+#'            rates in a different way: now the code uses explicit sample
+#'            thicknesses and sample-deposition times rather than diff(depth)
+#'            and diff(age).
+#'
 #' @examples
 #' \dontrun{
 #' # Load raw charcoal data:
@@ -39,9 +44,9 @@
 #' c <- co[, 6] # charcoal counts
 #' p <- co[, 1:5] # CmTop, CmBot, AgeTop, AgeBot, Volume
 #'
-#' # Calculates charcoal accumulation rate (CHAR, as pieces cm-2 yr-1)
+#' # Calculate charcoal accumulation rate (CHAR, as pieces cm-2 yr-1)
 #' co_CHAR <- tapas::pretreatment(params = p, serie = c, Int = TRUE)
-#' plot(co_CHAR)
+#' tapas::plot_ar_i(co_CHAR)
 #' }
 #' @export
 pretreatment <- function(params, serie, Int = TRUE, first = NULL, last = NULL,
@@ -56,7 +61,6 @@ pretreatment <- function(params, serie, Int = TRUE, first = NULL, last = NULL,
 
   ## Redefine the matrix and values
   cm <- A[, 1]
-  cmB <- A[, 2]
   count <- A[, 6]
   vol <- A[, 5]
   con <- count / vol
@@ -123,24 +127,32 @@ pretreatment <- function(params, serie, Int = TRUE, first = NULL, last = NULL,
 
   ## RETRIEVE VARIABLES FROM INPUT FILES:
   cm <- A[, 1] # [cm] sample depths.
+  cm_bot <- A[, 2] # [cm] bottom sample depths.
   count <- A[, 6] # [#] charcoal counts
   vol <- A[, 5] # [cm^3] sample volumes.
-  con <- count / vol # [# cm-3] charcoal con.
+  con <- count / vol # [# cm-3] charcoal concentration
   ybp <- A[, 3] # [cal ybp] age at top of sample
+  age_bot <- A[, 4] # [cal ybp] age at bottom of sample.
+
 
   ## Calculate sediment accumulation rate
+  dep_time <- age_bot - ybp
+  thickness <- cm_bot - cm
   sedacc <- c()
-  for (i in 1:length(ybp) - 1) {
-    sedacc[i] <- c((cm[i + 1] - cm[i]) / (ybp[i + 1] - ybp[i]))
+  for (i in 1:length(ybp)) {
+    if (dep_time[i] > 0) {
+    sedacc[i] <- c(thickness[i] / (dep_time[i]))
+    } else {
+      sedacc[i] <- 0
+    }
   }
-  sedacc <- c(sedacc, 0)
 
   ## Calculate yrInterp
   if (is.null(yrInterp)) {
     yrInterp <- round(median(diff(ybp)))
   }
 
-  ## INTERPOLATE CHAROCAL DATA TO yrInterp INTERVALS:
+  ## RESAMPLE CHARCOAL DATA TO yrInterp INTERVALS:
   cmTop <- A[, 1] # [cm] Depth at top of sample.
   cmBot <- A[, 2] # [cm] Depth at bottom of sample.
   ageTop <- A[, 3] # [yr BP] Age at top of sample.
@@ -173,7 +185,7 @@ pretreatment <- function(params, serie, Int = TRUE, first = NULL, last = NULL,
         propMatrix[i, j] <- c(rsAgeBot - rsAgeTop)
       }
     }
-  } # End making porportion matrix
+  } # End making proportion matrix
   propMatrix <- propMatrix / yrInterp
 
   # Determine values for each resampled interval.
@@ -193,8 +205,7 @@ pretreatment <- function(params, serie, Int = TRUE, first = NULL, last = NULL,
     conI[i] <- sum(con[inc] * t(propMatrix[i, inc]))
     sedAccI[i] <- sum(sedacc[inc] * t(propMatrix[i, inc]))
   }
-  cmI <- stats::approx(ybp, cm, ybpI)$y # [cm]
-  # interpolated depths.
+  cmI <- stats::approx(ybp, cm, ybpI)$y # [cm] interpolated depths.
 
   ## DERIVE CHARCOAL ACCUMULATOIN RATE:
   acc <- c()

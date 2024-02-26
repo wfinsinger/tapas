@@ -1,6 +1,11 @@
 
 # tapas 0.1.3
 
+- modified the pretreatment() function to calculate sediment-accumulation
+  rates in a different way: now the code uses explicit sample thicknesses and
+  sample-deposition times rather than diff(depth) and diff(age). Many thanks
+  to Pat Bartlein for flagging this issue (26/02/2024).
+
 - Added the pretreatment() from the paleofire v1.2.4 R package (30/10/2023).
 
 - Corrected the calculation of peak magnitude (06/06/2023).

@@ -228,9 +228,9 @@ steps [(Higuera et al., 2011)](http://dx.doi.org/10.1071/WF09134):
 
 - 1.) *resampling* the record to equally spaced sampling intervals in
   time (years) is performed using the `pretreatment_data()` function,
-  which loops the `paleofire::pretreatment()` function for all variables
-  in the input data frame. The user can choose among the following
-  output data types:
+  which loops the `pretreatment()` function for all variables in the
+  input data frame. The user can choose among the following output data
+  types:
   - resampled accumulation rates (out = “accI”; default),
   - resampled concentrations (out = “conI”), or
   - resampled input data (e.g., if variable1 in the input is charcoal

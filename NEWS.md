@@ -1,4 +1,9 @@
 
+# tapas 0.1.4
+
+- added a function to load results of charcoal analyses made with ImageJ
+
+
 # tapas 0.1.3
 
 - modified the pretreatment() function to calculate sediment-accumulation

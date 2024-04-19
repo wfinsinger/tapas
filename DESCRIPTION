@@ -42,4 +42,5 @@ Imports:
     stats,
     graphics,
     tidyselect,
-    rlang
+    rlang,
+    tidyr,

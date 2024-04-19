@@ -7,12 +7,14 @@
 read_imagej_results(
   folder_in = NULL,
   metadata = c("site_id", "depth", "image_id"),
-  image_id_default = "a"
+  image_id_default = "a",
+  na_replace = TRUE
 )
 }
 \arguments{
 \item{folder_in}{Sets the path to the directory where the *.csv files are
-located (e.g. "./data_in/")}
+located (e.g. "./data_in/" if the files are in a subfolder
+relatively to the working directory).}
 
 \item{metadata}{A vector that describes the metadata stored in the file names.
 By default, metadata = c("core_id", "depth", "image_id"),
@@ -21,24 +23,31 @@ However, other file name formats are possible. See the
 Description here below.}
 
 \item{image_id_default}{Specifies the value or character that shall be
-added if the file name does not include the
-information for the ImageID. By default,
+added if sometimes the file name does not include
+the information for the ImageID. By default,
 \code{image_id_default = "a"}.}
+
+\item{na_replace}{Logical. If \code{na_replace = TRUE} (default), \code{NA}
+values will be replaced with \code{0} values for all
+numeric columns.}
 }
 \value{
-A data.frame with the specified metadata columns, and all columns that
-are common to all input files.
+A data.frame with the specified \code{metadata} columns, and all columns
+that appear in any of the input files.
 }
 \description{
 The function loads spreadsheets obtained with ImageJ (https://imagej.net/)
 that were stored as *.csv files (comma-separated) in a common folder whose
 path is specified by the \code{folder_in} argument.
+
 The function expects that the file names include a set of information that
 identify the samples unequivocally, and that the information is given as
 strings separated by a dash (-) or an underscore (_) (do not use empty
 spaces (space bar) to separate the metadata).
+It is recommended to use a hierarchical file-name format that includes the
+ImageID information last.
 
-By default the following information is expected:
+By default the following set of information is expected in the file names:
 \itemize{
 \item a site identifier;
 \item a sample identifier, for instance the master core depth;
@@ -48,8 +57,8 @@ image identifier is optional (an "a" will be added if the file name does
 not include this information).
 }
 
-However, the function allows to use a different set and number of
-identifiers. Possible alternatives may include:
+However, users can choose a different set and number of identifiers.
+Possible alternatives may include:
 \itemize{
 \item "CoreID_SectionID_Depth_ImageID.csv" or
 \item "CoreID_SectionID_DepthInDrive_ImageID.csv".
@@ -62,6 +71,15 @@ core depth, depth in drive, or other).
 Further, make sure the file names include useful information to link
 the data with other data types from the same sediment archive,
 such as the chronology or other proxy data.
+}
+\examples{
+\dontrun{
+folder_in = "./data_in/",
+metadata = c("site_id", "depth", "image_id"),
+image_id_default = "a",
+na_replace = TRUE
+}
+
 }
 \author{
 Walter Finsinger

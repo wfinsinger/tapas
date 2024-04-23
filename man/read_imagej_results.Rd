@@ -8,7 +8,7 @@ read_imagej_results(
   folder_in = NULL,
   metadata = c("site_id", "depth", "image_id"),
   image_id_default = "a",
-  na_replace = TRUE
+  na_replace = FALSE
 )
 }
 \arguments{
@@ -27,8 +27,8 @@ added if sometimes the file name does not include
 the information for the ImageID. By default,
 \code{image_id_default = "a"}.}
 
-\item{na_replace}{Logical. If \code{na_replace = TRUE} (default), \code{NA}
-values will be replaced with \code{0} values for all
+\item{na_replace}{Logical. If \code{na_replace = FALSE} (default), \code{NA}
+values will not be replaced with \code{0} values for all
 numeric columns.}
 }
 \value{
@@ -39,7 +39,8 @@ that appear in any of the input files.
 The function loads spreadsheets obtained with ImageJ (https://imagej.net/)
 that were stored as *.csv files (comma-separated) in a common folder whose
 path is specified by the \code{folder_in} argument.
-
+}
+\details{
 The function expects that the file names include a set of information that
 identify the samples unequivocally, and that the information is given as
 strings separated by a dash (-) or an underscore (_) (do not use empty
@@ -77,7 +78,7 @@ such as the chronology or other proxy data.
 folder_in = "./data_in/",
 metadata = c("site_id", "depth", "image_id"),
 image_id_default = "a",
-na_replace = TRUE
+na_replace = FALSE
 }
 
 }

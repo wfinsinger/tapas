@@ -96,8 +96,10 @@
 #'                         500, 600, 700, 800, 900, 1000 years.
 #'
 #' @examples
+#' \dontrun{
 #' co <- tapas::co_char_data
 #' co_loc <- tapas::peak_detection(co, proxy = "char")
+#' }
 #'
 #' @author Walter Finsinger
 #'

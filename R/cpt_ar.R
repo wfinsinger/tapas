@@ -106,6 +106,7 @@
 #'    Analysis. Journal of Statistical Software, *58*(3), 1-19.
 #'
 #' @examples
+#' \dontrun{
 #' co <- tapas::co_char_data
 #' co_i <- tapas::pretreatment_data(co, out = "accI")
 #'
@@ -131,6 +132,7 @@
 #' rdn2$age_top <- a_bot - sdt
 #' rdn2_i <- tapas::pretreatment_data(rdn2, yrInterp = 25)
 #' rdn2_i_cpts <- tapas::cpts_ar(rdn2_i, proxy = "char")
+#' }
 #'
 #' @author Walter Finsinger
 #'

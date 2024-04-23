@@ -20,9 +20,11 @@ Requires an output from one of the following functions:
 or \code{\link{peak_detection}()}.
 }
 \examples{
+\dontrun{
 co <- tapas::co_char_data
 co_loc <- tapas::peak_detection(co, proxy = "char")
 co_glob_exp <- tapas::tapas_export(co_loc)
+}
 
 }
 \author{

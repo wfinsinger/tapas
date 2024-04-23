@@ -12,9 +12,11 @@
 #' @return A data frame.
 #'
 #' @examples
+#' \dontrun{
 #' co <- tapas::co_char_data
 #' co_loc <- tapas::peak_detection(co, proxy = "char")
 #' co_glob_exp <- tapas::tapas_export(co_loc)
+#' }
 #'
 #' @importFrom stringr str_remove
 #'

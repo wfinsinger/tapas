@@ -149,8 +149,10 @@ This wrapper function calls the following functions in correct order:
 and \code{Plot_ReturnIntervals()}.
 }
 \examples{
+\dontrun{
 co <- tapas::co_char_data
 co_loc <- tapas::peak_detection(co, proxy = "char")
+}
 
 }
 \author{

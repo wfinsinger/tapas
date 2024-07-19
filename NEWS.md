@@ -1,3 +1,9 @@
+# tapas 0.1.5
+
+- check_pretreat() function: added some lines to flag for the presence of 
+  overlapping sample depths. Modified some other warnings as well.
+  
+- added the get_overlap_depths() function.
 
 # tapas 0.1.4
 
@@ -11,7 +17,8 @@
   sample-deposition times rather than diff(depth) and diff(age). Many thanks
   to Pat Bartlein for flagging this issue (26/02/2024).
 
-- Added the pretreatment() from the paleofire v1.2.4 R package (30/10/2023).
+- Added the pretreatment() function from the paleofire v1.2.4 R package
+  (30/10/2023).
 
 - Corrected the calculation of peak magnitude (06/06/2023).
 

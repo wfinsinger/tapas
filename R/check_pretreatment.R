@@ -3,14 +3,15 @@
 #' This functions does some check-up on the data frame used for
 #' the \code{tapas::pretreatment_data()} function,
 #' which requires that the depth and age scales are continuous.
-#' In other words, for every i-th row, it requires that \itemize{
+#' In other words, for every *i-th* row, it requires that \itemize{
 #' \item{\code{CmBot[i] > CmTop[i]}}
 #' \item{\code{AgeBot[i] > AgeTop[i]}}
 #' \item{there shouldn't be duplicate values
-#'       in the \code{CmTop, CmBot, AgeTop}, and \code{AgeBot} columns}
-#' \item{\code{CmBot[i] == CmTop[i+1]}}
-#' \item{\code{AgeBot[i] == AgeTop[i+1]}}
+#'       in the \code{CmTop, CmBot, AgeTop}, and \code{AgeBot} columns}.
 #' }
+#'
+#'
+#' @details
 #'
 #' If any of the following is true: \itemize{
 #' \item{any \code{CmBot[i] < CmTop[i]}}
@@ -19,17 +20,24 @@
 #' }
 #' ...the function returns a fatal error and stops.
 #'
+#'
 #' The function also fixes a few things:
 #'
+#' Add missing samples:
 #' If any \code{CmBot[i] < CmTop[i+1]}, then
 #' the function adds a new row \code{[j = i+1]}
 #' to fill in the missing \code{CmTop} and \code{CmBot} values.
 #' Thus, the added samples will have \code{CmTop[j] == CmBot[i]}
 #' and \code{CmBot[j] == CmTop[i+1]}.
-#' The age scale values will be:
-#' \code{AgeTop[j] == AgeBot[i]}
-#' and \code{AgeBot[j] == AgeTop[i+1]}.
+#' The new age scale values will be:
+#' \code{AgeTop[j] == AgeBot[i]} and \code{AgeBot[j] == AgeTop[i+1]}.
 #'
+#' Check for overlapping sample depths:
+#' If any \code{CmBot[i] > CmTop[i+1]}, the function flags a warning due to the
+#' presence of overlapping sample depths. To get a data.frame of the
+#' overlapping sample depths, use the \code{tapas::get_overlaps()} function.
+#'
+#' Check presence of slumps:
 #' If after these checks any \code{AgeTop[i] == AgeBot[i]}, then
 #' the function *removes the flagged rows*,
 #' and *creates new* corrected \code{CmTop} and \code{CmBot} scales
@@ -43,6 +51,8 @@
 #'    which should be resampled (variables).
 #'
 #' @return A data frame.
+#'
+#' @seealso [get_overlap_depths]
 #'
 #' @export
 #'
@@ -106,6 +116,7 @@ check_pretreat <- function(series) {
   ## are not identified as slump samples
   if (!length(slumps_index) > 0) {
     print('No slump samples detected.')
+    print('')
   } else {
     slumps_cm <- vector()
 
@@ -116,6 +127,7 @@ check_pretreat <- function(series) {
     slumps_tot_cm <- sum(slumps_cm)
 
     print(paste0('Warning: AgeTop = AgeBot for ',slumps_n,' samples, totaling ',slumps_tot_cm,'cm'))
+    print('')
 
     # Remove samples identified as slumps (those with AgeBot[i] == AgeTop[i])
     A <- A[-c(slumps_index), ]
@@ -133,20 +145,42 @@ check_pretreat <- function(series) {
 
   ## Check if the depth scale is continuous (cmBot[i] = cmTop[i+1]) ----------
 
-  ## Difference between cmBot of sample[i] - cmTop of sample[i+1]
-  ## redefining the depth scale as it have may changed in the previous loop!
+  ## Get difference between cmBot of sample[i] and cmTop of sample[i+1].
+  ## The idea being that:
+  ## - negative differences point to gaps, whereas
+  ## - positive differences point to partially overlapping samples.
+
+  ## First, redefine the depth scale as it may have changed in the previous
+  ## loop:
   cm <- A[ ,1]
   cmB <- A[ ,2]
   gaps_index <- cmB[1:length(cmB) - 1] - cm[2:length(cm)]
 
-  # Indices for samples above missing samples
+  # Get indices for samples above missing samples
   gaps <- which(gaps_index < 0)
 
   if (length(gaps) > 0) { # if gaps were found...
-    print('The depth scale is not continuous.')
+    print('Warning: there are gaps in the depth scale,')
+    print('a new depth scale will be created')
+    print('')
   } else {
-    print('The depth scale is continuous')
+    print('No gaps found in the depth scale')
+    print('')
   }
+
+  # Get indices for overlapping samples
+  overlaps <- which(gaps_index > 0)
+
+  if (length(overlaps) > 0) { #if overlaps were found...
+    print('Warning: overlapping depths found,')
+    print('you may get them with the "tapas::get_overlap_samples() function')
+    print('')
+  } else {
+    print('No overlapping depths found')
+    print('')
+  }
+
+
 
 
   ## Check if the age scale is continuous (AgeBot[i] = AgeTop[i+1]) ----------
@@ -154,13 +188,18 @@ check_pretreat <- function(series) {
   ## Difference between cmBot of sample[i] - cmTop of sample[i+1]
   gaps_age_index <- ybpB[1:length(ybpB) - 1] - ybp[2:length(ybp)]
 
+  if (any(gaps_age_index != 0) == T) {
+    print('Warning: the age scale is not continuous.')
+  } else {
+    print('The age scale is continuous')
+    print('')
+  }
+
   # Indices for samples above missing samples
   gaps_age <- which(gaps_age_index < 0)
 
   if (length(gaps_age) > 0) { # if gaps were found...
-    print('The age scale is not continuous.')
-  } else {
-    print('The age scale is continuous')
+    print('Gaps found in the age scale. Missing samples will be added')
   }
 
 
@@ -194,7 +233,8 @@ check_pretreat <- function(series) {
     tot_gap <- sum(gap_cm)
 
     # print warning
-    print(paste0("Warning: added ",length(gaps)," missing samples, totaling ",tot_gap," cm."))
+    print(paste0("Warning: added ",length(gaps)," missing samples, totaling ",
+                 tot_gap," cm."))
 
 
     # get params and series data for each of the detected gaps
@@ -213,7 +253,7 @@ check_pretreat <- function(series) {
     A <- rbind(A, A_gaps)
     A <- A[order(A[ ,1]), ]
 
-    # If there still any A_gaps$TopAge[i] == A_gaps$BotAge[i]
+    # If there are still any A_gaps$TopAge[i] == A_gaps$BotAge[i],
     # slightly modify the sample ages
     p <- which(A$TopAge == A$BotAge)
     A$BotAge[p] <- A$BotAge[p] - 0.01

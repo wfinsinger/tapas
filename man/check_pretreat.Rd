@@ -19,13 +19,11 @@ A data frame.
 This functions does some check-up on the data frame used for
 the \code{tapas::pretreatment_data()} function,
 which requires that the depth and age scales are continuous.
-In other words, for every i-th row, it requires that \itemize{
+In other words, for every \emph{i-th} row, it requires that \itemize{
 \item{\code{CmBot[i] > CmTop[i]}}
 \item{\code{AgeBot[i] > AgeTop[i]}}
 \item{there shouldn't be duplicate values
-in the \code{CmTop, CmBot, AgeTop}, and \code{AgeBot} columns}
-\item{\code{CmBot[i] == CmTop[i+1]}}
-\item{\code{AgeBot[i] == AgeTop[i+1]}}
+in the \code{CmTop, CmBot, AgeTop}, and \code{AgeBot} columns}.
 }
 }
 \details{
@@ -38,15 +36,21 @@ If any of the following is true: \itemize{
 
 The function also fixes a few things:
 
+Add missing samples:
 If any \code{CmBot[i] < CmTop[i+1]}, then
 the function adds a new row \code{[j = i+1]}
 to fill in the missing \code{CmTop} and \code{CmBot} values.
 Thus, the added samples will have \code{CmTop[j] == CmBot[i]}
 and \code{CmBot[j] == CmTop[i+1]}.
-The age scale values will be:
-\code{AgeTop[j] == AgeBot[i]}
-and \code{AgeBot[j] == AgeTop[i+1]}.
+The new age scale values will be:
+\code{AgeTop[j] == AgeBot[i]} and \code{AgeBot[j] == AgeTop[i+1]}.
 
+Check for overlapping sample depths:
+If any \code{CmBot[i] > CmTop[i+1]}, the function flags a warning due to the
+presence of overlapping sample depths. To get a data.frame of the
+overlapping sample depths, use the \code{tapas::get_overlaps()} function.
+
+Check presence of slumps:
 If after these checks any \code{AgeTop[i] == AgeBot[i]}, then
 the function \emph{removes the flagged rows},
 and \emph{creates new} corrected \code{CmTop} and \code{CmBot} scales
@@ -58,6 +62,9 @@ and \code{CmBot[i] == CmTop[i+1]}.
 co <- tapas::co_char_data
 co_check <- tapas::check_pretreat(co)
 
+}
+\seealso{
+\link{get_overlap_depths}
 }
 \author{
 Walter Finsinger

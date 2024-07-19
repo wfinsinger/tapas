@@ -137,8 +137,13 @@ co_loc <- peak_detection(series = co, proxy = "char",
                                 first = -51, last = 7500, yrInterp = 15,
                                 detr_type = "mov.median", sens = F)
 #> [1] "No slump samples detected."
-#> [1] "The depth scale is continuous"
+#> [1] ""
+#> [1] "No gaps found in the depth scale"
+#> [1] ""
+#> [1] "No overlapping depths found"
+#> [1] ""
 #> [1] "The age scale is continuous"
+#> [1] ""
 ```
 
 With these settings, the results obtained using *tapas* strikingly

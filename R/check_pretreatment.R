@@ -130,16 +130,8 @@ check_pretreat <- function(series) {
     print('')
 
     # Remove samples identified as slumps (those with AgeBot[i] == AgeTop[i])
-    A <- A[-c(slumps_index), ]
-
-    # Build a new, corrected depth scale based on the sample thicknesses
-    smpl_thickn <- A[ ,2] - A[ ,1]
-
-    cm_corr <- cumsum(smpl_thickn)
-    cmB_corr <- cm_corr + smpl_thickn
-
-    A[ ,1] <- cm_corr
-    A[ ,2] <- cmB_corr
+    A <- A[-slumps_index, ]
+    row.names(A) <- NULL ## reset row.names
   }
 
 
@@ -150,10 +142,12 @@ check_pretreat <- function(series) {
   ## - negative differences point to gaps, whereas
   ## - positive differences point to partially overlapping samples.
 
-  ## First, redefine the depth scale as it may have changed in the previous
-  ## loop:
+  ## First, redefine the depth and age scales as they may have changed in the
+  ##  previous loop:
   cm <- A[ ,1]
   cmB <- A[ ,2]
+  ybp <- A[ ,3]
+  ybpB <- A[ ,4]
   gaps_index <- cmB[1:length(cmB) - 1] - cm[2:length(cm)]
 
   # Get indices for samples above missing samples
@@ -161,7 +155,6 @@ check_pretreat <- function(series) {
 
   if (length(gaps) > 0) { # if gaps were found...
     print('Warning: there are gaps in the depth scale,')
-    print('a new depth scale will be created')
     print('')
   } else {
     print('No gaps found in the depth scale')
@@ -173,7 +166,7 @@ check_pretreat <- function(series) {
 
   if (length(overlaps) > 0) { #if overlaps were found...
     print('Warning: overlapping depths found,')
-    print('you may get them with the "tapas::get_overlap_samples() function')
+    print('you may get them with the "tapas::get_overlap_depths() function')
     print('')
   } else {
     print('No overlapping depths found')
@@ -206,14 +199,13 @@ check_pretreat <- function(series) {
   ## If age scale is continuous & depth scale is not --------------------------
 
   if (!length(gaps_age) > 0 && length(gaps) > 0) {
-
+    print('A new depth scale will be created')
     # Build a new, corrected depth scale based on the sample thicknesses
     smpl_thickn <- A[ ,2] - A[ ,1]
 
     cm_corr <- cumsum(smpl_thickn) - smpl_thickn[1]
     cmB_corr <- c(cm_corr[2:length(cm_corr)],
                   cm_corr[length(cm_corr)] + smpl_thickn[length(smpl_thickn)])
-
     A[ ,1] <- cm_corr
     A[ ,2] <- cmB_corr
   }
@@ -228,7 +220,7 @@ check_pretreat <- function(series) {
 
     # Get gaps
     for (i in 1:length(gaps)) {
-      gap_cm[i] <- cm[ gaps[i] + 1] - cmB[ gaps[i] ]
+        gap_cm[i] <- cm[ gaps[i] + 1] - cmB[ gaps[i] ]
     }
     tot_gap <- sum(gap_cm)
 
@@ -252,12 +244,13 @@ check_pretreat <- function(series) {
     # add gaps to input data frame
     A <- rbind(A, A_gaps)
     A <- A[order(A[ ,1]), ]
+    row.names(A) <- NULL ## reset row.names
 
     # If there are still any A_gaps$TopAge[i] == A_gaps$BotAge[i],
     # slightly modify the sample ages
-    p <- which(A$TopAge == A$BotAge)
-    A$BotAge[p] <- A$BotAge[p] - 0.01
-    A$TopAge[p + 1] <- A$BotAge[p]
+    p <- which(A[, 3] == A[, 4])
+    A[p, 4] <- A[p, 4] + 0.0001
+    A[p + 1, 3] <- A[p, 4]
   }
 
   ## Prepare output ####

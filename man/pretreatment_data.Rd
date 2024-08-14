@@ -7,6 +7,7 @@
 pretreatment_data(
   series = NULL,
   out = "accI",
+  interp_missing = TRUE,
   series.name = NA,
   first = NULL,
   last = NULL,
@@ -23,6 +24,12 @@ and additional columns with the data which should be resampled.}
 \item{"conI"}{the function returns resampled concentrations}
 \item{"countI"}{the function returns resampled counts}
 }}
+
+\item{interp_missing}{Logical. Specifies whether the function
+interpolates missing values. By default
+\code{interp_missing = TRUE}. Missing values are
+identified when the value of a variable is equal to -999 or NA,
+or when the sample Volume = 0.}
 
 \item{series.name}{A string defining typically the site name. Defaults to
 \code{NA}.}

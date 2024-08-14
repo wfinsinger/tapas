@@ -11,6 +11,11 @@
 #'             \item{"conI"}{the function returns resampled concentrations}
 #'             \item{"countI"}{the function returns resampled counts}
 #'            }
+#' @param interp_missing Logical. Specifies whether the function
+#'            interpolates missing values. By default
+#'            \code{interp_missing = TRUE}. Missing values are
+#'            identified when the value of a variable is equal to -999 or NA,
+#'            or when the sample Volume = 0.
 #' @param series.name A string defining typically the site name. Defaults to
 #'                    \code{NA}.
 #' @param first,last Age boundaries of the resampled time serie.
@@ -31,7 +36,8 @@
 #' @importFrom stats median
 #'
 #' @export
-pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
+pretreatment_data <- function(series=NULL, out="accI", interp_missing = TRUE,
+                              series.name=NA,
                               first=NULL, last=NULL, yrInterp=NULL) {
 
   ## Gather data ####
@@ -74,7 +80,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       pre.i <- tapas::pretreatment(params = series[ ,1:5],
-                                       serie = series[ ,i], Int = T,
+                                       serie = series[ ,i], Int = interp_missing,
                                        first = first, last = last,
                                        yrInterp = yrInterp)
 
@@ -121,7 +127,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       pre.i <- tapas::pretreatment(params = series[ ,1:5],
-                                       serie = series[ ,i], Int = T,
+                                       serie = series[ ,i], Int = interp_missing,
                                        first = first, last = last,
                                        yrInterp = yrInterp)
 
@@ -168,7 +174,7 @@ pretreatment_data <- function(series=NULL, out="accI", series.name=NA,
     j = 2
     for (i in 6:ncol(series)) {
       pre.i <- tapas::pretreatment(params = series[ ,1:5],
-                                       serie = series[ ,i], Int = T,
+                                       serie = series[ ,i], Int = interp_missing,
                                        first = first, last = last,
                                        yrInterp = yrInterp)
 

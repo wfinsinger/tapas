@@ -7,6 +7,7 @@
 Plot.Anomalies(
   series = NULL,
   x.lim = NULL,
+  y_lim = NULL,
   plot.crosses = T,
   plot.x = F,
   plot.neg = T
@@ -16,7 +17,9 @@ Plot.Anomalies(
 \item{series}{The output of \code{\link{global_thresh}()},
 \code{\link{local_thresh}()}, or \code{\link{peak_detection}()}.}
 
-\item{x.lim}{Limit age for the x-axis scale (time scale).}
+\item{x.lim}{A vector defining the limits for the x-axis scale (time scale).}
+
+\item{y_lim}{A vector defining the limits for the y-axis scale.}
 
 \item{plot.crosses}{Boolean. If \code{TRUE} (by default),
 crosses are displayed to indicate

@@ -4,7 +4,13 @@
 \alias{Plot_ReturnIntervals}
 \title{Plot return intervals determined based on the Trend And Peaks AnalysiS (tapas).}
 \usage{
-Plot_ReturnIntervals(series = NULL, x.lim = NULL, plot.x = F, plot.neg = F)
+Plot_ReturnIntervals(
+  series = NULL,
+  x.lim = NULL,
+  y_lim = NULL,
+  plot.x = F,
+  plot.neg = F
+)
 }
 \arguments{
 \item{series}{The output of \code{\link{global_thresh}()},
@@ -12,6 +18,8 @@ Plot_ReturnIntervals(series = NULL, x.lim = NULL, plot.x = F, plot.neg = F)
 or \code{\link{peak_detection}()}.}
 
 \item{x.lim}{Limit age for the x-axis scale (time scale)}
+
+\item{y_lim}{A vector defining the limits of the y-axis scale.}
 
 \item{plot.x}{Boolean. If \code{FALSE} (by default),
 The x-axis labels are omitted.}

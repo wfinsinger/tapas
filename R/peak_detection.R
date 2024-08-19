@@ -2,7 +2,7 @@
 #'
 #' This wrapper function calls the following functions in correct order:
 #' \code{\link{check_pretreat}()}, \code{\link{pretreatment_data}()},
-#' \code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()},
+#' \code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()} or
 #' \code{\link{local_thresh}()}, \code{\link{Plot.Anomalies}()},
 #' and \code{Plot_ReturnIntervals()}.
 #'
@@ -17,6 +17,13 @@
 #'            }
 #' @param series_name A character string defining typically the site name
 #'                    (\code{NULL} by default).
+#' @param check_series Logical. If \code{TRUE} (default), the input data set
+#'              will be checked with the \code{check_pretreatment()} function.
+#' @param interp_missing Logical. Specifies whether the function
+#'            interpolates missing values. By default
+#'            \code{interp_missing = TRUE}. Missing values are
+#'            identified when the value of a variable is equal to -999 or NA,
+#'            or when the sample Volume = 0.
 #' @param first,last Age boundaries of the resampled time serie.
 #'                   If unspecified (\code{first=NULL} and \code{last=NULL}),
 #'                   then resampling is done over the entire sequence,
@@ -106,13 +113,16 @@
 #' @importFrom graphics boxplot layout
 #'
 #' @export
-peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
+peak_detection <- function(series = NULL, out = "accI", series_name = NULL,
+                           check_series = TRUE,
+                           interp_missing = TRUE,
+                           proxy = NULL,
                            first = NULL, last = NULL, yrInterp = NULL,
                            smoothing_yr = 500, detr_type = "mov.median",
                            thresh_type = "local", thresh_value = 0.95,
                            t_lim = NULL, noise_gmm = 1, keep_consecutive = F,
                            min_CountP = 0.05, MinCountP_window = 150,
-                           series_name = NULL, out_dir = NULL,
+                           out_dir = NULL,
                            plotit = TRUE, x_lim = t_lim,
                            plot_crosses = TRUE, plot_x = TRUE,
                            plot_neg = FALSE,
@@ -125,7 +135,9 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
   ## Initial check-ups ####
 
   ## Check if data is formatted correctly
-  series <- tapas::check_pretreat(series)
+  if (check_series == TRUE) {
+    series <- tapas::check_pretreat(series)
+  }
 
   ## Check if arguments for detrending are coherent
   detr_options <- c("rob.loess", "rob.lowess", "mov.median")
@@ -163,6 +175,7 @@ peak_detection <- function(series = NULL, out = "accI", proxy = NULL,
 
   ## Resample data ####
   d_i <- tapas::pretreatment_data(series = series, out = out,
+                                  interp_missing = interp_missing,
                                   series.name = series_name,
                                   first = first, last = last, yrInterp = yrInterp)
 

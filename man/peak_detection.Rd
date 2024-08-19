@@ -7,6 +7,9 @@
 peak_detection(
   series = NULL,
   out = "accI",
+  series_name = NULL,
+  check_series = TRUE,
+  interp_missing = TRUE,
   proxy = NULL,
   first = NULL,
   last = NULL,
@@ -20,7 +23,6 @@ peak_detection(
   keep_consecutive = F,
   min_CountP = 0.05,
   MinCountP_window = 150,
-  series_name = NULL,
   out_dir = NULL,
   plotit = TRUE,
   x_lim = t_lim,
@@ -42,6 +44,18 @@ and one or more columns with the data to be resampled.}
 \item{"conI"}{the function returns resampled concentrations}
 \item{"countI"}{the function returns resampled counts}
 }}
+
+\item{series_name}{A character string defining typically the site name
+(\code{NULL} by default).}
+
+\item{check_series}{Logical. If \code{TRUE} (default), the input data set
+will be checked with the \code{check_pretreatment()} function.}
+
+\item{interp_missing}{Logical. Specifies whether the function
+interpolates missing values. By default
+\code{interp_missing = TRUE}. Missing values are
+identified when the value of a variable is equal to -999 or NA,
+or when the sample Volume = 0.}
 
 \item{proxy}{Select variable for the peak-detection analysis
 with \code{proxy = "VariableName"}.
@@ -103,9 +117,6 @@ the test will not be performed.}
 used for the minimum-count test.
 Defaults to \code{MinCountP_window = 150}.}
 
-\item{series_name}{A character string defining typically the site name
-(\code{NULL} by default).}
-
 \item{out_dir}{Path to the output directory
 where \code{*.pdf} figures files are written files.
 Defaults to \code{out_dir = NULL},
@@ -144,7 +155,7 @@ for the following smoothing-window widths:
 \description{
 This wrapper function calls the following functions in correct order:
 \code{\link{check_pretreat}()}, \code{\link{pretreatment_data}()},
-\code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()},
+\code{\link{SeriesDetrend}()}, \code{\link{global_thresh}()} or
 \code{\link{local_thresh}()}, \code{\link{Plot.Anomalies}()},
 and \code{Plot_ReturnIntervals()}.
 }
